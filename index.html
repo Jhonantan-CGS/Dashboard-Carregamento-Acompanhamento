@@ -88,7 +88,7 @@
   input[readonly] { background: var(--bg-app); color: var(--text-muted); cursor: not-allowed; }
   select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 48px; }
 
-  /* UPLOAD DE FOTOS (NOVO) */
+  /* UPLOAD DE FOTOS */
   .file-upload-wrapper { position: relative; width: 100%; height: 140px; border: 2px dashed var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg-input); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;}
   .file-upload-wrapper:hover { border-color: var(--secondary); background: #EFF6FF; }
   .file-upload-wrapper input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;}
@@ -111,7 +111,7 @@
   .saldo-lbl { font-size: 11px; color: var(--secondary); margin-top: 6px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
 
   /* ==========================================
-     CHECKLIST
+     CHECKLIST E RNC
   ========================================== */
   .grid-check { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
   .check-card { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; transition: all 0.3s; border-left: 4px solid var(--border); }
@@ -126,6 +126,13 @@
   input[type="radio"][value="nao"]:checked + .check-opt-danger  { background: var(--danger);  color: white; border-color: var(--danger);}
   input[type="radio"][value="sim"]:checked + .check-opt-danger  { background: var(--danger);  color: white; border-color: var(--danger);}
   input[type="radio"][value="nao"]:checked + .check-opt-success { background: var(--success); color: white; border-color: var(--success);}
+
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  .rnc-list-wrapper { max-height: 200px; overflow-y: auto; padding-right: 8px; margin-top: 8px; }
+  .rnc-list-wrapper::-webkit-scrollbar { width: 6px; }
+  .rnc-list-wrapper::-webkit-scrollbar-track { background: transparent; }
+  .rnc-list-wrapper::-webkit-scrollbar-thumb { background: #FCA5A5; border-radius: 10px; }
 
   /* ==========================================
      PAINEL EXECUTIVO E BANNERS
@@ -346,7 +353,6 @@
       <section class="section anim-slide-up" style="animation-delay: 0.45s;">
         <div class="section-header"><h2><span>📷</span> Evidências Fotográficas</h2></div>
         <div class="grid-form" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-          
           <div class="form-group">
             <label>Frente com proteção e limpeza *</label>
             <div class="file-upload-wrapper">
@@ -355,7 +361,6 @@
                <input type="hidden" id="base64Frente">
             </div>
           </div>
-          
           <div class="form-group">
             <label>Traseira com proteção e limpeza *</label>
             <div class="file-upload-wrapper">
@@ -364,7 +369,6 @@
                <input type="hidden" id="base64Traseira">
             </div>
           </div>
-          
           <div class="form-group">
             <label>Assoalho com proteção e limpeza *</label>
             <div class="file-upload-wrapper">
@@ -373,7 +377,6 @@
                <input type="hidden" id="base64Assoalho">
             </div>
           </div>
-          
         </div>
       </section>
 
@@ -455,16 +458,17 @@
 
 <script>
 // ==========================================
-// 1. CONFIGURAÇÕES GERAIS E CORES DE CLIENTES
+// 1. CONFIGURAÇÕES GERAIS
 // ==========================================
 const config = {
   api: {
     sheetId: '1bF_9A1P12OAITTcYskNsNRJ8ti_PXjNC3ti7ij0TVw0',
     estoqueSheetId: '1ubMI0M0znO3DTSx4w3dIM8AnQZ5KaJc22ZMyC_oU63c',
     historicoSheetId: '1KAOCFX7_raD0YMhA3yPh8HjS1fF9TlJWp9TYGACCMCI',
+    rncSheetId: '1lyWfTaAkrgMWB0JrzbiPt9RIz7jB1WdCe2A9PwnRivY', 
     range: 'Carregamento!A1:Q20',
     key: 'AIzaSyAdzZznAPDRlGLqbT-8AAVSKslZYfr7Jc0',
-    scriptUrl: 'https://script.google.com/macros/s/AKfycbxy0bjxbvyvaIhRewUzLhIbNZbZAJjY22U0J7G0Emw62NyMV5lL7d_CmXdVSIgjqcWf/exec', // URL ATUALIZADA
+    scriptUrl: 'https://script.google.com/macros/s/AKfycbxy0bjxbvyvaIhRewUzLhIbNZbZAJjY22U0J7G0Emw62NyMV5lL7d_CmXdVSIgjqcWf/exec', 
     timeoutMs: 15000
   },
   checklist: [
@@ -482,10 +486,23 @@ const config = {
   clientColors: ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#EF4444']
 };
 
+const parseBRNumber = (str) => {
+    if (typeof str === 'number') return str;
+    if (!str) return 0;
+    let s = String(str).replace(/[^\d,\.-]/g, '').trim();
+    if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+        s = s.replace(/\./g, '').replace(',', '.');
+    } else if (s.lastIndexOf('.') > s.lastIndexOf(',')) {
+        s = s.replace(/,/g, ''); 
+    } else if (s.includes(',')) {
+        s = s.replace(',', '.'); 
+    }
+    return parseFloat(s) || 0;
+};
+
 const normalizeName = (s) => String(s || '').toUpperCase().replace(/\s+/g, ' ').trim();
-const formatTons = (val) => { const n = Number(val); return (isNaN(n) ? 0 : n).toFixed(3); };
+const formatTons = (val) => { const n = parseBRNumber(val); return (isNaN(n) ? 0 : n).toFixed(3); };
 const escapeHTML = (str) => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const parseBRNumber = (str) => parseFloat(String(str).replace(',', '.')) || 0;
 const extractPlaca = (obsStr) => { const match = /\b([A-Z]{3}-?[0-9][A-Z0-9][0-9]{2})\b/i.exec(obsStr || ''); return match ? match[1].toUpperCase() : ''; };
 
 // ==========================================
@@ -828,6 +845,21 @@ const apiService = {
       return null;
     }
   },
+  async fetchRncData() {
+    if(!navigator.onLine) return null;
+    try {
+      debugEngine.log("Verificando histórico de Reclamações (RNC)...", "info");
+      const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
+      const visible = (await res.json()).sheets.filter(s => !s.properties.hidden);
+      const targetSheet = visible.find(s => s.properties.title.toUpperCase().includes('RNC')) || visible[0];
+      const dataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:N?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`;
+      const data = (await (await fetch(dataUrl)).json()).values;
+      return data;
+    } catch (e) {
+      debugEngine.log("Falha ao buscar RNC (ignorando erro): " + e.message, "warn");
+      return null;
+    }
+  },
   async sendDataToAppScript(payload) {
     if(!navigator.onLine) throw new Error("OFFLINE");
     try {
@@ -843,7 +875,7 @@ const apiService = {
 };
 
 // ==========================================
-// MÓDULO: DATA PARSER
+// MÓDULO: DATA PARSER E RNC
 // ==========================================
 const dataParser = {
   parse(rawValues) {
@@ -852,7 +884,10 @@ const dataParser = {
     for (let i = 2; i < rawValues.length; i++) {
       const row = rawValues[i]; if (!row) continue;
       const produtoDesc = normalizeName(row[1]);
-      const qtd        = Number(row[2]) || 0;
+      
+      // ✅ CORREÇÃO AQUI: Aplica o parseBRNumber ao ler da planilha principal 
+      const qtd        = parseBRNumber(row[2]); 
+      
       const pedido     = row[3]  ? String(row[3]).trim()  : '';
       const cliente    = row[8]  ? String(row[8]).trim()  : '';
       const cidade     = row[9]  ? String(row[9]).trim()  : '-'; 
@@ -875,7 +910,6 @@ const dataParser = {
       const row = values[i]; if (!row || !row[0]) continue;
       const colA = String(row[0]).trim();
       
-      // FILTRO MELHORADO: IGNORA NÚMEROS ISOLADOS/FANTASMAS
       if (colA.toUpperCase().startsWith('TOTAL') || colA.toUpperCase() === 'LOTE' || colA.includes('%') || !/[a-zA-Z]/.test(colA)) { 
           ch = null; continue; 
       }
@@ -890,12 +924,24 @@ const dataParser = {
       } else { ch = colA; }
     }
     return map;
+  },
+  parseRnc(values) {
+    const rncs = [];
+    if (!values || values.length <= 1) return rncs;
+    for (let i = 1; i < values.length; i++) {
+        const row = values[i];
+        if (!row) continue;
+        rncs.push({
+            data: String(row[1] || '').trim(), 
+            cliente: String(row[2] || '').trim().toUpperCase(),
+            transportador: String(row[3] || '').trim().toUpperCase(),
+            descricao: String(row[8] || '').trim() 
+        });
+    }
+    return rncs;
   }
 };
 
-// ==========================================
-// FUNÇÃO AUXILIAR DE EXTRAÇÃO DE HORÁRIO
-// ==========================================
 function extrairHorarioObs(obs) {
     const match = /\b([0-1]?[0-9]|2[0-3]):([0-5][0-9])\b/.exec(obs);
     return match ? match[0] : null;
@@ -952,9 +998,79 @@ const dashboardEngine = {
       const bloqueado = itens.some(i => i.bloqueio.toUpperCase() !== 'LIBERADO' && i.bloqueio.trim() !== '');
       const isParaguai = itens.some(i => i.estado === 'PY' || /PARAGUAI/i.test(i.cidade) || /PARAGUAI/i.test(i.obsStr));
       const obsSet = [...new Set(itens.map(i => i.obsStr).filter(Boolean))];
+      const clientesStr = [...new Set(itens.map(i => i.cliente))].join(' • ');
       
       const minutosTotal = truckStatusManager.calcularTempoCarregamento(totalQtd, isPallet);
       const tempos = truckStatusManager.calcularHorarioFinal(timeStr, minutosTotal);
+
+      let rncMatches = [];
+      const upperClientes = clientesStr.toUpperCase();
+      const upperObs = obsUnificado.toUpperCase();
+      const upperPlaca = placa.toUpperCase();
+
+      if (uiBuilder.rncCargas) {
+          uiBuilder.rncCargas.forEach(rnc => {
+              const matchC = rnc.cliente.length > 3 && upperClientes.includes(rnc.cliente);
+              const matchT = rnc.transportador.length > 3 && upperObs.includes(rnc.transportador);
+              const matchP = upperPlaca.length > 4 && (rnc.transportador.includes(upperPlaca) || rnc.cliente.includes(upperPlaca));
+              
+              let triggers = [];
+              if (matchP) triggers.push("Placa");
+              if (matchC && !matchP) triggers.push("Cliente");
+              if (matchT && !matchP) triggers.push("Transportadora");
+
+              if (triggers.length > 0) {
+                  rncMatches.push({
+                      data: rnc.data,
+                      descricao: rnc.descricao,
+                      trigger: triggers.join(' e ')
+                  });
+              }
+          });
+      }
+
+      let rncHTML = '';
+      if (rncMatches.length > 0) {
+          const uniqueRncs = [];
+          const descSet = new Set();
+          for (let r of rncMatches) {
+              if (!descSet.has(r.descricao)) {
+                  descSet.add(r.descricao);
+                  uniqueRncs.push(r);
+              }
+          }
+
+          const detalhesRnc = uniqueRncs.map(r => 
+              `<li style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #FCA5A5;">
+                  <div style="font-weight: 700; color: #991B1B; margin-bottom: 4px;">
+                      📅 ${escapeHTML(r.data)} &nbsp;|&nbsp; 🔍 Identificado via: ${escapeHTML(r.trigger)}
+                  </div>
+                  <div style="color: #7F1D1D; line-height: 1.4;">${escapeHTML(r.descricao)}</div>
+               </li>`
+          ).join('');
+
+          rncHTML = `
+            <div style="background: #FEF2F2; border-left: 4px solid #EF4444; padding: 12px 16px; margin: 16px 20px 0 20px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">⚠️</span>
+                    <span style="font-size: 13px; font-weight: 800; color: #991B1B; text-transform: uppercase;">ALERTA DE NÃO CONFORMIDADE (RNC)</span>
+                </div>
+                <span style="font-size: 11px; font-weight: 600; color: #7F1D1D;">
+                    Foram encontrados ${uniqueRncs.length} registro(s) de reclamação com impacto nesta carga.
+                </span>
+                
+                <details style="margin-top: 4px; font-size: 11px;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #991B1B; padding: 4px 0; outline: none; user-select: none;">
+                        ℹ️ Expandir Detalhes e Histórico
+                    </summary>
+                    <div class="rnc-list-wrapper">
+                        <ul style="list-style: none; margin: 0; padding: 0;">
+                            ${detalhesRnc}
+                        </ul>
+                    </div>
+                </details>
+            </div>`;
+      }
 
       let infoInteligenteHTML = '';
       if(statusInteligente) {
@@ -982,7 +1098,6 @@ const dashboardEngine = {
 
       const cardClass = bloqueado ? 'carga-card bloqueado' : 'carga-card liberado';
       const statusBadge = bloqueado ? `<span class="badge-vermelho">⛔ BLOQUEADO</span>` : `<span class="badge-verde">✔ LIBERADO</span>`;
-      const clientesStr = [...new Set(itens.map(i => i.cliente))].join(' • ');
 
       const produtosHTML = itens.map(item => {
         const hasPallet = String(item.pallet||'').toUpperCase() === 'SIM';
@@ -1013,6 +1128,7 @@ const dashboardEngine = {
                      </div>
                      <div class="carga-card-status">${statusBadge}</div>
                   </div>
+                  ${rncHTML}
                   ${infoInteligenteHTML}
                   <div class="carga-card-body">${produtosHTML}</div>
                   ${obsHTML}
@@ -1051,7 +1167,7 @@ const dashboardEngine = {
 };
 
 const uiBuilder = {
-  localDataStore: [], lotesMap: {}, currentProdMap: {}, currentColorMap: {}, historicoCargas: [],
+  localDataStore: [], lotesMap: {}, currentProdMap: {}, currentColorMap: {}, historicoCargas: [], rncCargas: [],
   visibleEmptyRows: 0, 
 
   init() { this.buildChecklistUI(); this.buildUnifiedGrid(); this.updateTimestamp(true); this.updateGlobalUpdateTimestamp(); this.updateGridVisibility(); },
@@ -1252,7 +1368,6 @@ const uiBuilder = {
     document.querySelectorAll('.check-card').forEach(c => c.className = 'check-card');
     const ta = document.getElementById('chk_text_obs_geral'); if(ta) ta.value='';
     
-    // Limpa as fotos
     ['Frente', 'Traseira', 'Assoalho'].forEach(id => {
         const fileInp = document.getElementById(`file${id}`);
         const preview = document.getElementById(`preview${id}`);
@@ -1517,10 +1632,14 @@ const appController = {
   async silentRefresh() {
     if(!navigator.onLine) return; 
     try {
-      const rawValues = await apiService.fetchSheetData().catch(() => null);
-      const historicoRaw = await apiService.fetchHistoricoData().catch(() => null);
+      const [rawValues, historicoRaw, rncRaw] = await Promise.all([
+          apiService.fetchSheetData().catch(() => null),
+          apiService.fetchHistoricoData().catch(() => null),
+          apiService.fetchRncData().catch(() => null)
+      ]);
       
       if (historicoRaw) uiBuilder.historicoCargas = historicoRaw;
+      if (rncRaw) uiBuilder.rncCargas = dataParser.parseRnc(rncRaw);
       
       if (rawValues && rawValues.length > 0) {
           const parsedData = dataParser.parse(rawValues);
@@ -1558,13 +1677,15 @@ const appController = {
     try {
       uiBuilder.setFatalError(false);
       
-      const [rawValues, historicoRaw] = await Promise.all([
+      const [rawValues, historicoRaw, rncRaw] = await Promise.all([
           apiService.fetchSheetData(),
-          apiService.fetchHistoricoData()
+          apiService.fetchHistoricoData(),
+          apiService.fetchRncData()
       ]);
 
       const parsedData = dataParser.parse(rawValues || []);
       uiBuilder.historicoCargas = historicoRaw || [];
+      uiBuilder.rncCargas = dataParser.parseRnc(rncRaw);
       
       let lotesMap = null; 
       try { 
@@ -1691,20 +1812,87 @@ const appController = {
 // MÓDULO: PERDAS CONTROLLER
 // ==========================================
 const perdasController = {
-  init() { this.buildPerdasGrid(); },
+  visibleEmptyRows: 0,
+
+  init() { this.buildPerdasGrid(); this.updateGridVisibility(); },
   buildPerdasGrid() {
     const c = document.getElementById('perdasContainer');
     for(let i = 1; i <= 10; i++) {
       c.insertAdjacentHTML('beforeend', `
-        <div class="grid-row perda-row">
+        <div class="grid-row perda-row" id="perdaRow_${i}">
           <div class="grid-cell" data-label="Produto"><select id="perdaProd_${i}" onchange="perdasController.onPerdaProdChange(${i})"><option value="">Selecione...</option></select></div>
-          <div class="grid-cell" data-label="Qtd (t)"><input type="number" id="perdaQtd_${i}" step="0.001" min="0" placeholder="Ex: 2.500"></div>
+          <div class="grid-cell" data-label="Qtd (t)"><input type="number" id="perdaQtd_${i}" step="0.001" min="0" placeholder="Ex: 2.500" oninput="perdasController.updateGridVisibility()"></div>
           <div class="grid-cell" data-label="Lote (Saldo)"><select id="perdaLote_${i}" onchange="perdasController.onPerdaLoteChange(${i})"><option value="">Lote...</option></select><div id="perdaSaldo_${i}" class="saldo-lbl"></div></div>
           <div class="grid-cell" data-label="Tipo de Perda"><select id="perdaTipo_${i}"><option value="">Motivo...</option><option value="Processo">Processo</option><option value="Carregamento">Carregamento</option><option value="Avaria">Avaria</option></select></div>
           <div class="grid-cell" data-label="Observação"><input type="text" id="perdaObs_${i}" placeholder="Detalhes adicionais..."></div>
         </div>`);
     }
+    
+    // Injeta botão ocultar/expandir
+    c.parentElement.insertAdjacentHTML('beforeend', `
+      <div style="padding: 12px; display: flex; justify-content: center; background: var(--bg-app); border-top: 1px solid var(--border);">
+          <button type="button" id="btnTogglePerdasRows" onclick="perdasController.toggleGridRows()" style="background: transparent; border: 1px dashed var(--secondary); color: var(--secondary); font-size: 12px; font-weight: 700; min-height: 36px; border-radius: 20px; padding: 0 20px; transition: all 0.2s; cursor: pointer;">⬇ Expandir mais uma linha</button>
+      </div>
+    `);
   },
+
+  toggleGridRows() {
+      let totalShown = 0;
+      for (let i = 1; i <= 10; i++) {
+          const row = document.getElementById(`perdaRow_${i}`);
+          if(row && row.style.display !== 'none') totalShown++;
+      }
+      if (totalShown >= 10) {
+          this.visibleEmptyRows = 0; 
+      } else {
+          this.visibleEmptyRows++; 
+      }
+      this.updateGridVisibility();
+  },
+
+  updateGridVisibility() {
+      const btn = document.getElementById('btnTogglePerdasRows');
+      let hasContentCount = 0;
+      let emptyRowsShown = 0;
+      let totalShown = 0;
+
+      for (let i = 1; i <= 10; i++) {
+        const row = document.getElementById(`perdaRow_${i}`);
+        if(!row) continue;
+        
+        const p = document.getElementById(`perdaProd_${i}`).value;
+        const q = document.getElementById(`perdaQtd_${i}`).value;
+        
+        const hasData = (p !== '' || parseFloat(q) > 0);
+        
+        if (hasData) {
+            row.style.display = ''; 
+            hasContentCount++;
+            totalShown++;
+        } else {
+            if (emptyRowsShown < this.visibleEmptyRows || (hasContentCount === 0 && emptyRowsShown === 0)) {
+                row.style.display = '';
+                emptyRowsShown++;
+                totalShown++;
+            } else {
+                row.style.display = 'none';
+            }
+        }
+      }
+
+      if (btn) {
+        if (totalShown >= 10) {
+          btn.innerHTML = '⬆ Ocultar linhas vazias';
+          btn.style.color = 'var(--text-muted)';
+          btn.style.borderColor = 'var(--border)';
+        } else {
+          btn.innerHTML = '⬇ Expandir mais uma linha';
+          btn.style.color = 'var(--secondary)';
+          btn.style.borderColor = 'var(--secondary)';
+        }
+      }
+  },
+
   populateProdutos(lotesMap) {
     const keys = Object.keys(lotesMap).filter(k => /[a-zA-Z]/.test(k)).sort();
     const opts = '<option value="">Selecione...</option>' + keys.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
@@ -1731,6 +1919,7 @@ const perdasController = {
         if(Object.keys(lotesObj).length === 1) { loteSelect.selectedIndex = 1; this.onPerdaLoteChange(index); }
       } else { loteSelect.innerHTML = '<option value="S/ Lote">Sem Lote no Estoque</option>'; }
     }
+    this.updateGridVisibility();
   },
   onPerdaLoteChange(index) {
     const loteSelect = document.getElementById(`perdaLote_${index}`); const lblSaldo = document.getElementById(`perdaSaldo_${index}`); 
@@ -1744,6 +1933,8 @@ const perdasController = {
       document.getElementById(`perdaSaldo_${i}`).innerText = ''; document.getElementById(`perdaTipo_${i}`).value = ''; document.getElementById(`perdaObs_${i}`).value = ''; 
     } 
     uiBuilder.updateTimestamp(); 
+    this.visibleEmptyRows = 0;
+    this.updateGridVisibility();
   },
   async submitPerda() {
     const acomp = document.getElementById('perdaAcomp').value; 
