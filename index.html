@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cysy Fertilizantes - Controle Logístico</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+  :root {
+    --primary: #1E3A8A; --primary-hover: #1E40AF; --secondary: #3B82F6; 
+    --bg-app: #F1F5F9; --bg-card: #FFFFFF; --bg-input: #F8FAFC;
+    --border: #E2E8F0; --text-main: #1E293B; --text-muted: #64748B; --text-white: #FFFFFF;
+    --success: #10B981; --success-bg: #D1FAE5; --danger: #EF4444; --danger-bg: #FEE2E2;
+    --warning: #F59E0B; --warning-bg: #FEF3C7;
+    --radius-lg: 12px; --radius: 8px; --shadow-sm: 0 1px 3px rgba(0,0,0,0.1); --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --touch-size: 48px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body { 
+    background-color: var(--bg-app); 
+    color: var(--text-main); 
+    font-family: 'Inter', system-ui, sans-serif; 
+    -webkit-font-smoothing: antialiased; 
+    padding-top: 155px; 
+    padding-bottom: 80px; 
+    overflow-x: hidden; 
+    position: relative; 
+  }
+  
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .anim-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+  /* ==========================================
+     HEADER, NAVEGAÇÃO E STATUS DE REDE
+  ========================================== */
+  header { position: fixed; top: 0; left: 0; width: 100%; background: var(--primary); color: var(--text-white); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 100; display: flex; flex-direction: column; box-shadow: var(--shadow-md); }
+  .header-top { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; flex-wrap: wrap; gap: 12px; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { width: 42px; height: 42px; background: var(--text-white); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: var(--shadow-sm); }
+  .brand-text h1 { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
+  .global-timestamp { font-size: 11px; color: rgba(255,255,255,0.8); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+  
+  .status-badge { font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm); transition: all 0.3s; }
+  .status-badge.online { background: #D1FAE5; color: #065F46; border: 1px solid #10B981; }
+  .status-badge.offline { background: #FEE2E2; color: #991B1B; border: 1px solid #EF4444; }
+  .status-badge.syncing { background: #FEF3C7; color: #B45309; border: 1px solid #F59E0B; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+  .header-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+
+  .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn { flex: 1; padding: 16px; text-align: center; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; min-width: max-content; }
+  .tab-btn:hover { background: var(--bg-input); }
+  .tab-btn.active { color: var(--secondary); border-bottom-color: var(--secondary); background: #EFF6FF; }
+
+  button { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px; min-height: var(--touch-size); padding: 0 24px; border-radius: var(--radius); border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; }
+  .btn-header { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-white); }
+  .btn-header:hover { background: rgba(255,255,255,0.2); }
+  .btn-success { background: var(--success); color: white; font-size: 16px; width: 100%; box-shadow: var(--shadow-md); }
+  .btn-success:hover { background: #059669; transform: translateY(-2px); }
+  .btn-danger { background: var(--bg-card); border: 2px solid var(--danger); color: var(--danger); font-size: 16px; width: 100%; }
+  .btn-danger:hover { background: var(--danger-bg); transform: translateY(-2px); }
+  button:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+  /* ==========================================
+     LAYOUT, FORMS E GRIDS
+  ========================================== */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 24px; }
+  .tab-content { display: none; animation: fade-in 0.4s ease; flex-direction: column; gap: 24px; }
+  .tab-content.active { display: flex; }
+
+  .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow-sm); }
+  .section-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--bg-app); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .section-header h2 { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 700; color: var(--primary); text-transform: uppercase; display: flex; align-items: center; gap: 8px;}
+  
+  .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+  label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  input, select, textarea { width: 100%; min-height: var(--touch-size); padding: 12px 16px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-main); font-size: 15px; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.5; }
+  input::placeholder, textarea::placeholder { color: #94A3B8; font-style: italic; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--secondary); background: #FFFFFF; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+  input[readonly] { background: var(--bg-app); color: var(--text-muted); cursor: not-allowed; }
+  select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 48px; }
+
+  /* UPLOAD DE FOTOS */
+  .file-upload-wrapper { position: relative; width: 100%; height: 140px; border: 2px dashed var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg-input); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;}
+  .file-upload-wrapper:hover { border-color: var(--secondary); background: #EFF6FF; }
+  .file-upload-wrapper input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;}
+  .img-preview { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 13px; font-weight: 700; text-transform: uppercase; background-size: cover; background-position: center; pointer-events: none; flex-direction: column; gap: 8px;}
+  .img-preview span { background: #FFFFFF; padding: 6px 12px; border-radius: 20px; box-shadow: var(--shadow-sm); z-index: 2;}
+  .img-preview.has-image { border: none; }
+  .img-preview.has-image span { background: rgba(0,0,0,0.6); color: white; border: 1px solid rgba(255,255,255,0.3); font-size: 11px; }
+
+  .badge-ja-carregou { display: none; background: #FEE2E2; color: #991B1B; font-size: 11px; font-weight: 800; padding: 8px 12px; border-radius: 6px; border: 1px solid #EF4444; margin-top: 8px; text-transform: uppercase; animation: pulse 1.5s infinite; letter-spacing: 0.5px; width: fit-content; }
+  .chk-manual-wrapper { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-muted); font-size: 12px; font-weight: 600; margin-top: 8px; text-transform: none;}
+  .chk-manual-wrapper input { width: 18px; min-height: 18px; padding: 0; margin: 0; }
+
+  .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); scrollbar-width: none; }
+  .unified-grid { min-width: 950px; display: flex; flex-direction: column; }
+  .grid-header { display: grid; grid-template-columns: minmax(250px, 3fr) 1.2fr 2fr 1.2fr 2fr; gap: 1px; background: var(--bg-app); border-bottom: 2px solid var(--border); }
+  .grid-header > div { padding: 16px; font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+  .grid-row { display: grid; grid-template-columns: minmax(250px, 3fr) 1.2fr 2fr 1.2fr 2fr; gap: 1px; border-bottom: 1px solid var(--border); transition: all 0.3s ease;}
+  .grid-cell { padding: 12px; display: flex; flex-direction: column; justify-content: center; }
+  .grid-cell input, .grid-cell select { min-height: 44px; padding: 8px 12px; font-size: 14px; background: #FFFFFF; }
+  .saldo-lbl { font-size: 11px; color: var(--secondary); margin-top: 6px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+  /* ==========================================
+     CHECKLIST E RNC EXPANSÍVEL
+  ========================================== */
+  .grid-check { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+  .check-card { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; transition: all 0.3s; border-left: 4px solid var(--border); }
+  .check-card.sim { border-left-color: var(--success); background: var(--success-bg); }
+  .check-card.nao { border-left-color: var(--danger);  background: var(--danger-bg); }
+  .check-text-card { flex-direction: column; align-items: flex-start; grid-column: 1 / -1; border-left-color: var(--primary); }
+  .check-title { font-size: 14px; font-weight: 600; flex: 1; color: var(--text-main); }
+  .check-options { display: flex; gap: 8px; }
+  .check-opt { min-height: 44px; min-width: 60px; display: flex; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid var(--border); border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+  input[type="radio"] { display: none; }
+  input[type="radio"][value="sim"]:checked + .check-opt-success { background: var(--success); color: white; border-color: var(--success);}
+  input[type="radio"][value="nao"]:checked + .check-opt-danger  { background: var(--danger);  color: white; border-color: var(--danger);}
+  input[type="radio"][value="sim"]:checked + .check-opt-danger  { background: var(--danger);  color: white; border-color: var(--danger);}
+  input[type="radio"][value="nao"]:checked + .check-opt-success { background: var(--success); color: white; border-color: var(--success);}
+
+  details.rnc-details > summary { list-style: none; }
+  details.rnc-details > summary::-webkit-details-marker { display: none; }
+  details.rnc-details > summary .rnc-expand-text::before { content: 'EXPANDIR ▼'; }
+  details.rnc-details[open] > summary .rnc-expand-text::before { content: 'OCULTAR ▲'; }
+  .rnc-list-wrapper::-webkit-scrollbar { width: 6px; }
+  .rnc-list-wrapper::-webkit-scrollbar-track { background: transparent; }
+  .rnc-list-wrapper::-webkit-scrollbar-thumb { background: #FCA5A5; border-radius: 10px; }
+
+  /* ==========================================
+     PAINEL EXECUTIVO E BANNERS
+  ========================================== */
+  .smart-banner { padding: 20px; border-radius: var(--radius); margin-bottom: 16px; display: flex; align-items: flex-start; gap: 16px; }
+  .banner-icon { font-size: 28px; }
+  .banner-content h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .banner-content p { font-size: 14px; opacity: 0.9; }
+  .banner-danger { background: var(--danger-bg); border: 1px solid var(--danger); color: #991B1B; }
+  .banner-success { background: var(--success-bg); border: 1px solid var(--success); color: #065F46; }
+
+  .carga-cards-grid { display: flex; flex-direction: column; gap: 20px; padding: 20px 24px 24px; }
+  .carga-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: all 0.4s ease;}
+  .carga-card.bloqueado { border-color: var(--danger); border-left: 4px solid var(--danger); }
+  .carga-card.liberado  { border-left: 4px solid var(--success); }
+  .carga-card-header { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: var(--bg-app); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .carga-placa { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--primary); background: #FFFFFF; border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; letter-spacing: 2px; display: flex; align-items: center; gap: 8px;}
+  
+  .time-badge { font-size: 14px; font-weight: 800; padding: 4px 8px; border-radius: 4px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main); }
+  .time-badge.alert { background: var(--warning-bg); color: #B45309; border-color: var(--warning); }
+  .time-badge.late { background: var(--danger-bg); color: #991B1B; border-color: var(--danger); }
+  
+  .badge-especial { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 4px; }
+  .badge-palete { background: #FFF7ED; color: #9A3412; border-color: #FDBA74; }
+  .badge-filme { background: #F0FDF4; color: #166534; border-color: #86EFAC; }
+  .badge-py { background: #EEF2FF; color: #3730A3; border-color: #A5B4FC; }
+
+  .carga-cliente { font-size: 15px; font-weight: 700; color: var(--text-main); flex: 1; display:flex; flex-direction:column; gap:4px;}
+  .carga-badges { display:flex; gap: 6px; flex-wrap: wrap; }
+  .carga-card-status { margin-left: auto; }
+  .carga-card-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .produto-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px 20px; align-items: center; padding: 12px 16px; background: var(--bg-input); border-radius: var(--radius); border: 1px solid var(--border); }
+  .produto-nome { font-size: 14px; font-weight: 600; color: var(--text-main); }
+  .produto-qtd  { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--secondary); }
+  .produto-label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px; }
+  .carga-card-footer { padding: 12px 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; background: var(--bg-app); }
+  
+  .badge-verde { background: var(--success-bg); color: #065F46; border: 1px solid var(--success); padding: 4px 10px; border-radius: 4px; font-weight: 800; font-size: 11px; }
+  .badge-vermelho{ background: var(--danger-bg);  color: #991B1B;  border: 1px solid var(--danger); padding: 4px 10px; border-radius: 4px; font-weight: 800; font-size: 11px; }
+
+  .btn-status-manual { background: #FFFFFF; border: 1px solid var(--border); color: var(--text-main); font-size: 11px; padding: 6px 12px; min-height: 28px; height: 28px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); white-space: nowrap; cursor: pointer; font-family: 'Montserrat', sans-serif; font-weight: 700; transition: all 0.2s; }
+  .btn-status-manual:hover { background: var(--bg-app); border-color: var(--primary); }
+
+  /* ==========================================
+     RESPONSIVIDADE MÁXIMA - iPHONE RETRATO (390px)
+  ========================================== */
+  @media (max-width: 768px) {
+    body { padding-top: 180px; }
+    .header-top { flex-direction: column; align-items: flex-start; }
+    .header-actions { margin-left: 0; width: 100%; justify-content: space-between; margin-top: 10px;}
+    
+    .container { padding: 0 16px; }
+    .section { padding: 20px 16px; }
+    
+    .table-wrapper { border: none; background: transparent; overflow-x: hidden; }
+    .unified-grid { min-width: 100%; display: flex; flex-direction: column; gap: 16px; }
+    .grid-header { display: none; }
+    
+    .grid-row { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-card); box-shadow: var(--shadow-sm); padding: 16px; gap: 12px; }
+    .grid-cell { padding: 0; display: flex; flex-direction: column; width: 100%; }
+    
+    .grid-cell::before { content: attr(data-label); font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+    .grid-cell:first-child { border-bottom: 1px dashed var(--border); padding-bottom: 16px; margin-bottom: 4px; }
+    .grid-cell:first-child::before { color: var(--primary); }
+    
+    .grid-form { grid-template-columns: 1fr; }
+    .grid-check { grid-template-columns: 1fr; }
+    .carga-card-header { flex-direction: column; align-items: flex-start; }
+    .carga-card-status { margin-left: 0; margin-top: 8px; width: 100%; text-align: left; }
+    .produto-row { grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  /* ==========================================
+     OVERLAYS, LOADING E TERMINAL DEBUG
+  ========================================== */
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; gap: 12px; color: var(--text-muted); text-align: center; }
+  .empty-state span { font-size: 48px; }
+
+  #fatalError { display: none; background: var(--danger-bg); border: 1px solid var(--danger); border-radius: var(--radius-lg); padding: 40px; text-align: center; gap: 12px; flex-direction: column; color: var(--text-main); }
+  #fatalError h2 { font-family: 'Montserrat', sans-serif; font-size: 22px; color: var(--danger); }
+  #fatalError.info-mode { border-color: var(--success); background: var(--success-bg); }
+  #fatalError.info-mode h2 { color: #065F46; }
+
+  #loaderOverlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); z-index: 9999; backdrop-filter: blur(4px); flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+  .spinner-large { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--secondary); border-radius: 50%; animation: spin 1s linear infinite; }
+  #loaderOverlay p { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 600; color: white; }
+
+  .btn-debug { position: fixed; bottom: 24px; right: 24px; z-index: 10000; border-radius: 50px; box-shadow: var(--shadow-md); background: #1E293B; border: 1px solid #334155; color: white; }
+  .debug-panel { position: fixed; top: 0; right: -450px; width: 450px; max-width: 100vw; height: 100vh; background: #0F172A; border-left: 1px solid #334155; z-index: 10001; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.5); color: #F8FAFC; }
+  .debug-panel.open { right: 0; }
+  .debug-header { padding: 20px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; background: #1E293B; }
+  .debug-header h3 { font-family: 'Montserrat', sans-serif; font-size: 16px; color: #F59E0B; }
+  .debug-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .debug-box { background: #1E293B; border: 1px solid #334155; border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 8px;}
+  .debug-box h4 { color: #94A3B8; margin-bottom: 4px; border-bottom: 1px dashed #475569; padding-bottom: 8px; font-family: 'Montserrat', sans-serif;}
+  .dbg-status-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);}
+  .dbg-status-item:last-child { border-bottom: none; padding-bottom: 0; }
+  
+  .log-container { overflow-y: auto; flex: 1; min-height: 300px; max-height: 50vh; background: #0B0F19; padding: 12px; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 6px;}
+  .log-entry { padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); word-break: break-word; display: flex; align-items: flex-start; gap: 8px;}
+  .log-time { color: #94A3B8; font-weight: bold; flex-shrink: 0;}
+  .log-msg { flex: 1; line-height: 1.4; }
+
+  footer { margin-top: 40px; padding: 30px 24px; text-align: center; border-top: 1px solid var(--border); background: var(--bg-card); }
+  footer p { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-family: 'Inter', sans-serif; }
+  footer strong { font-family: 'Montserrat', sans-serif; color: var(--text-main); }
+  footer .credits { font-size: 12px; font-weight: 600; color: var(--primary); margin-top: 12px;}
+</style>
+</head>
+<body>
+
+  <div id="loaderOverlay"><div class="spinner-large"></div><p id="loaderText">Processando...</p></div>
+
+  <header>
+    <div class="header-top">
+      <div class="header-brand">
+        <div class="logo-icon">🌱</div>
+        <div class="brand-text">
+          <h1>Cysy Fertilizantes</h1>
+          <div class="global-timestamp" id="lastUpdateText">Atualizando sistema...</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div id="netStatusBadge" class="status-badge syncing">🔄 Inicializando...</div>
+        <button class="btn-header" onclick="appController.handleRefresh()">🔄 ATUALIZAR</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab-btn active" onclick="uiBuilder.switchTab(event, 'op')">📋 Operação e Checklist</div>
+      <div class="tab-btn" onclick="uiBuilder.switchTab(event, 'perdas')">📉 Baixa de Perdas</div>
+      <div class="tab-btn" onclick="uiBuilder.switchTab(event, 'dash')">📊 Painel Executivo</div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div id="fatalError">
+      <h2 id="fatalTitle">❌ Falha de Comunicação</h2>
+      <p id="fatalDesc">Verifique sua conexão ou as configurações do Apps Script.</p>
+    </div>
+
+    <div id="tab-op" class="tab-content active">
+      <section class="section anim-slide-up" style="animation-delay: 0.1s;">
+        <div class="section-header">
+          <h2><span>🏢</span> Dados da Operação e Destinos</h2>
+        </div>
+        <div class="grid-form">
+          <div class="form-group"><label>Data e Hora Local</label><input type="text" id="inpDataHora" readonly></div>
+          <div class="form-group">
+            <label>Responsável Operacional *</label>
+            <select id="selAcomp">
+              <option value="">Selecione...</option>
+              <option value="Jhonantan Cardoso Gonçalves">Jhonantan Cardoso Gonçalves</option>
+              <option value="Patrick Ramos">Patrick Ramos</option>
+              <option value="Ronaldo">Ronaldo</option>
+            </select>
+          </div>
+          
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Buscar Carga por Placa 🚛 *</label>
+            <select id="selPlacaBusca" onchange="uiBuilder.onPlacaChange()" style="border-color: var(--secondary); border-width: 2px;">
+              <option value="">Aguardando dados...</option>
+            </select>
+          </div>
+
+          <div id="pedidosContainer" style="grid-column: 1 / -1; display: none;">
+            <label style="margin-bottom: 8px; display: block;">Pedidos e Clientes Vinculados a esta Placa</label>
+            <div class="table-wrapper">
+               <div class="unified-grid" id="listaPedidosGrid">
+                  </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section anim-slide-up" style="animation-delay: 0.2s;">
+        <div class="section-header"><h2><span>🚛</span> Dados do Transporte</h2></div>
+        <div class="grid-form">
+          <div class="form-group">
+            <label>Placa do Veículo *</label>
+            <input type="text" id="inpPlaca" autocomplete="off" placeholder="Ex: ABC-1234" oninput="uiBuilder.verificarPlacaJaCarregou()">
+            <div id="badgeJaCarregou" class="badge-ja-carregou">🚨 JÁ CARREGOU HOJE</div>
+            <label class="chk-manual-wrapper" title="Marque manualmente caso a verificação automática falhe.">
+              <input type="checkbox" id="chkManualPlaca" onchange="uiBuilder.verificarPlacaJaCarregou()">
+              <span>Forçar verificação (Já Carregou)</span>
+            </label>
+          </div>
+          
+          <div class="form-group"><label>Nome do Motorista</label><input type="text" id="inpMotorista" autocomplete="off" placeholder="Nome completo..."></div>
+          
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Observações do Documento</label>
+            <textarea id="inpObs" placeholder="Ex: 16:00 - PROPRIO - PLACA: IZQ8B34 - MOT: ..." oninput="uiBuilder.verificarPlacaJaCarregou()"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="section anim-slide-up" style="animation-delay: 0.3s;">
+        <div class="section-header"><h2><span>📦</span> Produtos, Lotes e Avarias</h2></div>
+        <div class="table-wrapper">
+          <div class="unified-grid" id="materialsContainer">
+            <div class="grid-header">
+              <div>Produto Liberado</div>
+              <div>Carregado (t)</div>
+              <div>Lote Utilizado (Saldo)</div>
+              <div>Avaria (t)</div>
+              <div>Motivo da Avaria</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section anim-slide-up" style="animation-delay: 0.4s;">
+        <div class="section-header"><h2><span>🛡️</span> Checklist de Qualidade</h2></div>
+        <div class="grid-check" id="checklistGrid"></div>
+      </section>
+      
+      <section class="section anim-slide-up" style="animation-delay: 0.45s;">
+        <div class="section-header"><h2><span>📷</span> Evidências Fotográficas</h2></div>
+        <div class="grid-form" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+          <div class="form-group">
+            <label>Frente com proteção e limpeza *</label>
+            <div class="file-upload-wrapper">
+               <input type="file" id="fileFrente" accept="image/*" capture="environment" onchange="uiBuilder.handleImageUpload(event, 'previewFrente', 'base64Frente')">
+               <div class="img-preview" id="previewFrente"><span>📷 Tirar Foto</span></div>
+               <input type="hidden" id="base64Frente">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Traseira com proteção e limpeza *</label>
+            <div class="file-upload-wrapper">
+               <input type="file" id="fileTraseira" accept="image/*" capture="environment" onchange="uiBuilder.handleImageUpload(event, 'previewTraseira', 'base64Traseira')">
+               <div class="img-preview" id="previewTraseira"><span>📷 Tirar Foto</span></div>
+               <input type="hidden" id="base64Traseira">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Assoalho com proteção e limpeza *</label>
+            <div class="file-upload-wrapper">
+               <input type="file" id="fileAssoalho" accept="image/*" capture="environment" onchange="uiBuilder.handleImageUpload(event, 'previewAssoalho', 'base64Assoalho')">
+               <div class="img-preview" id="previewAssoalho"><span>📷 Tirar Foto</span></div>
+               <input type="hidden" id="base64Assoalho">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section anim-slide-up" style="animation-delay: 0.5s; background: transparent; border: none; padding: 0; box-shadow: none;">
+        <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+          <button class="btn-success" id="btnAprovar" onclick="appController.submitFinal('APROVADO')">✅ CONFIRMAR E LIBERAR VEÍCULO</button>
+          <button class="btn-danger" id="btnBloquear" onclick="appController.submitFinal('BLOQUEADO')">⛔ REGISTRAR VEÍCULO BLOQUEADO</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="tab-perdas" class="tab-content">
+      <section class="section anim-slide-up">
+        <div class="section-header"><h2><span>📉</span> Baixa de Perdas Operacionais</h2></div>
+        <div class="grid-form" style="margin-bottom: 24px;">
+          <div class="form-group"><label>Data e Hora</label><input type="text" id="perdaDataHora" readonly></div>
+          <div class="form-group">
+            <label>Responsável Operacional *</label>
+            <select id="perdaAcomp">
+              <option value="">Selecione...</option>
+              <option value="Jhonantan Cardoso Gonçalves">Jhonantan Cardoso Gonçalves</option>
+              <option value="Patrick Ramos">Patrick Ramos</option>
+              <option value="Ronaldo">Ronaldo</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <div class="unified-grid" id="perdasContainer">
+            <div class="grid-header" style="grid-template-columns: minmax(250px,3fr) 1.4fr 2fr 1.2fr 2fr;">
+              <div>Produto</div><div>Qtd (t)</div><div>Lote (Saldo)</div><div>Tipo de Perda</div><div>Observação</div>
+            </div>
+          </div>
+        </div>
+        <div class="grid-form" style="margin-top: 32px;">
+          <button class="btn-success" onclick="perdasController.submitPerda()" style="height: 60px;">✅ REGISTRAR BAIXA NO SISTEMA</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="tab-dash" class="tab-content">
+      <div id="bannerContainer" class="anim-slide-up" style="animation-delay: 0.1s;"></div>
+      <section class="section anim-slide-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
+        <div class="section-header" style="padding: 24px 24px 0 24px; border:none; margin-bottom: 0;">
+          <h2><span>🚛</span> Carregamentos Pendentes do Dia</h2>
+        </div>
+        <div id="tabelaDiariaContainer"></div>
+      </section>
+    </div>
+
+  </div>
+
+  <footer>
+    <p><strong>© 2026 Cysy Fertilizantes</strong> — Painel Logístico Avançado</p>
+    <div class="credits">
+      Desenvolvido por Jhonantan Cardoso Gonçalves<br>
+      📞 48 99215-9791
+    </div>
+  </footer>
+
+  <button class="btn-debug" onclick="debugEngine.togglePanel()">🐞 Terminal</button>
+  <div class="debug-panel" id="debugPanel">
+    <div class="debug-header">
+      <h3>🛠 TERMINAL DE DIAGNÓSTICO</h3>
+      <button class="btn-header" style="min-height: 36px; padding: 0 12px; font-size: 12px;" onclick="debugEngine.togglePanel()">FECHAR ✖</button>
+    </div>
+    <div class="debug-content">
+      <div class="debug-box">
+        <h4>1️⃣ Status do Sistema</h4>
+        <div class="dbg-status-item" id="dbgStatusAPI"><span style="color:var(--text-muted)">⏳ Aguardando API...</span></div>
+        <div class="dbg-status-item" id="dbgStatusNet"><span style="color:var(--text-muted)">⏳ Aguardando Rede...</span></div>
+        <div class="dbg-status-item" id="dbgStatusSW"><span style="color:var(--text-muted)">⏳ Inicializando SW...</span></div>
+      </div>
+      <div class="debug-box" style="flex: 1; display: flex; flex-direction: column;">
+        <h4>2️⃣ Log Cronológico</h4>
+        <div id="dbgLogConsole" class="log-container"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ==========================================
+// 1. CONFIGURAÇÕES GERAIS E CORES DE CLIENTES
+// ==========================================
+const config = {
+  api: {
+    sheetId: '1bF_9A1P12OAITTcYskNsNRJ8ti_PXjNC3ti7ij0TVw0',
+    estoqueSheetId: '1ubMI0M0znO3DTSx4w3dIM8AnQZ5KaJc22ZMyC_oU63c',
+    historicoSheetId: '1KAOCFX7_raD0YMhA3yPh8HjS1fF9TlJWp9TYGACCMCI',
+    rncSheetId: '1lyWfTaAkrgMWB0JrzbiPt9RIz7jB1WdCe2A9PwnRivY',
+    range: 'Carregamento!A1:Q20',
+    key: 'AIzaSyAdzZznAPDRlGLqbT-8AAVSKslZYfr7Jc0',
+    scriptUrl: 'https://script.google.com/macros/s/AKfycbxy0bjxbvyvaIhRewUzLhIbNZbZAJjY22U0J7G0Emw62NyMV5lL7d_CmXdVSIgjqcWf/exec', 
+    timeoutMs: 15000
+  },
+  checklist: [
+    {id:'carroceria', lbl:'Baú ou carroceria limpa, livre de resíduos anteriores?', type:'yn'},
+    {id:'umidade',    lbl:'Ausência de umidade que comprometa o produto?', type:'yn'},
+    {id:'lona',       lbl:'Lona ou cobertura em bom estado de conservação?', type:'yn'},
+    {id:'estrutura',  lbl:'Laterais e piso em boas condições estruturais?', type:'yn'},
+    {id:'indicacao',  lbl:'Carregado conforme instrução do motorista?', type:'yn'},
+    {id:'excesso',    lbl:'A carga foi realizada com excesso de peso?', type:'yn_r'},
+    {id:'poeira',     lbl:'Produto carregado com excesso de poeira?', type:'yn_r'},
+    {id:'tamanho',    lbl:'O tamanho da carroceria é adequado para a carga?', type:'yn'},
+    {id:'forracao',   lbl:'Há necessidade de forração extra para proteção?', type:'yn_r'},
+    {id:'obs_geral',  lbl:'Observações gerais de qualidade:', type:'text'}
+  ],
+  clientColors: ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#EF4444']
+};
+
+const parseBRNumber = (str) => {
+    if (typeof str === 'number') return str;
+    if (!str) return 0;
+    let s = String(str).replace(/[^\d,\.-]/g, '').trim();
+    if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+        s = s.replace(/\./g, '').replace(',', '.');
+    } else if (s.lastIndexOf('.') > s.lastIndexOf(',')) {
+        s = s.replace(/,/g, ''); 
+    } else if (s.includes(',')) {
+        s = s.replace(',', '.'); 
+    }
+    return parseFloat(s) || 0;
+};
+
+const normalizeName = (s) => String(s || '').toUpperCase().replace(/\s+/g, ' ').trim();
+const formatTons = (val) => { const n = parseBRNumber(val); return (isNaN(n) ? 0 : n).toFixed(3); };
+const escapeHTML = (str) => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const extractPlaca = (obsStr) => { const match = /\b([A-Z]{3}-?[0-9][A-Z0-9][0-9]{2})\b/i.exec(obsStr || ''); return match ? match[1].toUpperCase() : ''; };
+
+// ==========================================
+// MÓDULO: MOTOR INTELIGENTE DE STATUS DE CAMINHÕES
+// ==========================================
+const truckStatusManager = {
+    manualConfirmations: new Set(),
+
+    calcularTempoCarregamento(quantidadeToneladas, isPaletizado) {
+        const minutosBase = quantidadeToneladas * 120; 
+        const minutosExtra = isPaletizado ? (quantidadeToneladas * 5) : 0; 
+        return minutosBase + minutosExtra;
+    },
+
+    calcularHorarioFinal(horarioInicioStr, minutosTotal) {
+        if (!horarioInicioStr) return null;
+        const [h, m] = horarioInicioStr.split(':').map(Number);
+        const now = new Date();
+        const startData = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+        const endData = new Date(startData.getTime() + minutosTotal * 60000);
+        
+        const endH = String(endData.getHours()).padStart(2, '0');
+        const endM = String(endData.getMinutes()).padStart(2, '0');
+        return { startData, endData, endStr: `${endH}:${endM}` };
+    },
+
+    verificarSeJaCarregouPlanilha(placa) {
+        const hoje = new Date();
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const ano = hoje.getFullYear();
+        const dataAtualRegex = new RegExp(`\\b${dia}/${mes}/${ano}\\b`);
+        const p = normalizeName(placa);
+
+        if(!uiBuilder.historicoCargas || uiBuilder.historicoCargas.length === 0) return false;
+        
+        for (let row of uiBuilder.historicoCargas) {
+            if (!row) continue;
+            const rowStr = normalizeName(row.join(' '));
+            if (dataAtualRegex.test(rowStr) && rowStr.includes(p)) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    definirStatusCaminhao(placa, horarioInicioStr, totalQtd, isPaletizado, pendingOffline) {
+        const isLoadedPlanilha = this.verificarSeJaCarregouPlanilha(placa);
+        const isLoadedManual = this.manualConfirmations.has(placa);
+
+        if (isLoadedPlanilha || isLoadedManual || pendingOffline) {
+            return { code: 'FATURAMENTO', color: '#065F46', bg: '#D1FAE5', label: '✅ LOTES ENVIADOS PARA FATURAMENTO', msg: 'Processo finalizado e enviado ao faturamento.' };
+        }
+
+        if (!horarioInicioStr) {
+            return { code: 'AGUARDANDO', color: '#64748B', bg: '#F8FAFC', label: 'Aguardando', msg: 'Horário não programado no documento.' };
+        }
+
+        const minutosTotal = this.calcularTempoCarregamento(totalQtd, isPaletizado);
+        const tempos = this.calcularHorarioFinal(horarioInicioStr, minutosTotal);
+        if (!tempos) return null;
+
+        const now = new Date();
+
+        if (now >= tempos.startData && now <= tempos.endData) {
+            return { code: 'CARREGANDO', color: '#1E3A8A', bg: '#DBEAFE', label: '🚛 CARREGANDO', msg: `Carregamento em andamento. Previsão de término às ${tempos.endStr}` };
+        } else if (now > tempos.endData) {
+            return { code: 'ATRASADO', color: '#991B1B', bg: '#FEE2E2', label: '⏳ EM ATRASO', msg: `Carregamento deveria ter finalizado às ${tempos.endStr}` };
+        } else {
+            return { code: 'AGENDADO', color: '#B45309', bg: '#FEF3C7', label: '⏰ AGENDADO', msg: `Aguardando horário programado. Início previsto para às ${horarioInicioStr}` };
+        }
+    },
+
+    confirmarCarregamentoManual(placa) {
+        this.manualConfirmations.add(placa);
+        if (appController.lastParsedData) {
+            dashboardEngine.renderExecTable(appController.lastParsedData, appController.currentPendingPlacas || []);
+        }
+    }
+};
+
+// ==========================================
+// MÓDULO: TERMINAL DE DIAGNÓSTICO
+// ==========================================
+const debugEngine = {
+  logs: [], isOpen: false,
+  log(msg, type = 'info') {
+    const now = new Date();
+    const time = `[${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}]`;
+    const entry = { time, msg, type };
+    this.logs.push(entry);
+    if (type === 'error') console.error(`${time} ${msg}`);
+    else if (type === 'warn') console.warn(`${time} ${msg}`);
+    else console.log(`${time} ${msg}`);
+    this._renderLogEntry(entry);
+  },
+  _renderLogEntry(entry) {
+    const consoleDiv = document.getElementById('dbgLogConsole');
+    if(!consoleDiv) return;
+    const div = document.createElement('div');
+    div.className = 'log-entry';
+    const clr = entry.type === 'error' ? '#EF4444' : entry.type === 'success' ? '#10B981' : entry.type === 'warn' ? '#F59E0B' : '#F8FAFC';
+    div.innerHTML = `<span class="log-time">${escapeHTML(entry.time)}</span><span class="log-msg" style="color:${clr}">${escapeHTML(entry.msg)}</span>`;
+    consoleDiv.appendChild(div);
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+  },
+  updateAPIStatus(connected, detail = '') {
+    const el = document.getElementById('dbgStatusAPI');
+    if(el) el.innerHTML = connected ? `<span style="color:#10B981">✔ API Conectada</span> <span style="color:#94A3B8; font-size:11px;">${detail}</span>` : `<span style="color:#EF4444">✖ API Desconectada</span> <span style="color:#94A3B8; font-size:11px;">${detail}</span>`;
+  },
+  updateNetStatus(online) {
+    const el = document.getElementById('dbgStatusNet');
+    if(el) el.innerHTML = online ? `<span style="color:#10B981">✔ Online</span>` : `<span style="color:#EF4444">✖ Offline</span>`;
+  },
+  updateSWStatus(active, msg = '', isWarning = false) {
+    const el = document.getElementById('dbgStatusSW');
+    if (!el) return;
+    if (active) {
+       el.innerHTML = `<span style="color:#10B981">✔ Service Worker Ativo</span>`;
+    } else if (isWarning) {
+       el.innerHTML = `<span style="color:#F59E0B">⚠ SW Inativo</span> <span style="color:#94A3B8; font-size:11px;">${msg}</span>`;
+    } else {
+       el.innerHTML = `<span style="color:#EF4444">✖ SW Inativo</span> <span style="color:#94A3B8; font-size:11px;">${msg}</span>`;
+    }
+  },
+  togglePanel() { this.isOpen = !this.isOpen; const p = document.getElementById('debugPanel'); if(p) p.classList.toggle('open', this.isOpen); }
+};
+
+// ==========================================
+// MÓDULO: BANCO DE DADOS OFFLINE (IndexedDB)
+// ==========================================
+const dbManager = {
+  dbName: 'CysyOfflineDB', storeName: 'pending_uploads', db: null,
+  async init() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(this.dbName, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if(!db.objectStoreNames.contains(this.storeName)) db.createObjectStore(this.storeName, { keyPath: 'id', autoIncrement: true });
+      };
+      req.onsuccess = (e) => { this.db = e.target.result; resolve(); };
+      req.onerror = () => reject("Erro ao inicializar banco local");
+    });
+  },
+  async savePending(type, payload) {
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction(this.storeName, 'readwrite');
+      const store = tx.objectStore(this.storeName);
+      const req = store.add({ type, payload, timestamp: Date.now() });
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject();
+    });
+  },
+  async getAllPending() {
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction(this.storeName, 'readonly');
+      const store = tx.objectStore(this.storeName);
+      const req = store.getAll();
+      req.onsuccess = (e) => resolve(e.target.result);
+      req.onerror = () => reject();
+    });
+  },
+  async deletePending(id) {
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction(this.storeName, 'readwrite');
+      const store = tx.objectStore(this.storeName);
+      const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject();
+    });
+  }
+};
+
+// ==========================================
+// MÓDULO: GERENCIADOR DE REDE E SINCRONIZAÇÃO
+// ==========================================
+const syncManager = {
+  isOnline: navigator.onLine, isSyncing: false,
+  async init() {
+    window.addEventListener('online', () => this.updateStatus(true));
+    window.addEventListener('offline', () => this.updateStatus(false));
+    await dbManager.init();
+    this.updateStatus(navigator.onLine);
+    setInterval(() => this.processQueue(), 30000); 
+  },
+  async updateStatus(online) {
+    this.isOnline = online;
+    debugEngine.updateNetStatus(online);
+    let count = 0;
+    try { const pending = await dbManager.getAllPending(); count = pending ? pending.length : 0; } catch(e) {}
+    
+    const badge = document.getElementById('netStatusBadge');
+    if(!badge) return;
+    if(this.isSyncing) {
+       badge.innerHTML = '🔄 Sincronizando...'; badge.className = 'status-badge syncing';
+    } else if(this.isOnline) {
+       badge.innerHTML = `🟢 ONLINE ${count > 0 ? `| Pendentes: ${count}` : ''}`; badge.className = 'status-badge online';
+       if(count > 0) this.processQueue(); 
+    } else {
+       badge.innerHTML = `🔴 OFFLINE ${count > 0 ? `| Pendentes: ${count}` : ''}`; badge.className = 'status-badge offline';
+    }
+  },
+  async processQueue() {
+    if(!this.isOnline || this.isSyncing) return;
+    const pending = await dbManager.getAllPending();
+    if(!pending || pending.length === 0) return;
+
+    this.isSyncing = true; this.updateStatus(true);
+    debugEngine.log(`Iniciando sincronização de ${pending.length} registros pendentes...`, 'info');
+
+    let successCount = 0;
+    for(const item of pending) {
+      try {
+        const resp = await apiService.sendDataToAppScript(item.payload);
+        if(resp && resp.success) { await dbManager.deletePending(item.id); successCount++; }
+      } catch(e) { debugEngine.log(`Falha ao sincronizar registro local ID ${item.id}. Será tentado novamente.`, 'warn'); }
+    }
+    this.isSyncing = false;
+    if(successCount > 0) { uiBuilder.updateGlobalUpdateTimestamp(); appController.handleRefresh(); }
+    this.updateStatus(this.isOnline);
+  }
+};
+
+// ==========================================
+// MÓDULO: ALERTAS AUTOMÁTICOS (NOTIFICAÇÕES)
+// ==========================================
+const alertManager = {
+  notifiedPlates: new Set(),
+  init() {
+    if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+      Notification.requestPermission();
+    }
+    setInterval(() => this.checkTimes(), 30000);
+  },
+  checkTimes() {
+    const obs = document.getElementById('inpObs')?.value || '';
+    const placa = document.getElementById('inpPlaca')?.value || 'Desconhecida';
+    if (!obs || !placa) return;
+
+    const match = /\b([0-1]?[0-9]|2[0-3]):([0-5][0-9])\b/.exec(obs);
+    if (match) {
+      const schedH = parseInt(match[1], 10);
+      const schedM = parseInt(match[2], 10);
+      const now = new Date();
+      const currTotal = now.getHours() * 60 + now.getMinutes();
+      const schedTotal = schedH * 60 + schedM;
+
+      if (currTotal >= (schedTotal - 15) && currTotal <= (schedTotal + 15) && !this.notifiedPlates.has(placa)) {
+        this.notifiedPlates.add(placa);
+        this.showNotification(`Hora de Carregamento`, `A placa ${placa} está programada para carregar agora (${match[0]}).`);
+      }
+    }
+  },
+  showNotification(title, body) {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(title, { body, icon: '🚛' });
+    } else {
+      alert(`🔔 ALERTA DE CARREGAMENTO:\n${title}\n${body}`); 
+    }
+  }
+};
+
+// ==========================================
+// MÓDULO: SERVICE WORKER DINÂMICO
+// ==========================================
+const swManager = {
+  init() {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isHttps = window.location.protocol === 'https:';
+    
+    if (!('serviceWorker' in navigator) || (!isHttps && !isLocalhost)) {
+      debugEngine.log("Service Worker indisponível neste ambiente (Requer HTTPS ou Localhost).", "warn");
+      debugEngine.updateSWStatus(false, "(Protocolo HTTP ou Local)", true); 
+      return;
+    }
+    
+    const swCode = `
+      const CACHE_NAME = 'cysy-offline-v5';
+      self.addEventListener('install', e => { self.skipWaiting(); });
+      self.addEventListener('activate', e => { clients.claim(); });
+      self.addEventListener('fetch', e => {
+        if (e.request.method === 'GET') { e.respondWith( fetch(e.request).catch(() => caches.match(e.request)) ); }
+      });
+    `;
+    const blob = new Blob([swCode], {type: 'application/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).then(() => {
+      debugEngine.log("Service Worker Dinâmico registrado com sucesso.", "success");
+      debugEngine.updateSWStatus(true);
+    }).catch(err => {
+      debugEngine.log("Falha ao registrar SW: " + err, "warn");
+      debugEngine.updateSWStatus(false, "(Bloqueado pelo navegador)", true);
+    });
+  }
+};
+
+// ==========================================
+// MÓDULO: API SERVICE (REDE HTTP)
+// ==========================================
+const apiService = {
+  async fetchSheetData() {
+    if(!navigator.onLine) throw new Error("OFFLINE");
+    debugEngine.log("Conectando na API de Carregamentos...", "info");
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${config.api.sheetId}/values/${config.api.range}?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`;
+    const fetchPromise = fetch(url);
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), config.api.timeoutMs));
+    const res = await Promise.race([fetchPromise, timeoutPromise]);
+    if (!res.ok) {
+      debugEngine.updateAPIStatus(false, `(HTTP ${res.status})`);
+      throw new Error("Erro HTTP " + res.status);
+    }
+    debugEngine.updateAPIStatus(true, "(200 OK)");
+    return (await res.json()).values;
+  },
+  async fetchEstoqueData() {
+    if(!navigator.onLine) return null;
+    try {
+      const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.estoqueSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
+      const visible = (await res.json()).sheets.filter(s => !s.properties.hidden);
+      const now = new Date();
+      const meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+      const nomeEsperado = `${meses[now.getMonth()]}/${now.getFullYear()}`;
+      let targetSheet = visible.find(s => s.properties.title.toUpperCase() === nomeEsperado || s.properties.title.toUpperCase() === nomeEsperado.replace('Ç','C')) || visible[0];
+      const dataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${config.api.estoqueSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:F?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`;
+      return (await (await fetch(dataUrl)).json()).values;
+    } catch (e) { return null; }
+  },
+  async fetchHistoricoData() {
+    if(!navigator.onLine) return null;
+    try {
+      debugEngine.log("Buscando histórico de carregamentos...", "info");
+      const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
+      const visible = (await res.json()).sheets.filter(s => !s.properties.hidden);
+      const targetSheet = visible[0]; 
+      const dataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:Z?key=${config.api.key}&valueRenderOption=FORMATTED_VALUE`;
+      const data = (await (await fetch(dataUrl)).json()).values;
+      return data;
+    } catch (e) {
+      debugEngine.log("Falha silenciosa ao ler histórico: " + e.message, "warn");
+      return null;
+    }
+  },
+  async fetchRncData() {
+    if(!navigator.onLine) return null;
+    try {
+      debugEngine.log("Verificando histórico de Reclamações (RNC)...", "info");
+      const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
+      const visible = (await res.json()).sheets.filter(s => !s.properties.hidden);
+      const targetSheet = visible.find(s => s.properties.title.toUpperCase().includes('RNC')) || visible[0];
+      const dataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:N?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`;
+      const data = (await (await fetch(dataUrl)).json()).values;
+      return data;
+    } catch (e) {
+      debugEngine.log("Falha ao buscar RNC (ignorando erro): " + e.message, "warn");
+      return null;
+    }
+  },
+  async sendDataToAppScript(payload) {
+    if(!navigator.onLine) throw new Error("OFFLINE");
+    try {
+      const res = await fetch(config.api.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+      return JSON.parse(await res.text());
+    } catch (err) {
+      try {
+        await fetch(config.api.scriptUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+        return { success: true, status: 'success', message: 'Túnel secundário utilizado.' };
+      } catch (fatalErr) { throw new Error("FALHA_TOTAL"); }
+    }
+  }
+};
+
+// ==========================================
+// MÓDULO: DATA PARSER E RNC
+// ==========================================
+const dataParser = {
+  parse(rawValues) {
+    const parsed = [];
+    if (!rawValues || rawValues.length === 0) return parsed;
+    for (let i = 2; i < rawValues.length; i++) {
+      const row = rawValues[i]; if (!row) continue;
+      const produtoDesc = normalizeName(row[1]);
+      
+      const qtd        = parseBRNumber(row[2]); 
+      
+      const pedido     = row[3]  ? String(row[3]).trim()  : '';
+      const cliente    = row[8]  ? String(row[8]).trim()  : '';
+      const cidade     = row[9]  ? String(row[9]).trim()  : '-'; 
+      const estado     = row[10] ? String(row[10]).trim() : '-';
+      const pallet     = row[11] ? String(row[11]).trim() : 'NÃO';
+      const filme      = row[12] ? String(row[12]).trim() : 'NÃO';
+      const bloqueio   = row[14] ? String(row[14]).trim() : 'LIBERADO';
+      const obsStr     = row[15] ? String(row[15]).trim() : '';
+      const placa      = extractPlaca(obsStr);
+
+      if (cliente && cliente.toUpperCase() !== 'CLIENTE') {
+        parsed.push({ pedido, cliente, cidade, estado, qtd, bloqueio, obsStr, produtoDesc, placa, pallet, filme });
+      }
+    }
+    return parsed;
+  },
+  parseEstoque(values) {
+    const map = {}; let ch = null;
+    for (let i = 0; i < values.length; i++) {
+      const row = values[i]; if (!row || !row[0]) continue;
+      const colA = String(row[0]).trim();
+      
+      if (colA.toUpperCase().startsWith('TOTAL') || colA.toUpperCase() === 'LOTE' || colA.includes('%') || !/[a-zA-Z]/.test(colA)) { 
+          ch = null; continue; 
+      }
+      
+      if (row.length >= 2 && row[1] && String(row[1]).trim().toUpperCase() !== 'LOTE') {
+        const saldo = typeof row[5] === 'number' ? row[5] : parseBRNumber(row[5]);
+        if (saldo > 0) {
+          const kA = normalizeName(colA); const kL = String(row[1]).trim();
+          if (kA !== normalizeName(kL)) { if (!map[kA]) map[kA] = {}; map[kA][kL] = saldo; }
+          if (ch) { const kH = normalizeName(ch); if (!map[kH]) map[kH] = {}; map[kH][kL] = saldo; }
+        }
+      } else { ch = colA; }
+    }
+    return map;
+  },
+  
+  parseRnc(values) {
+    const rncs = [];
+    if (!values || values.length <= 1) return rncs;
+    for (let i = 1; i < values.length; i++) {
+        const row = values[i];
+        if (!row) continue;
+        rncs.push({
+            data: String(row[1] || '').trim(), 
+            cliente: String(row[2] || '').trim().toUpperCase(),
+            transportador: String(row[3] || '').trim().toUpperCase(),
+            produto: String(row[7] || '').trim(),
+            descricao: String(row[8] || '').trim(),
+            acaoImediata: String(row[11] || '').trim()
+        });
+    }
+    return rncs;
+  }
+};
+
+function extrairHorarioObs(obs) {
+    const match = /\b([0-1]?[0-9]|2[0-3]):([0-5][0-9])\b/.exec(obs);
+    return match ? match[0] : null;
+}
+
+// ==========================================
+// MÓDULO: UI BUILDER E DASHBOARD
+// ==========================================
+const dashboardEngine = {
+
+  // FILTRO INTELIGENTE PARA IMPEDIR FALSOS POSITIVOS NO CRUZAMENTO DO RNC
+  limparNomesGenericos(str) {
+      if (!str) return '';
+      const genericos = ['LTDA', 'S/A', 'SA', 'ME', 'EPP', 'TRANSPORTES', 'TRANSPORTADORA', 'LOGISTICA', 'LOGÍSTICA', 'COMERCIO', 'COMÉRCIO', 'COMERCIAL', 'AGROPECUARIA', 'AGROPECUÁRIA', 'AGRO', 'BRASIL', 'CIA', 'EIRELI'];
+      let words = str.split(/[\s,\.\-]+/);
+      words = words.filter(w => !genericos.includes(w));
+      return words.join(' ').trim();
+  },
+
+  renderExecTable(parsedData, pendingPlacas = []) {
+    const container = document.getElementById('tabelaDiariaContainer');
+    if (!parsedData || parsedData.length === 0) { container.innerHTML = `<div class="empty-state"><span>📭</span><p>Nenhum carregamento encontrado para hoje.</p></div>`; return; }
+    
+    const grupos = {};
+    parsedData.forEach(item => { const key = item.placa || 'SEM PLACA'; if (!grupos[key]) grupos[key] = []; grupos[key].push(item); });
+    
+    const placaAtual = document.getElementById('selPlacaBusca')?.value || '';
+
+    let arrayGrupos = Object.entries(grupos).map(([placa, itens]) => {
+      const obsSet = [...new Set(itens.map(i => i.obsStr).filter(Boolean))];
+      const obsUnificado = obsSet.join(' | ');
+      const timeStr = extrairHorarioObs(obsUnificado);
+      
+      let timeMins = 9999; 
+      if(timeStr) {
+          const [h, m] = timeStr.split(':').map(Number);
+          timeMins = (h * 60) + m;
+      }
+
+      const isPallet = itens.some(i => String(i.pallet||'').toUpperCase() === 'SIM');
+      const totalQtd = itens.reduce((sum, i) => sum + Number(i.qtd||0), 0);
+      const isPendingOffline = pendingPlacas.includes(placa);
+      
+      let statusInteligente = truckStatusManager.definirStatusCaminhao(placa, timeStr, totalQtd, isPallet, isPendingOffline);
+      
+      if (placa === placaAtual && placa !== '' && statusInteligente && statusInteligente.code !== 'FATURAMENTO') {
+          statusInteligente = {
+              code: 'EM_PREENCHIMENTO',
+              color: '#2563EB', 
+              bg: '#EFF6FF',
+              label: '▶️ EM PREENCHIMENTO',
+              msg: 'Aguardando finalização das informações.'
+          };
+      }
+
+      return { placa, itens, timeMins, timeStr, obsUnificado, isPallet, totalQtd, statusInteligente };
+    });
+
+    this.organizarCardsPainel(arrayGrupos);
+
+    let html = '<div class="carga-cards-grid">';
+    
+    arrayGrupos.forEach(({placa, itens, timeStr, obsUnificado, isPallet, totalQtd, statusInteligente}) => {
+      const bloqueado = itens.some(i => i.bloqueio.toUpperCase() !== 'LIBERADO' && i.bloqueio.trim() !== '');
+      const isParaguai = itens.some(i => i.estado === 'PY' || /PARAGUAI/i.test(i.cidade) || /PARAGUAI/i.test(i.obsStr));
+      const obsSet = [...new Set(itens.map(i => i.obsStr).filter(Boolean))];
+      const clientesStr = [...new Set(itens.map(i => i.cliente))].join(' • ');
+      
+      const minutosTotal = truckStatusManager.calcularTempoCarregamento(totalQtd, isPallet);
+      const tempos = truckStatusManager.calcularHorarioFinal(timeStr, minutosTotal);
+
+      // =====================================
+      // VERIFICAÇÃO INTELIGENTE E PRECISA DE RNC
+      // =====================================
+      let rncMatches = [];
+      const upperClientes = clientesStr.toUpperCase();
+      const upperObs = obsUnificado.toUpperCase();
+      const upperPlaca = placa.toUpperCase();
+      
+      const baseCliente = this.limparNomesGenericos(upperClientes);
+      const baseObs = this.limparNomesGenericos(upperObs);
+
+      if (uiBuilder.rncCargas) {
+          uiBuilder.rncCargas.forEach(rnc => {
+              const rncClienteBase = this.limparNomesGenericos(rnc.cliente);
+              const rncTranspBase = this.limparNomesGenericos(rnc.transportador);
+
+              const matchC = rncClienteBase.length >= 3 && baseCliente.includes(rncClienteBase);
+              const matchT = rncTranspBase.length >= 3 && baseObs.includes(rncTranspBase);
+              
+              const placaLimpa = upperPlaca.replace(/[^A-Z0-9]/g, '');
+              const rncTranspLimpa = rnc.transportador.replace(/[^A-Z0-9]/g, '');
+              const rncDescLimpa = rnc.descricao.toUpperCase().replace(/[^A-Z0-9]/g, '');
+              
+              const matchP = placaLimpa.length >= 7 && (rncTranspLimpa.includes(placaLimpa) || rncDescLimpa.includes(placaLimpa));
+              
+              let triggers = [];
+              if (matchP) triggers.push("Placa");
+              if (matchC && !matchP) triggers.push("Cliente");
+              if (matchT && !matchP) triggers.push("Transportadora");
+
+              if (triggers.length > 0) {
+                  rncMatches.push({
+                      data: rnc.data,
+                      descricao: rnc.descricao,
+                      produto: rnc.produto,
+                      acaoImediata: rnc.acaoImediata,
+                      trigger: triggers.join(' e ')
+                  });
+              }
+          });
+      }
+
+      let rncHTML = '';
+      if (rncMatches.length > 0) {
+          const uniqueRncs = [];
+          const descSet = new Set();
+          for (let r of rncMatches) {
+              if (!descSet.has(r.descricao)) {
+                  descSet.add(r.descricao);
+                  uniqueRncs.push(r);
+              }
+          }
+
+          const detalhesRnc = uniqueRncs.map((r, index) => 
+              `<div style="font-size: 11px; color: #7F1D1D; line-height: 1.5; padding-bottom: 8px; ${index !== uniqueRncs.length - 1 ? 'border-bottom: 1px dashed #FCA5A5; margin-bottom: 8px;' : ''}">
+                  <div><strong>Data da Ocorrência:</strong> ${escapeHTML(r.data)}</div>
+                  <div><strong>Alvo:</strong> ${escapeHTML(r.trigger)}</div>
+                  <div><strong>Produto Envolvido:</strong> ${escapeHTML(r.produto)}</div>
+                  <div><strong>Descrição:</strong> ${escapeHTML(r.descricao)}</div>
+                  <div><strong>Ação Imediata:</strong> ${escapeHTML(r.acaoImediata)}</div>
+               </div>`
+          ).join('');
+
+          rncHTML = `
+            <div style="background: #FEF2F2; border-left: 4px solid #EF4444; padding: 12px 16px; margin: 16px 20px 0 20px; border-radius: 6px;">
+                <details class="rnc-details">
+                    <summary style="cursor: pointer; outline: none; list-style: none; user-select: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 16px;">⚠️</span>
+                                <span style="font-size: 13px; font-weight: 800; color: #991B1B; text-transform: uppercase;">
+                                    ${uniqueRncs.length} Registro(s) de Não Conformidade (RNC)
+                                </span>
+                            </div>
+                            <span class="rnc-expand-text" style="font-size: 10px; font-weight: 800; letter-spacing: 0.5px; color: #991B1B; background: #FEE2E2; padding: 4px 8px; border-radius: 4px; border: 1px solid #FCA5A5;"></span>
+                        </div>
+                    </summary>
+                    <div class="rnc-list-wrapper" style="margin-top: 12px; border-top: 1px dashed #FCA5A5; padding-top: 12px;">
+                        ${detalhesRnc}
+                    </div>
+                </details>
+            </div>`;
+      }
+
+      let infoInteligenteHTML = '';
+      if(statusInteligente) {
+          infoInteligenteHTML = `
+            <div class="status-card-box" data-status="${statusInteligente.code}" style="background: ${statusInteligente.bg}; border-left: 4px solid ${statusInteligente.color}; padding: 12px 16px; margin: 16px 20px 0 20px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <span style="font-size: 14px; font-weight: 800; color: ${statusInteligente.color}; text-transform: uppercase;">${statusInteligente.label}</span>
+                    ${statusInteligente.code !== 'FATURAMENTO' ? `<button onclick="truckStatusManager.confirmarCarregamentoManual('${escapeHTML(placa)}')" title="Utilize caso o sistema ainda não tenha atualizado automaticamente." class="btn-status-manual">✔ Confirmar que já carregou</button>` : ''}
+                </div>
+                <div style="font-size: 12px; font-weight: 600; color: ${statusInteligente.color}; opacity: 0.9;">
+                    ${statusInteligente.msg}
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 12px; row-gap: 6px; margin-top: 4px;">
+                    <span><strong>Qtd:</strong> ${formatTons(totalQtd)} t</span>
+                    <span><strong>Tipo:</strong> ${isPallet ? 'Paletizado' : 'Granel'}</span>
+                    ${timeStr ? `<span><strong>Início:</strong> ${timeStr}</span>` : ''}
+                    ${tempos && statusInteligente.code !== 'FATURAMENTO' ? `<span><strong>Término previsto:</strong> ${tempos.endStr}</span>` : ''}
+                </div>
+            </div>`;
+      }
+
+      let badgesHeaderHTML = '';
+      if(isParaguai) badgesHeaderHTML += `<span class="badge-especial badge-py">🇵🇾 PY</span>`;
+      if(bloqueado) badgesHeaderHTML += `<span class="badge-especial" style="background:#FEE2E2; color:#991B1B; border-color:#EF4444;">🚨 ATENÇÃO</span>`;
+
+      const cardClass = bloqueado ? 'carga-card bloqueado' : 'carga-card liberado';
+      const statusBadge = bloqueado ? `<span class="badge-vermelho">⛔ BLOQUEADO</span>` : `<span class="badge-verde">✔ LIBERADO</span>`;
+
+      const produtosHTML = itens.map(item => {
+        const hasPallet = String(item.pallet||'').toUpperCase() === 'SIM';
+        const hasFilme  = String(item.filme||'').toUpperCase() === 'SIM';
+        let prodBadges = '';
+        if(hasPallet) prodBadges += `<span class="badge-especial badge-palete" style="font-size:9px; padding:2px 6px;">🟫 PALETE</span>`;
+        if(hasFilme) prodBadges += `<span class="badge-especial badge-filme" style="font-size:9px; padding:2px 6px;">🎞️ FILME</span>`;
+
+        return `<div class="produto-row">
+                  <div class="produto-nome">
+                     <span class="produto-label">Produto</span>
+                     ${escapeHTML(item.produtoDesc || '—')}
+                     ${prodBadges ? `<div style="display:flex; gap:4px; margin-top:6px;">${prodBadges}</div>` : ''}
+                  </div>
+                  <div><span class="produto-label">Quantidade</span><span class="produto-qtd">${formatTons(item.qtd)} t</span></div>
+                  <div>${bloqueado && item.bloqueio.trim() !== '' && item.bloqueio.toUpperCase() !== 'LIBERADO' ? `<span class="badge-vermelho" title="Motivo">⛔ ${escapeHTML(item.bloqueio)}</span>` : `<span class="badge-verde">✔ OK</span>`}</div>
+                </div>`;
+      }).join('');
+      
+      const obsHTML = obsSet.length > 0 ? `<div class="carga-card-footer"><span class="obs-icon">📝</span><span>${escapeHTML(obsUnificado)}</span></div>` : '';
+      
+      html += `<div class="${cardClass}">
+                  <div class="carga-card-header">
+                     <div class="carga-placa">${escapeHTML(placa)}</div>
+                     <div class="carga-cliente">
+                        ${escapeHTML(clientesStr)}
+                        ${badgesHeaderHTML ? `<div class="carga-badges">${badgesHeaderHTML}</div>` : ''}
+                     </div>
+                     <div class="carga-card-status">${statusBadge}</div>
+                  </div>
+                  ${rncHTML}
+                  ${infoInteligenteHTML}
+                  <div class="carga-card-body">${produtosHTML}</div>
+                  ${obsHTML}
+               </div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  },
+  
+  organizarCardsPainel(arrayGrupos) {
+      arrayGrupos.sort((a, b) => {
+          const isFinishedA = a.statusInteligente && a.statusInteligente.code === 'FATURAMENTO';
+          const isFinishedB = b.statusInteligente && b.statusInteligente.code === 'FATURAMENTO';
+
+          if (isFinishedA && !isFinishedB) return 1;
+          if (!isFinishedA && isFinishedB) return -1;
+
+          return a.timeMins - b.timeMins;
+      });
+  },
+
+  renderBanners(parsedData) {
+    const banners = [];
+    parsedData.forEach(item => {
+      if (item.bloqueio.toUpperCase() !== 'LIBERADO' && item.bloqueio !== '') {
+        banners.push(`<div class="smart-banner banner-danger"><div class="banner-icon">🚨</div><div class="banner-content"><h4>BLOQUEIO ATIVO — PEDIDO ${escapeHTML(item.pedido)}</h4><p><strong>Cliente:</strong> ${escapeHTML(item.cliente)} &nbsp;|&nbsp; <strong>Motivo:</strong> ${escapeHTML(item.bloqueio)}</p></div></div>`);
+      }
+    });
+    const bannerContainer = document.getElementById('bannerContainer');
+    if (banners.length > 0) {
+      bannerContainer.innerHTML = banners.join('');
+    } else {
+      bannerContainer.innerHTML = `<div class="smart-banner banner-success"><div class="banner-icon">🟢</div><div class="banner-content"><h4>Status da Operação</h4><p>Não há bloqueios ativos identificados nos pedidos em análise.</p></div></div>`;
+    }
+  }
+};
+
+const uiBuilder = {
+  localDataStore: [], lotesMap: {}, currentProdMap: {}, currentColorMap: {}, historicoCargas: [], rncCargas: [],
+  visibleEmptyRows: 0, 
+
+  init() { this.buildChecklistUI(); this.buildUnifiedGrid(); this.updateTimestamp(true); this.updateGlobalUpdateTimestamp(); this.updateGridVisibility(); },
+  
+  switchTab(event, tabId) { 
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
+    if(event) event.currentTarget.classList.add('active'); 
+    document.getElementById(`tab-${tabId}`).classList.add('active'); 
+  },
+  
+  updateTimestamp(isInit = false) { 
+    const now = new Date(); 
+    document.getElementById('inpDataHora').value = now.toLocaleString('pt-BR'); 
+    document.getElementById('perdaDataHora').value = now.toLocaleString('pt-BR'); 
+  },
+
+  updateGlobalUpdateTimestamp() {
+    const now = new Date();
+    document.getElementById('lastUpdateText').innerText = `Última atualização: ${now.toLocaleString('pt-BR')}`;
+  },
+  
+  buildChecklistUI() {
+    const grid = document.getElementById('checklistGrid');
+    grid.innerHTML = config.checklist.map(c => {
+      if(c.type === 'text') return `<div class="check-card check-text-card" id="card_${c.id}"><div class="check-title">${escapeHTML(c.lbl)}</div><textarea id="chk_text_${c.id}" style="min-height: 140px; margin-top: 12px;"></textarea></div>`;
+      const isInv = c.type === 'yn_r'; const simClass = isInv ? 'check-opt-danger' : 'check-opt-success'; const naoClass = isInv ? 'check-opt-success' : 'check-opt-danger';
+      return `<div class="check-card" id="card_${c.id}" data-inverted="${isInv}"><div class="check-title">${escapeHTML(c.lbl)}</div><div class="check-options"><label><input type="radio" name="chk_${c.id}" value="sim" onchange="uiBuilder.onCheckChange('${c.id}','sim')"><div class="check-opt ${simClass}">SIM</div></label><label><input type="radio" name="chk_${c.id}" value="nao" onchange="uiBuilder.onCheckChange('${c.id}','nao')"><div class="check-opt ${naoClass}">NÃO</div></label></div></div>`;
+    }).join('');
+  },
+  onCheckChange(id, val) { 
+    const card = document.getElementById(`card_${id}`); 
+    const isInv = card.dataset.inverted === 'true'; 
+    card.className = `check-card ${isInv ? (val === 'sim' ? 'nao' : 'sim') : val}`; 
+  },
+  
+  buildUnifiedGrid() {
+    const m = document.getElementById('materialsContainer'); 
+    for(let i=1; i<=10; i++) {
+      m.insertAdjacentHTML('beforeend', `
+        <div class="grid-row" id="gridRow_${i}">
+          <div class="grid-cell" data-label="Produto Liberado">
+            <div id="lblDestino_${i}" style="font-size: 11px; font-weight: 800; color: var(--secondary); margin-bottom: 8px; display: none; text-transform: uppercase; letter-spacing: 0.5px; background: #F8FAFC; padding: 6px 10px; border-radius: 4px; border: 1px solid #E2E8F0; border-left: 4px solid var(--secondary);"></div>
+            <select id="selProd_${i}" onchange="uiBuilder.onProdChange(${i})"><option value="">Selecione...</option></select>
+          </div>
+          <div class="grid-cell" data-label="Carregado (t)"><input type="number" id="inpQtd_${i}" step="0.001" min="0" oninput="uiBuilder.recalcularLinhas(${i})" placeholder="Ex: 15.000"></div>
+          <div class="grid-cell" data-label="Lote Utilizado (Saldo)"><select id="selLote_${i}" onchange="uiBuilder.onLoteChange(${i})"><option value="">Lote...</option></select><div id="lblSaldo_${i}" class="saldo-lbl"></div></div>
+          <div class="grid-cell" data-label="Avaria (t)"><input type="number" id="inpPerda_${i}" step="0.001" min="0" placeholder="Ex: 0.150"></div>
+          <div class="grid-cell" data-label="Motivo da Avaria"><select id="selMotivo_${i}"><option value="">Motivo...</option><option value="Rasgo na embalagem">Rasgo na embalagem</option><option value="Material de má qualidade">Material de má qualidade</option><option value="Avaria no transporte">Avaria no transporte</option></select></div>
+        </div>`);
+    }
+    
+    m.parentElement.insertAdjacentHTML('beforeend', `
+      <div style="padding: 12px; display: flex; justify-content: center; background: var(--bg-app); border-top: 1px solid var(--border);">
+          <button type="button" id="btnToggleGridRows" onclick="uiBuilder.toggleGridRows()" style="background: transparent; border: 1px dashed var(--secondary); color: var(--secondary); font-size: 12px; font-weight: 700; min-height: 36px; border-radius: 20px; padding: 0 20px; transition: all 0.2s; cursor: pointer;">⬇ Expandir mais uma linha</button>
+      </div>
+    `);
+  },
+
+  handleImageUpload(event, previewId, hiddenInputId) {
+      const file = event.target.files[0];
+      const preview = document.getElementById(previewId);
+      const hiddenInput = document.getElementById(hiddenInputId);
+
+      if (!file) {
+          preview.classList.remove('has-image');
+          preview.style.backgroundImage = 'none';
+          hiddenInput.value = '';
+          return;
+      }
+
+      preview.innerHTML = '<span>Processando...</span>';
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const MAX_WIDTH = 1000;
+              const MAX_HEIGHT = 1000;
+              let width = img.width;
+              let height = img.height;
+
+              if (width > height) {
+                  if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+              } else {
+                  if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.6); 
+              
+              preview.style.backgroundImage = `url(${dataUrl})`;
+              preview.classList.add('has-image');
+              preview.innerHTML = '<span>Trocar Foto</span>';
+              
+              hiddenInput.value = dataUrl;
+          };
+          img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+  },
+
+  toggleGridRows() {
+      let totalShown = 0;
+      for (let i = 1; i <= 10; i++) {
+          const row = document.getElementById(`gridRow_${i}`);
+          if(row && row.style.display !== 'none') totalShown++;
+      }
+
+      if (totalShown >= 10) {
+          this.visibleEmptyRows = 0; 
+      } else {
+          this.visibleEmptyRows++; 
+      }
+      this.updateGridVisibility();
+  },
+
+  updateGridVisibility() {
+      const btn = document.getElementById('btnToggleGridRows');
+      let hasContentCount = 0;
+      let emptyRowsShown = 0;
+      let totalShown = 0;
+
+      for (let i = 1; i <= 10; i++) {
+        const row = document.getElementById(`gridRow_${i}`);
+        if(!row) continue;
+        
+        const p = document.getElementById(`selProd_${i}`).value;
+        const q = document.getElementById(`inpQtd_${i}`).value;
+        
+        const hasData = (p !== '' || parseFloat(q) > 0);
+        
+        if (hasData) {
+            row.style.display = ''; 
+            hasContentCount++;
+            totalShown++;
+        } else {
+            if (emptyRowsShown < this.visibleEmptyRows || (hasContentCount === 0 && emptyRowsShown === 0)) {
+                row.style.display = '';
+                emptyRowsShown++;
+                totalShown++;
+            } else {
+                row.style.display = 'none';
+            }
+        }
+      }
+
+      if (btn) {
+        if (totalShown >= 10) {
+          btn.innerHTML = '⬆ Ocultar linhas vazias';
+          btn.style.color = 'var(--text-muted)';
+          btn.style.borderColor = 'var(--border)';
+        } else {
+          btn.innerHTML = '⬇ Expandir mais uma linha';
+          btn.style.color = 'var(--secondary)';
+          btn.style.borderColor = 'var(--secondary)';
+        }
+      }
+  },
+
+  populateSelects(parsedData, lotesMap) {
+    this.localDataStore = parsedData; 
+    this.clearDependentFields();
+    
+    const placas = [...new Set(parsedData.map(d => d.placa).filter(Boolean))].sort();
+    const placaSelect = document.getElementById('selPlacaBusca');
+    const currentPlaca = placaSelect.value;
+    placaSelect.innerHTML = '<option value="">Selecione a Placa...</option>' + placas.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
+    if(currentPlaca && placas.includes(currentPlaca)) {
+        placaSelect.value = currentPlaca;
+    }
+  },
+
+  clearDependentFields() {
+    ['inpPlaca','inpMotorista','inpObs'].forEach(id => { const e = document.getElementById(id); if(e) e.value = ''; });
+    const pedContainer = document.getElementById('pedidosContainer');
+    if(pedContainer) pedContainer.style.display = 'none';
+
+    for(let i = 1; i <= 10; i++) {
+      const sel = document.getElementById(`selProd_${i}`);
+      if(sel) { sel.innerHTML = '<option value="">Selecione...</option>'; sel.dataset.sugQtd = ''; }
+      document.getElementById(`inpQtd_${i}`).value = '';
+      document.getElementById(`selLote_${i}`).innerHTML = '<option value="">Lote...</option>';
+      document.getElementById(`lblSaldo_${i}`).innerText = '';
+      document.getElementById(`inpPerda_${i}`).value = '';
+      document.getElementById(`selMotivo_${i}`).value = '';
+      
+      const lbl = document.getElementById(`lblDestino_${i}`);
+      if(lbl) { lbl.innerText = ''; lbl.style.display = 'none'; lbl.style.borderLeftColor = 'var(--secondary)'; lbl.style.color = 'var(--secondary)'; }
+      const row = document.getElementById(`gridRow_${i}`);
+      if(row) { row.style.borderLeft = 'none'; }
+    }
+    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false); 
+    document.querySelectorAll('.check-card').forEach(c => c.className = 'check-card');
+    const ta = document.getElementById('chk_text_obs_geral'); if(ta) ta.value='';
+    
+    ['Frente', 'Traseira', 'Assoalho'].forEach(id => {
+        const fileInp = document.getElementById(`file${id}`);
+        const preview = document.getElementById(`preview${id}`);
+        const base64Inp = document.getElementById(`base64${id}`);
+        if(fileInp) fileInp.value = '';
+        if(preview) {
+            preview.style.backgroundImage = 'none';
+            preview.classList.remove('has-image');
+            preview.innerHTML = '<span>📷 Tirar Foto</span>';
+        }
+        if(base64Inp) base64Inp.value = '';
+    });
+
+    this.verificarPlacaJaCarregou();
+    
+    this.visibleEmptyRows = 0;
+    this.updateGridVisibility();
+  },
+
+  onPlacaChange() {
+    const placa = document.getElementById('selPlacaBusca').value; 
+    this.clearDependentFields(); 
+    
+    if (appController.lastParsedData) {
+        dashboardEngine.renderExecTable(appController.lastParsedData, appController.currentPendingPlacas || []);
+    }
+
+    if(!placa) return;
+    
+    const items = this.localDataStore.filter(d => d.placa === placa);
+    if(items.length > 0) {
+      document.getElementById('pedidosContainer').style.display = 'block';
+
+      const pedidosUnicos = [];
+      const mapPed = new Set();
+      items.forEach(i => {
+        const key = `${i.pedido}-${i.cliente}`;
+        if(!mapPed.has(key)) { mapPed.add(key); pedidosUnicos.push({ cliente: i.cliente, pedido: i.pedido, cidade: i.cidade, estado: i.estado }); }
+      });
+
+      const uniqueClients = [...new Set(pedidosUnicos.map(p => p.cliente))];
+      this.currentColorMap = {};
+      if (uniqueClients.length > 1) {
+          uniqueClients.forEach((c, idx) => { this.currentColorMap[c] = config.clientColors[idx % config.clientColors.length]; });
+      }
+
+      let htmlTabela = `<div class="grid-header" style="grid-template-columns: 2fr 1.2fr 1.5fr;"><div>Cliente</div><div>Pedido</div><div>Destino (Cidade/UF)</div></div>`;
+      pedidosUnicos.forEach(p => {
+        const rowColor = this.currentColorMap[p.cliente] || 'var(--primary)';
+        htmlTabela += `<div class="grid-row" style="grid-template-columns: 2fr 1.2fr 1.5fr; border-left: 4px solid ${rowColor}">
+                         <div class="grid-cell" data-label="Cliente" style="font-size: 13px; font-weight: 800; color: ${rowColor};">${escapeHTML(p.cliente)}</div>
+                         <div class="grid-cell" data-label="Pedido" style="font-size: 13px; font-family: 'JetBrains Mono', monospace;">${escapeHTML(p.pedido)}</div>
+                         <div class="grid-cell" data-label="Destino (Cidade/UF)" style="font-size: 13px; color: var(--text-muted);">${escapeHTML(p.cidade)} / ${escapeHTML(p.estado)}</div>
+                       </div>`;
+      });
+      document.getElementById('listaPedidosGrid').innerHTML = htmlTabela;
+
+      const allObs = items.map(i => i.obsStr).filter(Boolean); 
+      let motEncontrado = "";
+      const regexMot = /MOT(?:ORISTA)?[:\s]+([A-ZÀ-Úa-z\s]+?)(?:\s*-|\s*CPF|$)/i;
+      for (const obs of allObs) { const matchMotStr = regexMot.exec(obs); if (matchMotStr) motEncontrado = matchMotStr[1].trim(); }
+      
+      document.getElementById('inpPlaca').value = placa; 
+      document.getElementById('inpMotorista').value = motEncontrado; 
+      document.getElementById('inpObs').value = [...new Set(allObs)].join('\n');
+      
+      let rowIdx = 1;
+      const agrupamentoCliProd = {};
+      items.forEach(i => { 
+        if (i.produtoDesc) { 
+          const destinoStr = `${i.cidade}/${i.estado}`;
+          const key = `${i.cliente}|${destinoStr}|${i.produtoDesc}`;
+          if (!agrupamentoCliProd[key]) agrupamentoCliProd[key] = { cliente: i.cliente, destino: destinoStr, produto: i.produtoDesc, qtd: 0 };
+          agrupamentoCliProd[key].qtd += Number(i.qtd);
+        } 
+      });
+
+      const allUniqueProds = [...new Set(items.map(i => i.produtoDesc).filter(Boolean))];
+      const optionsHTML = '<option value="">Selecione...</option>' + allUniqueProds.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
+      for(let i = 1; i <= 10; i++) document.getElementById(`selProd_${i}`).innerHTML = optionsHTML;
+
+      Object.values(agrupamentoCliProd).forEach(item => {
+        if (rowIdx > 10) return;
+        const sel = document.getElementById(`selProd_${rowIdx}`);
+        const lbl = document.getElementById(`lblDestino_${rowIdx}`);
+        const row = document.getElementById(`gridRow_${rowIdx}`);
+        
+        lbl.innerText = `📦 ${item.cliente} 📍 ${item.destino}`;
+        lbl.style.display = 'inline-block';
+        
+        if (this.currentColorMap[item.cliente]) {
+           lbl.style.borderLeftColor = this.currentColorMap[item.cliente];
+           lbl.style.color = this.currentColorMap[item.cliente];
+           if(row) row.style.borderLeft = `4px solid ${this.currentColorMap[item.cliente]}`;
+        }
+
+        sel.value = item.produto;
+        sel.dataset.sugQtd = item.qtd;
+        this.onProdChange(rowIdx, item.qtd);
+        rowIdx++;
+      });
+      
+      this.verificarPlacaJaCarregou();
+      
+      this.visibleEmptyRows = 0;
+      this.updateGridVisibility();
+    }
+  },
+
+  verificarPlacaJaCarregou() {
+    const placa = normalizeName(document.getElementById('inpPlaca')?.value || '');
+    const obs = normalizeName(document.getElementById('inpObs')?.value || '');
+    const isManual = document.getElementById('chkManualPlaca')?.checked;
+    const badge = document.getElementById('badgeJaCarregou');
+
+    if(isManual) {
+      badge.style.display = 'inline-block';
+      return;
+    }
+
+    if(!placa || !obs || !this.historicoCargas || this.historicoCargas.length === 0) {
+      badge.style.display = 'none';
+      return;
+    }
+
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const ano = hoje.getFullYear();
+    const dataAtualRegex = new RegExp(`\\b${dia}/${mes}/${ano}\\b`);
+
+    let jaCarregou = false;
+    for (let row of this.historicoCargas) {
+      if (!row) continue;
+      const rowStr = normalizeName(row.join(' '));
+      if (dataAtualRegex.test(rowStr) && rowStr.includes(placa) && rowStr.includes(obs)) {
+         jaCarregou = true;
+         break;
+      }
+    }
+
+    if (jaCarregou) {
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  },
+
+  onProdChange(index, sugQtd = null) {
+    const sel = document.getElementById(`selProd_${index}`);
+    const prodDesc = sel.value; 
+    const qtdField = document.getElementById(`inpQtd_${index}`); 
+    const loteSelect = document.getElementById(`selLote_${index}`);
+    
+    loteSelect.innerHTML = '<option value="">Lote...</option>'; 
+    qtdField.value = ''; 
+    
+    if(prodDesc) {
+      const prodKey = normalizeName(prodDesc); 
+      const lotesObj = this.lotesMap[prodKey];
+      if (lotesObj && Object.keys(lotesObj).length > 0) {
+        loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + Object.keys(lotesObj).map(l => `<option value="${escapeHTML(l)}" data-saldo="${lotesObj[l]}">${escapeHTML(l)}</option>`).join('');
+        if(Object.keys(lotesObj).length === 1) { loteSelect.selectedIndex = 1; this.onLoteChange(index); }
+      } else { 
+        loteSelect.innerHTML = '<option value="S/ Lote">Sem Lote no Estoque</option>'; 
+      }
+      const valQtd = typeof sugQtd === 'number' ? sugQtd : Number(sel.dataset.sugQtd || 0);
+      if (valQtd > 0) qtdField.value = formatTons(valQtd);
+      this.recalcularLinhas(index);
+    } else {
+      const lbl = document.getElementById(`lblDestino_${index}`);
+      if(lbl) { lbl.innerText = ''; lbl.style.display = 'none'; }
+      const row = document.getElementById(`gridRow_${index}`);
+      if(row) { row.style.borderLeft = 'none'; }
+      this.recalcularLinhas(index);
+    }
+  },
+
+  onLoteChange(index) {
+    const loteSelect = document.getElementById(`selLote_${index}`); 
+    const lblSaldo = document.getElementById(`lblSaldo_${index}`); 
+    const opt = loteSelect.options[loteSelect.selectedIndex];
+    lblSaldo.innerText = opt && opt.dataset.saldo ? `Saldo: ${formatTons(opt.dataset.saldo)}t` : '';
+    this.recalcularLinhas(index);
+  },
+
+  _round3(v) { return Math.round((Number(v) || 0) * 1000) / 1000; },
+
+  recalcularLinhas(changedIndex) {
+    const somaQtdPorProd = {}; const somaUsoPorLote = {};
+    for (let i = 1; i <= 10; i++) {
+      const p = (document.getElementById(`selProd_${i}`) || {}).value || ''; 
+      const q = this._round3((document.getElementById(`inpQtd_${i}`) || {}).value); 
+      const lSel = document.getElementById(`selLote_${i}`); const l = lSel ? lSel.value : '';
+      if (p && q > 0) somaQtdPorProd[p] = this._round3((somaQtdPorProd[p] || 0) + q);
+      if (l && l !== 'S/ Lote' && l !== '' && q > 0) { 
+        const key = `${p}||${l}`; somaUsoPorLote[key] = this._round3((somaUsoPorLote[key] || 0) + q); 
+      }
+    }
+    for (let i = 1; i <= 10; i++) {
+      const p = (document.getElementById(`selProd_${i}`) || {}).value || ''; 
+      const qtdField = document.getElementById(`inpQtd_${i}`); 
+      const lSel = document.getElementById(`selLote_${i}`); const lblSaldo = document.getElementById(`lblSaldo_${i}`);
+      if (!qtdField) continue;
+      if (lSel && lblSaldo) {
+        const l = lSel.value;
+        if (l && l !== 'S/ Lote' && l !== '') {
+          const opt = lSel.options[lSel.selectedIndex]; const sOrig = opt ? this._round3(Number(opt.dataset.saldo) || 0) : 0;
+          const qtdLinha = this._round3(Number(qtdField.value) || 0); const usoOutras = this._round3((somaUsoPorLote[`${p}||${l}`] || 0) - qtdLinha); 
+          const sReal = this._round3(sOrig - usoOutras);
+          lblSaldo.innerText = `Disponível: ${formatTons(Math.max(0, sReal))} t`; 
+          qtdField.max = formatTons(Math.max(0, sReal));
+        }
+      }
+    }
+    this.updateGridVisibility(); 
+  },
+
+  setFatalError(show, isInfo = false, customTitle = null, customDesc = null) {
+    const fe = document.getElementById('fatalError'); if(!fe) return;
+    if (show) { 
+      fe.style.display = 'flex'; fe.className = isInfo ? 'info-mode' : ''; 
+      if(customTitle) document.getElementById('fatalTitle').innerText = customTitle; 
+      if(customDesc) document.getElementById('fatalDesc').innerText = customDesc; 
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); 
+    } else { 
+      fe.style.display = 'none'; 
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
+      const firstTabContent = document.getElementById('tab-op'); if(firstTabContent) firstTabContent.classList.add('active'); 
+      const firstTabBtn = document.querySelector('.tab-btn'); if(firstTabBtn) firstTabBtn.classList.add('active'); 
+    }
+  },
+  toggleLoader(show, text="Sincronizando...") { 
+    const overlay = document.getElementById('loaderOverlay');
+    document.getElementById('loaderText').innerText = text;
+    overlay.style.display = show ? 'flex' : 'none'; 
+  }
+};
+
+// ==========================================
+// MÓDULO: APP CONTROLLER
+// ==========================================
+const appController = {
+  isSubmitting: false,
+  lastParsedData: [], 
+  currentPendingPlacas: [],
+
+  async initApp() { 
+    uiBuilder.init(); 
+    perdasController.init(); 
+    swManager.init();
+    await syncManager.init();
+    alertManager.init();
+    await this.handleRefresh(); 
+    
+    setInterval(() => {
+        this.silentRefresh();
+    }, 60000);
+  },
+  
+  async silentRefresh() {
+    if(!navigator.onLine) return; 
+    try {
+      const [rawValues, historicoRaw, rncRaw] = await Promise.all([
+          apiService.fetchSheetData().catch(() => null),
+          apiService.fetchHistoricoData().catch(() => null),
+          apiService.fetchRncData().catch(() => null)
+      ]);
+      
+      if (historicoRaw) uiBuilder.historicoCargas = historicoRaw;
+      if (rncRaw) uiBuilder.rncCargas = dataParser.parseRnc(rncRaw);
+      
+      if (rawValues && rawValues.length > 0) {
+          const parsedData = dataParser.parse(rawValues);
+          this.lastParsedData = parsedData; 
+          uiBuilder.localDataStore = parsedData;
+      } else {
+          this.lastParsedData = [];
+          uiBuilder.localDataStore = [];
+      }
+      
+      const rawEstoque = await apiService.fetchEstoqueData().catch(() => null);
+      if (rawEstoque) {
+          const lotesMap = dataParser.parseEstoque(rawEstoque);
+          if (Object.keys(lotesMap).length > 0) {
+              uiBuilder.lotesMap = lotesMap;
+              perdasController.populateProdutos(lotesMap); 
+          }
+      }
+      
+      const pending = await dbManager.getAllPending();
+      this.currentPendingPlacas = (pending || []).filter(p => p.type === 'OPERACAO').map(p => p.payload.placa);
+
+      if (document.getElementById('tab-dash').classList.contains('active')) {
+         dashboardEngine.renderExecTable(this.lastParsedData, this.currentPendingPlacas);
+      }
+      
+      uiBuilder.verificarPlacaJaCarregou();
+      uiBuilder.updateGlobalUpdateTimestamp();
+    } catch (error) {}
+  },
+
+  async handleRefresh() {
+    if(!navigator.onLine) return; 
+    uiBuilder.toggleLoader(true, "Acessando banco de dados da CYSY...");
+    try {
+      uiBuilder.setFatalError(false);
+      
+      const [rawValues, historicoRaw, rncRaw] = await Promise.all([
+          apiService.fetchSheetData(),
+          apiService.fetchHistoricoData(),
+          apiService.fetchRncData()
+      ]);
+
+      const parsedData = dataParser.parse(rawValues || []);
+      uiBuilder.historicoCargas = historicoRaw || [];
+      uiBuilder.rncCargas = dataParser.parseRnc(rncRaw);
+      
+      let lotesMap = null; 
+      try { 
+          const rawEstoque = await apiService.fetchEstoqueData();
+          if (rawEstoque) lotesMap = dataParser.parseEstoque(rawEstoque); 
+      } catch(e) {}
+      
+      this.lastParsedData = parsedData; 
+      uiBuilder.localDataStore = parsedData;
+      
+      if (lotesMap && Object.keys(lotesMap).length > 0) {
+          uiBuilder.lotesMap = lotesMap;
+          perdasController.populateProdutos(lotesMap); 
+      }
+      
+      const pending = await dbManager.getAllPending();
+      this.currentPendingPlacas = (pending || []).filter(p => p.type === 'OPERACAO').map(p => p.payload.placa);
+
+      uiBuilder.populateSelects(parsedData, uiBuilder.lotesMap); 
+      dashboardEngine.renderBanners(parsedData);
+      dashboardEngine.renderExecTable(parsedData, this.currentPendingPlacas);
+      
+      uiBuilder.updateTimestamp();
+      uiBuilder.updateGlobalUpdateTimestamp();
+
+    } catch (error) {
+      uiBuilder.setFatalError(true, false, "FALHA DE LIGAÇÃO", "Não foi possível carregar os dados. Verifique sua conexão.");
+    } finally { uiBuilder.toggleLoader(false); }
+  },
+
+  async submitFinal(statusLiberacao) {
+    if(this.isSubmitting) return;
+    const acomp = document.getElementById('selAcomp').value; 
+    const placaSelecionada = document.getElementById('selPlacaBusca').value; 
+    if(!acomp || !placaSelecionada) return alert("⚠️ Preencha Responsável e a Placa da carga antes de finalizar.");
+
+    const itemsCarga = uiBuilder.localDataStore.filter(d => d.placa === placaSelecionada);
+    const cli = [...new Set(itemsCarga.map(i => i.cliente))].join(' | ');
+    const ped = [...new Set(itemsCarga.map(i => i.pedido))].join(' | ');
+
+    let missingCheck = false;
+    config.checklist.forEach(c => { if(c.type !== 'text' && !document.querySelector(`input[name="chk_${c.id}"]:checked`)) missingCheck = true; });
+    if(missingCheck) return alert("⚠️ Por favor, responda a todos os itens do Checklist de Segurança.");
+
+    const base64Frente = document.getElementById('base64Frente').value;
+    const base64Traseira = document.getElementById('base64Traseira').value;
+    const base64Assoalho = document.getElementById('base64Assoalho').value;
+
+    if(!base64Frente || !base64Traseira || !base64Assoalho) {
+        return alert("⚠️ FOTOS PENDENTES!\n\nPor favor, adicione as 3 evidências fotográficas obrigatórias (Frente, Traseira e Assoalho) antes de prosseguir.");
+    }
+
+    const payload = {
+      tipo: "OPERACAO", status: statusLiberacao, dataHora: new Date().toLocaleString('pt-BR'),
+      acompanhamento: acomp, cliente: cli, pedido: ped, produto: '', quantidadeTotal: 0,
+      placa: document.getElementById('inpPlaca').value, motorista: document.getElementById('inpMotorista').value,
+      obs: document.getElementById('inpObs').value, linhasOperacao: [], checklist: {},
+      fotos: {
+          frente: base64Frente,
+          traseira: base64Traseira,
+          assoalho: base64Assoalho
+      }
+    };
+
+    let hasMaterial = false;
+    for(let i=1; i<=10; i++) {
+      const p = document.getElementById(`selProd_${i}`).value; 
+      const q = parseBRNumber(document.getElementById(`inpQtd_${i}`).value);
+      const l = document.getElementById(`selLote_${i}`)?.value || 'S/ Lote';
+      const qPerda = parseBRNumber(document.getElementById(`inpPerda_${i}`).value); 
+      const mPerda = document.getElementById(`selMotivo_${i}`).value;
+      if (q < 0 || qPerda < 0) return alert(`⛔ Valores negativos não permitidos (Linha ${i}).`);
+      if(p && (q > 0 || qPerda > 0)) {
+        hasMaterial = true; 
+        if (!payload.produto) payload.produto = p;
+        if(qPerda > 0 && !mPerda) return alert(`⛔ Informe o motivo da perda na (Linha ${i}).`);
+        payload.quantidadeTotal += q; 
+        payload.linhasOperacao.push({ produto: p, quantidade: q, lote: l, perda: qPerda, motivoPerda: mPerda || "-" });
+      }
+    }
+    
+    if(!hasMaterial) return alert("⚠️ Informe a quantidade carregada de pelo menos um produto.");
+
+    config.checklist.forEach(c => {
+      payload.checklist[c.lbl] = c.type === 'text' 
+        ? (document.getElementById(`chk_text_${c.id}`).value || 'Sem observações adicionais') 
+        : document.querySelector(`input[name="chk_${c.id}"]:checked`).value;
+    });
+
+    this.isSubmitting = true; 
+    uiBuilder.toggleLoader(true, "Enviando dados e fotos...");
+    
+    try {
+      const resp = await apiService.sendDataToAppScript(payload);
+      if(resp && resp.success) {
+        alert("✅ SUCESSO! Registro integrado à planilha.");
+        uiBuilder.clearDependentFields(); 
+        document.getElementById('selAcomp').value = ''; 
+        document.getElementById('selPlacaBusca').value = '';
+        uiBuilder.updateGlobalUpdateTimestamp();
+        this.silentRefresh(); 
+      } else {
+        alert("❌ ERRO DO SCRIPT:\n\n" + (resp.message || "Erro desconhecido."));
+      }
+    } catch(err) { 
+      await dbManager.savePending('OPERACAO', payload);
+      alert("📡 MODO OFFLINE DETECTADO!\n\nSeu registro foi salvo com segurança no seu dispositivo e será enviado automaticamente quando a internet voltar.");
+      uiBuilder.clearDependentFields(); 
+      document.getElementById('selAcomp').value = ''; 
+      document.getElementById('selPlacaBusca').value = '';
+      
+      const pending = await dbManager.getAllPending();
+      this.currentPendingPlacas = (pending || []).filter(p => p.type === 'OPERACAO').map(p => p.payload.placa);
+      dashboardEngine.renderExecTable(this.lastParsedData, this.currentPendingPlacas);
+      
+      syncManager.updateStatus(navigator.onLine);
+    } finally { 
+      this.isSubmitting = false; uiBuilder.toggleLoader(false); 
+    }
+  }
+};
+
+// ==========================================
+// MÓDULO: PERDAS CONTROLLER
+// ==========================================
+const perdasController = {
+  visibleEmptyRows: 0,
+
+  init() { this.buildPerdasGrid(); this.updateGridVisibility(); },
+  buildPerdasGrid() {
+    const c = document.getElementById('perdasContainer');
+    for(let i = 1; i <= 10; i++) {
+      c.insertAdjacentHTML('beforeend', `
+        <div class="grid-row perda-row" id="perdaRow_${i}">
+          <div class="grid-cell" data-label="Produto"><select id="perdaProd_${i}" onchange="perdasController.onPerdaProdChange(${i})"><option value="">Selecione...</option></select></div>
+          <div class="grid-cell" data-label="Qtd (t)"><input type="number" id="perdaQtd_${i}" step="0.001" min="0" placeholder="Ex: 2.500" oninput="perdasController.updateGridVisibility()"></div>
+          <div class="grid-cell" data-label="Lote (Saldo)"><select id="perdaLote_${i}" onchange="perdasController.onPerdaLoteChange(${i})"><option value="">Lote...</option></select><div id="perdaSaldo_${i}" class="saldo-lbl"></div></div>
+          <div class="grid-cell" data-label="Tipo de Perda"><select id="perdaTipo_${i}"><option value="">Motivo...</option><option value="Processo">Processo</option><option value="Carregamento">Carregamento</option><option value="Avaria">Avaria</option></select></div>
+          <div class="grid-cell" data-label="Observação"><input type="text" id="perdaObs_${i}" placeholder="Detalhes adicionais..."></div>
+        </div>`);
+    }
+    
+    // Injeta botão ocultar/expandir
+    c.parentElement.insertAdjacentHTML('beforeend', `
+      <div style="padding: 12px; display: flex; justify-content: center; background: var(--bg-app); border-top: 1px solid var(--border);">
+          <button type="button" id="btnTogglePerdasRows" onclick="perdasController.toggleGridRows()" style="background: transparent; border: 1px dashed var(--secondary); color: var(--secondary); font-size: 12px; font-weight: 700; min-height: 36px; border-radius: 20px; padding: 0 20px; transition: all 0.2s; cursor: pointer;">⬇ Expandir mais uma linha</button>
+      </div>
+    `);
+  },
+
+  toggleGridRows() {
+      let totalShown = 0;
+      for (let i = 1; i <= 10; i++) {
+          const row = document.getElementById(`perdaRow_${i}`);
+          if(row && row.style.display !== 'none') totalShown++;
+      }
+      if (totalShown >= 10) {
+          this.visibleEmptyRows = 0; 
+      } else {
+          this.visibleEmptyRows++; 
+      }
+      this.updateGridVisibility();
+  },
+
+  updateGridVisibility() {
+      const btn = document.getElementById('btnTogglePerdasRows');
+      let hasContentCount = 0;
+      let emptyRowsShown = 0;
+      let totalShown = 0;
+
+      for (let i = 1; i <= 10; i++) {
+        const row = document.getElementById(`perdaRow_${i}`);
+        if(!row) continue;
+        
+        const p = document.getElementById(`perdaProd_${i}`).value;
+        const q = document.getElementById(`perdaQtd_${i}`).value;
+        
+        const hasData = (p !== '' || parseFloat(q) > 0);
+        
+        if (hasData) {
+            row.style.display = ''; 
+            hasContentCount++;
+            totalShown++;
+        } else {
+            if (emptyRowsShown < this.visibleEmptyRows || (hasContentCount === 0 && emptyRowsShown === 0)) {
+                row.style.display = '';
+                emptyRowsShown++;
+                totalShown++;
+            } else {
+                row.style.display = 'none';
+            }
+        }
+      }
+
+      if (btn) {
+        if (totalShown >= 10) {
+          btn.innerHTML = '⬆ Ocultar linhas vazias';
+          btn.style.color = 'var(--text-muted)';
+          btn.style.borderColor = 'var(--border)';
+        } else {
+          btn.innerHTML = '⬇ Expandir mais uma linha';
+          btn.style.color = 'var(--secondary)';
+          btn.style.borderColor = 'var(--secondary)';
+        }
+      }
+  },
+
+  populateProdutos(lotesMap) {
+    const keys = Object.keys(lotesMap).filter(k => /[a-zA-Z]/.test(k)).sort();
+    const opts = '<option value="">Selecione...</option>' + keys.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
+    
+    for(let i = 1; i <= 10; i++) {
+        const el = document.getElementById(`perdaProd_${i}`);
+        if (el) {
+            const currentVal = el.value;
+            el.innerHTML = opts;
+            if(currentVal) el.value = currentVal;
+        }
+    }
+  },
+  onPerdaProdChange(index) {
+    const prodDesc = document.getElementById(`perdaProd_${index}`).value; 
+    const loteSelect = document.getElementById(`perdaLote_${index}`);
+    const lblSaldo = document.getElementById(`perdaSaldo_${index}`);
+    loteSelect.innerHTML = '<option value="">Lote...</option>'; lblSaldo.innerText = '';
+    
+    if(prodDesc && uiBuilder.lotesMap[normalizeName(prodDesc)]) {
+      const lotesObj = uiBuilder.lotesMap[normalizeName(prodDesc)];
+      if (Object.keys(lotesObj).length > 0) {
+        loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + Object.keys(lotesObj).map(l => `<option value="${escapeHTML(l)}" data-saldo="${lotesObj[l]}">${escapeHTML(l)}</option>`).join('');
+        if(Object.keys(lotesObj).length === 1) { loteSelect.selectedIndex = 1; this.onPerdaLoteChange(index); }
+      } else { loteSelect.innerHTML = '<option value="S/ Lote">Sem Lote no Estoque</option>'; }
+    }
+    this.updateGridVisibility();
+  },
+  onPerdaLoteChange(index) {
+    const loteSelect = document.getElementById(`perdaLote_${index}`); const lblSaldo = document.getElementById(`perdaSaldo_${index}`); 
+    const opt = loteSelect.options[loteSelect.selectedIndex];
+    lblSaldo.innerText = opt && opt.dataset.saldo ? `Saldo do Lote: ${formatTons(opt.dataset.saldo)}t` : '';
+  },
+  limparPerda() { 
+    document.getElementById('perdaAcomp').value = ''; 
+    for(let i = 1; i <= 10; i++) { 
+      document.getElementById(`perdaProd_${i}`).value = ''; document.getElementById(`perdaQtd_${i}`).value = ''; document.getElementById(`perdaLote_${i}`).innerHTML = '<option value="">Lote...</option>'; 
+      document.getElementById(`perdaSaldo_${i}`).innerText = ''; document.getElementById(`perdaTipo_${i}`).value = ''; document.getElementById(`perdaObs_${i}`).value = ''; 
+    } 
+    uiBuilder.updateTimestamp(); 
+    this.visibleEmptyRows = 0;
+    this.updateGridVisibility();
+  },
+  async submitPerda() {
+    const acomp = document.getElementById('perdaAcomp').value; 
+    if(!acomp) return alert('⚠️ Selecione o Responsável.');
+    
+    const perdas = [];
+    for(let i=1; i<=10; i++) {
+      const p = document.getElementById(`perdaProd_${i}`).value; const q = parseBRNumber(document.getElementById(`perdaQtd_${i}`).value);
+      if(p && q > 0) perdas.push({ produto: p, qtd: q, lote: document.getElementById(`perdaLote_${i}`).value || 'Sem Lote', tipo: document.getElementById(`perdaTipo_${i}`).value || 'Não informado', obs: document.getElementById(`perdaObs_${i}`).value });
+    }
+    if(perdas.length === 0) return alert('⚠️ Preencha ao menos uma perda válida.');
+    
+    uiBuilder.toggleLoader(true, "Enviando dados de perdas...");
+    const payload = { tipo: 'BAIXA_PERDA', dataHora: new Date().toLocaleString('pt-BR'), acomp, perdas };
+    
+    try {
+      const resp = await apiService.sendDataToAppScript(payload);
+      if(resp.success) { 
+        alert('✅ PERDA REGISTRADA COM SUCESSO!'); 
+        uiBuilder.updateGlobalUpdateTimestamp();
+        this.limparPerda(); 
+      } else { alert("❌ ERRO DO SCRIPT:\n\n" + resp.message); }
+    } catch(err) { 
+      await dbManager.savePending('BAIXA_PERDA', payload);
+      alert("📡 MODO OFFLINE DETECTADO!\n\nA Baixa de Perda foi salva no seu dispositivo e será sincronizada assim que a internet voltar.");
+      this.limparPerda();
+      syncManager.updateStatus(navigator.onLine);
+    } finally { uiBuilder.toggleLoader(false); }
+  }
+};
+
+window.addEventListener('DOMContentLoaded', () => appController.initApp());
+</script>
+</body>
+</html>
