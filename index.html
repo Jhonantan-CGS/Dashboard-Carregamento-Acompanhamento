@@ -406,8 +406,8 @@
         </div>
         <div class="table-wrapper">
           <div class="unified-grid" id="perdasContainer">
-            <div class="grid-header" style="grid-template-columns: minmax(250px,3fr) 1.4fr 2fr 1.2fr 2fr;">
-              <div>Produto</div><div>Qtd (t)</div><div>Lote (Saldo)</div><div>Tipo de Perda</div><div>Observação</div>
+            <div class="grid-header" style="grid-template-columns: minmax(250px,3fr) 2fr 1.4fr 1.2fr 2fr;">
+              <div>Produto</div><div>Lote (Saldo)</div><div>Qtd (t)</div><div>Tipo de Perda</div><div>Observação</div>
             </div>
           </div>
         </div>
@@ -955,7 +955,6 @@ function extrairHorarioObs(obs) {
 // ==========================================
 const dashboardEngine = {
 
-  // FILTRO INTELIGENTE PARA IMPEDIR FALSOS POSITIVOS NO CRUZAMENTO DO RNC
   limparNomesGenericos(str) {
       if (!str) return '';
       const genericos = ['LTDA', 'S/A', 'SA', 'ME', 'EPP', 'TRANSPORTES', 'TRANSPORTADORA', 'LOGISTICA', 'LOGÍSTICA', 'COMERCIO', 'COMÉRCIO', 'COMERCIAL', 'AGROPECUARIA', 'AGROPECUÁRIA', 'AGRO', 'BRASIL', 'CIA', 'EIRELI'];
@@ -1016,9 +1015,6 @@ const dashboardEngine = {
       const minutosTotal = truckStatusManager.calcularTempoCarregamento(totalQtd, isPallet);
       const tempos = truckStatusManager.calcularHorarioFinal(timeStr, minutosTotal);
 
-      // =====================================
-      // VERIFICAÇÃO INTELIGENTE E PRECISA DE RNC
-      // =====================================
       let rncMatches = [];
       const upperClientes = clientesStr.toUpperCase();
       const upperObs = obsUnificado.toUpperCase();
@@ -1842,17 +1838,40 @@ const appController = {
 const perdasController = {
   visibleEmptyRows: 0,
 
-  init() { this.buildPerdasGrid(); this.updateGridVisibility(); },
+  init() { 
+      this.buildPerdasGrid(); 
+      this.updateGridVisibility(); 
+  },
   buildPerdasGrid() {
     const c = document.getElementById('perdasContainer');
+    
+    // Injeta a datalist (lista invisível para a barra de pesquisa)
+    c.insertAdjacentHTML('beforebegin', '<datalist id="listaProdutosPerda"></datalist>');
+
     for(let i = 1; i <= 10; i++) {
       c.insertAdjacentHTML('beforeend', `
-        <div class="grid-row perda-row" id="perdaRow_${i}">
-          <div class="grid-cell" data-label="Produto"><select id="perdaProd_${i}" onchange="perdasController.onPerdaProdChange(${i})"><option value="">Selecione...</option></select></div>
-          <div class="grid-cell" data-label="Qtd (t)"><input type="number" id="perdaQtd_${i}" step="0.001" min="0" placeholder="Ex: 2.500" oninput="perdasController.updateGridVisibility()"></div>
-          <div class="grid-cell" data-label="Lote (Saldo)"><select id="perdaLote_${i}" onchange="perdasController.onPerdaLoteChange(${i})"><option value="">Lote...</option></select><div id="perdaSaldo_${i}" class="saldo-lbl"></div></div>
-          <div class="grid-cell" data-label="Tipo de Perda"><select id="perdaTipo_${i}"><option value="">Motivo...</option><option value="Processo">Processo</option><option value="Carregamento">Carregamento</option><option value="Avaria">Avaria</option></select></div>
-          <div class="grid-cell" data-label="Observação"><input type="text" id="perdaObs_${i}" placeholder="Detalhes adicionais..."></div>
+        <div class="grid-row perda-row" id="perdaRow_${i}" style="grid-template-columns: minmax(250px,3fr) 2fr 1.4fr 1.2fr 2fr;">
+          <div class="grid-cell" data-label="Produto">
+              <input type="text" list="listaProdutosPerda" id="perdaProd_${i}" placeholder="Comece a digitar o produto..." oninput="perdasController.onPerdaProdChange(${i})" onchange="perdasController.onPerdaProdChange(${i})" autocomplete="off">
+          </div>
+          <div class="grid-cell" data-label="Lote (Saldo)">
+              <select id="perdaLote_${i}" onchange="perdasController.onPerdaLoteChange(${i})"><option value="">Lote...</option></select>
+              <div id="perdaSaldo_${i}" class="saldo-lbl"></div>
+          </div>
+          <div class="grid-cell" data-label="Qtd (t)">
+              <input type="number" id="perdaQtd_${i}" step="0.001" min="0" placeholder="Ex: 2.500" oninput="perdasController.updateGridVisibility()">
+          </div>
+          <div class="grid-cell" data-label="Tipo de Perda">
+              <select id="perdaTipo_${i}">
+                  <option value="">Motivo...</option>
+                  <option value="Processo">Processo</option>
+                  <option value="Carregamento">Carregamento</option>
+                  <option value="Avaria">Avaria</option>
+              </select>
+          </div>
+          <div class="grid-cell" data-label="Observação">
+              <input type="text" id="perdaObs_${i}" placeholder="Detalhes adicionais...">
+          </div>
         </div>`);
     }
     
@@ -1923,37 +1942,39 @@ const perdasController = {
 
   populateProdutos(lotesMap) {
     const keys = Object.keys(lotesMap).filter(k => /[a-zA-Z]/.test(k)).sort();
-    const opts = '<option value="">Selecione...</option>' + keys.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
-    
-    for(let i = 1; i <= 10; i++) {
-        const el = document.getElementById(`perdaProd_${i}`);
-        if (el) {
-            const currentVal = el.value;
-            el.innerHTML = opts;
-            if(currentVal) el.value = currentVal;
-        }
+    const opts = keys.map(p => `<option value="${escapeHTML(p)}">`).join('');
+    const datalist = document.getElementById('listaProdutosPerda');
+    if (datalist) {
+        datalist.innerHTML = opts;
     }
   },
+
   onPerdaProdChange(index) {
     const prodDesc = document.getElementById(`perdaProd_${index}`).value; 
     const loteSelect = document.getElementById(`perdaLote_${index}`);
     const lblSaldo = document.getElementById(`perdaSaldo_${index}`);
     loteSelect.innerHTML = '<option value="">Lote...</option>'; lblSaldo.innerText = '';
     
-    if(prodDesc && uiBuilder.lotesMap[normalizeName(prodDesc)]) {
-      const lotesObj = uiBuilder.lotesMap[normalizeName(prodDesc)];
+    const normalizedInput = normalizeName(prodDesc);
+    
+    if(normalizedInput && uiBuilder.lotesMap[normalizedInput]) {
+      const lotesObj = uiBuilder.lotesMap[normalizedInput];
       if (Object.keys(lotesObj).length > 0) {
         loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + Object.keys(lotesObj).map(l => `<option value="${escapeHTML(l)}" data-saldo="${lotesObj[l]}">${escapeHTML(l)}</option>`).join('');
         if(Object.keys(lotesObj).length === 1) { loteSelect.selectedIndex = 1; this.onPerdaLoteChange(index); }
       } else { loteSelect.innerHTML = '<option value="S/ Lote">Sem Lote no Estoque</option>'; }
+    } else if (prodDesc.length > 0) {
+        loteSelect.innerHTML = '<option value="">Produto não encontrado</option>';
     }
     this.updateGridVisibility();
   },
+
   onPerdaLoteChange(index) {
     const loteSelect = document.getElementById(`perdaLote_${index}`); const lblSaldo = document.getElementById(`perdaSaldo_${index}`); 
     const opt = loteSelect.options[loteSelect.selectedIndex];
     lblSaldo.innerText = opt && opt.dataset.saldo ? `Saldo do Lote: ${formatTons(opt.dataset.saldo)}t` : '';
   },
+
   limparPerda() { 
     document.getElementById('perdaAcomp').value = ''; 
     for(let i = 1; i <= 10; i++) { 
@@ -1964,16 +1985,28 @@ const perdasController = {
     this.visibleEmptyRows = 0;
     this.updateGridVisibility();
   },
+
   async submitPerda() {
     const acomp = document.getElementById('perdaAcomp').value; 
     if(!acomp) return alert('⚠️ Selecione o Responsável.');
     
     const perdas = [];
     for(let i=1; i<=10; i++) {
-      const p = document.getElementById(`perdaProd_${i}`).value; const q = parseBRNumber(document.getElementById(`perdaQtd_${i}`).value);
-      if(p && q > 0) perdas.push({ produto: p, qtd: q, lote: document.getElementById(`perdaLote_${i}`).value || 'Sem Lote', tipo: document.getElementById(`perdaTipo_${i}`).value || 'Não informado', obs: document.getElementById(`perdaObs_${i}`).value });
+      const pRaw = document.getElementById(`perdaProd_${i}`).value; 
+      const p = normalizeName(pRaw);
+      const q = parseBRNumber(document.getElementById(`perdaQtd_${i}`).value);
+      
+      if(pRaw && q > 0) {
+        // Trava para forçar produto válido
+        if (!uiBuilder.lotesMap[p]) {
+            return alert(`⚠️ O produto "${pRaw}" digitado na linha ${i} não é válido. Por favor, selecione um produto válido da lista suspensa.`);
+        }
+        
+        perdas.push({ produto: pRaw, qtd: q, lote: document.getElementById(`perdaLote_${i}`).value || 'Sem Lote', tipo: document.getElementById(`perdaTipo_${i}`).value || 'Não informado', obs: document.getElementById(`perdaObs_${i}`).value });
+      }
     }
-    if(perdas.length === 0) return alert('⚠️ Preencha ao menos uma perda válida.');
+    
+    if(perdas.length === 0) return alert('⚠️ Preencha ao menos uma perda válida (com quantidade e produto da lista).');
     
     uiBuilder.toggleLoader(true, "Enviando dados de perdas...");
     const payload = { tipo: 'BAIXA_PERDA', dataHora: new Date().toLocaleString('pt-BR'), acomp, perdas };
