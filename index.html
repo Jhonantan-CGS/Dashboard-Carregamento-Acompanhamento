@@ -265,6 +265,7 @@
       <div class="tab-btn active" onclick="uiBuilder.switchTab(event, 'op')">📋 Operação e Checklist</div>
       <div class="tab-btn" onclick="uiBuilder.switchTab(event, 'perdas')">📉 Baixa de Perdas</div>
       <div class="tab-btn" onclick="uiBuilder.switchTab(event, 'dash')">📊 Painel Executivo</div>
+      <div class="tab-btn" onclick="uiBuilder.switchTab(event, 'consulta')">🔍 Consulta de Lotes</div>
     </div>
   </header>
 
@@ -404,13 +405,15 @@
             </select>
           </div>
         </div>
+        
         <div class="table-wrapper">
           <div class="unified-grid" id="perdasContainer">
             <div class="grid-header" style="grid-template-columns: minmax(250px,3fr) 2fr 1.4fr 1.2fr 2fr;">
               <div>Produto</div><div>Lote (Saldo)</div><div>Qtd (t)</div><div>Tipo de Perda</div><div>Observação</div>
             </div>
-          </div>
+            </div>
         </div>
+        
         <div class="grid-form" style="margin-top: 32px;">
           <button class="btn-success" onclick="perdasController.submitPerda()" style="height: 60px;">✅ REGISTRAR BAIXA NO SISTEMA</button>
         </div>
@@ -424,6 +427,22 @@
           <h2><span>🚛</span> Carregamentos Pendentes do Dia</h2>
         </div>
         <div id="tabelaDiariaContainer"></div>
+      </section>
+    </div>
+
+    <div id="tab-consulta" class="tab-content">
+      <section class="section anim-slide-up">
+        <div class="section-header"><h2><span>🔍</span> Consulta Rápida de Estoque</h2></div>
+        <div class="grid-form" style="margin-bottom: 24px;">
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label style="font-size: 14px;">Digite o Lote Completo ou os últimos 4 números para buscar:</label>
+            <input type="text" id="inpBuscaLoteConsulta" placeholder="Ex: 3574 ou 9043574" style="font-size: 20px; font-weight: bold; text-align: center; border-color: var(--secondary); border-width: 2px;" oninput="consultaController.buscar()" autocomplete="off">
+          </div>
+        </div>
+        <div class="table-wrapper" id="consultaResultWrapper" style="display: none;">
+          <div class="unified-grid" id="consultaResultContainer">
+             </div>
+        </div>
       </section>
     </div>
 
@@ -459,7 +478,7 @@
 
 <script>
 // ==========================================
-// 1. CONFIGURAÇÕES GERAIS E CORES DE CLIENTES
+// 1. CONFIGURAÇÕES GERAIS
 // ==========================================
 const config = {
   api: {
@@ -906,6 +925,7 @@ const dataParser = {
   },
   parseEstoque(values) {
     const map = {}; let ch = null;
+    const flat = []; // NOVO ARRAY LINEAR DE LOTES
     for (let i = 0; i < values.length; i++) {
       const row = values[i]; if (!row || !row[0]) continue;
       const colA = String(row[0]).trim();
@@ -920,10 +940,14 @@ const dataParser = {
           const kA = normalizeName(colA); const kL = String(row[1]).trim();
           if (kA !== normalizeName(kL)) { if (!map[kA]) map[kA] = {}; map[kA][kL] = saldo; }
           if (ch) { const kH = normalizeName(ch); if (!map[kH]) map[kH] = {}; map[kH][kL] = saldo; }
+          
+          // Adiciona à lista linear para busca rápida
+          const prodNameForFlat = ch ? normalizeName(ch) : kA;
+          flat.push({ lote: kL, produto: prodNameForFlat, saldo: saldo });
         }
       } else { ch = colA; }
     }
-    return map;
+    return { map, flat };
   },
   
   parseRnc(values) {
@@ -949,6 +973,50 @@ function extrairHorarioObs(obs) {
     const match = /\b([0-1]?[0-9]|2[0-3]):([0-5][0-9])\b/.exec(obs);
     return match ? match[0] : null;
 }
+
+// ==========================================
+// MÓDULO: CONSULTA DE LOTES (NOVA ABA)
+// ==========================================
+const consultaController = {
+    buscar() {
+        const termo = document.getElementById('inpBuscaLoteConsulta').value.trim().toUpperCase();
+        const wrapper = document.getElementById('consultaResultWrapper');
+        const container = document.getElementById('consultaResultContainer');
+        
+        if (termo.length < 3) {
+            wrapper.style.display = 'none';
+            return;
+        }
+
+        const matches = (uiBuilder.lotesFlat || []).filter(item => {
+            // Busca final inteligente de 4 dígitos ou match genérico
+            if (termo.length === 4 && !isNaN(termo)) {
+                return item.lote.endsWith(termo);
+            }
+            return item.lote.toUpperCase().includes(termo);
+        });
+
+        if (matches.length === 0) {
+            container.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--danger); font-weight: bold;">Nenhum lote encontrado no estoque com esta numeração.</div>';
+            wrapper.style.display = 'block';
+            return;
+        }
+
+        let html = `<div class="grid-header" style="grid-template-columns: 1.5fr 3fr 1.5fr;">
+                        <div>Lote</div><div>Produto</div><div>Qtd Disponível (t)</div>
+                    </div>`;
+        matches.forEach(m => {
+            html += `<div class="grid-row" style="grid-template-columns: 1.5fr 3fr 1.5fr; border-left: 4px solid var(--secondary);">
+                        <div class="grid-cell" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary);">${escapeHTML(m.lote)}</div>
+                        <div class="grid-cell" style="font-weight: 600;">${escapeHTML(m.produto)}</div>
+                        <div class="grid-cell" style="font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--success);">${formatTons(m.saldo)} t</div>
+                     </div>`;
+        });
+        
+        container.innerHTML = html;
+        wrapper.style.display = 'block';
+    }
+};
 
 // ==========================================
 // MÓDULO: UI BUILDER E DASHBOARD
@@ -1191,7 +1259,7 @@ const dashboardEngine = {
 };
 
 const uiBuilder = {
-  localDataStore: [], lotesMap: {}, currentProdMap: {}, currentColorMap: {}, historicoCargas: [], rncCargas: [],
+  localDataStore: [], lotesMap: {}, lotesFlat: [], currentProdMap: {}, currentColorMap: {}, historicoCargas: [], rncCargas: [],
   visibleEmptyRows: 0, 
 
   init() { this.buildChecklistUI(); this.buildUnifiedGrid(); this.updateTimestamp(true); this.updateGlobalUpdateTimestamp(); this.updateGridVisibility(); },
@@ -1676,10 +1744,12 @@ const appController = {
       
       const rawEstoque = await apiService.fetchEstoqueData().catch(() => null);
       if (rawEstoque) {
-          const lotesMap = dataParser.parseEstoque(rawEstoque);
-          if (Object.keys(lotesMap).length > 0) {
-              uiBuilder.lotesMap = lotesMap;
-              perdasController.populateProdutos(lotesMap); 
+          const parsedE = dataParser.parseEstoque(rawEstoque);
+          if (Object.keys(parsedE.map).length > 0) {
+              uiBuilder.lotesMap = parsedE.map;
+              uiBuilder.lotesFlat = parsedE.flat;
+              perdasController.populateProdutos(parsedE.map); 
+              perdasController.populateGlobais();
           }
       }
       
@@ -1711,18 +1781,22 @@ const appController = {
       uiBuilder.historicoCargas = historicoRaw || [];
       uiBuilder.rncCargas = dataParser.parseRnc(rncRaw);
       
-      let lotesMap = null; 
+      let rawEstoque = null; 
       try { 
-          const rawEstoque = await apiService.fetchEstoqueData();
-          if (rawEstoque) lotesMap = dataParser.parseEstoque(rawEstoque); 
+          rawEstoque = await apiService.fetchEstoqueData();
       } catch(e) {}
       
       this.lastParsedData = parsedData; 
       uiBuilder.localDataStore = parsedData;
       
-      if (lotesMap && Object.keys(lotesMap).length > 0) {
-          uiBuilder.lotesMap = lotesMap;
-          perdasController.populateProdutos(lotesMap); 
+      if (rawEstoque) {
+          const parsedE = dataParser.parseEstoque(rawEstoque);
+          if (Object.keys(parsedE.map).length > 0) {
+              uiBuilder.lotesMap = parsedE.map;
+              uiBuilder.lotesFlat = parsedE.flat;
+              perdasController.populateProdutos(parsedE.map); 
+              perdasController.populateGlobais();
+          }
       }
       
       const pending = await dbManager.getAllPending();
@@ -1846,16 +1920,16 @@ const perdasController = {
     const c = document.getElementById('perdasContainer');
     
     // Injeta a datalist (lista invisível para a barra de pesquisa)
-    c.insertAdjacentHTML('beforebegin', '<datalist id="listaProdutosPerda"></datalist>');
+    c.insertAdjacentHTML('beforebegin', '<datalist id="listaProdutosPerda"></datalist><datalist id="listaLotesGlobais"></datalist>');
 
     for(let i = 1; i <= 10; i++) {
       c.insertAdjacentHTML('beforeend', `
         <div class="grid-row perda-row" id="perdaRow_${i}" style="grid-template-columns: minmax(250px,3fr) 2fr 1.4fr 1.2fr 2fr;">
           <div class="grid-cell" data-label="Produto">
-              <input type="text" list="listaProdutosPerda" id="perdaProd_${i}" placeholder="Comece a digitar o produto..." oninput="perdasController.onPerdaProdChange(${i})" onchange="perdasController.onPerdaProdChange(${i})" autocomplete="off">
+              <input type="text" list="listaProdutosPerda" id="perdaProd_${i}" placeholder="Comece a digitar o produto..." onchange="perdasController.onPerdaProdChange(${i})" autocomplete="off">
           </div>
           <div class="grid-cell" data-label="Lote (Saldo)">
-              <select id="perdaLote_${i}" onchange="perdasController.onPerdaLoteChange(${i})"><option value="">Lote...</option></select>
+              <input type="text" list="listaLotesGlobais" id="perdaLote_${i}" placeholder="Lote (Ex: 3574)" autocomplete="off" onchange="perdasController.onPerdaLoteChange(${i})" oninput="perdasController.limparSaldo(${i})">
               <div id="perdaSaldo_${i}" class="saldo-lbl"></div>
           </div>
           <div class="grid-cell" data-label="Qtd (t)">
@@ -1949,37 +2023,89 @@ const perdasController = {
     }
   },
 
+  populateGlobais() {
+      const dl = document.getElementById('listaLotesGlobais');
+      if (dl && uiBuilder.lotesFlat) {
+          dl.innerHTML = uiBuilder.lotesFlat.map(item => `<option value="${escapeHTML(item.lote)}">${escapeHTML(item.produto)}</option>`).join('');
+      }
+  },
+
   onPerdaProdChange(index) {
-    const prodDesc = document.getElementById(`perdaProd_${index}`).value; 
-    const loteSelect = document.getElementById(`perdaLote_${index}`);
-    const lblSaldo = document.getElementById(`perdaSaldo_${index}`);
-    loteSelect.innerHTML = '<option value="">Lote...</option>'; lblSaldo.innerText = '';
-    
-    const normalizedInput = normalizeName(prodDesc);
-    
-    if(normalizedInput && uiBuilder.lotesMap[normalizedInput]) {
-      const lotesObj = uiBuilder.lotesMap[normalizedInput];
-      if (Object.keys(lotesObj).length > 0) {
-        loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + Object.keys(lotesObj).map(l => `<option value="${escapeHTML(l)}" data-saldo="${lotesObj[l]}">${escapeHTML(l)}</option>`).join('');
-        if(Object.keys(lotesObj).length === 1) { loteSelect.selectedIndex = 1; this.onPerdaLoteChange(index); }
-      } else { loteSelect.innerHTML = '<option value="S/ Lote">Sem Lote no Estoque</option>'; }
-    } else if (prodDesc.length > 0) {
-        loteSelect.innerHTML = '<option value="">Produto não encontrado</option>';
-    }
-    this.updateGridVisibility();
+      const prodInput = document.getElementById(`perdaProd_${index}`);
+      const loteInput = document.getElementById(`perdaLote_${index}`);
+      const pVal = normalizeName(prodInput.value);
+      
+      if (pVal && !uiBuilder.lotesMap[pVal]) {
+          prodInput.style.borderColor = 'var(--danger)';
+      } else {
+          prodInput.style.borderColor = 'var(--success)';
+          if(!loteInput.value) {
+              const lblSaldo = document.getElementById(`perdaSaldo_${index}`);
+              lblSaldo.innerText = 'Digite o lote para ver saldo...';
+              lblSaldo.style.color = 'var(--text-muted)';
+          }
+      }
+      this.updateGridVisibility();
+  },
+
+  limparSaldo(index) {
+      const lblSaldo = document.getElementById(`perdaSaldo_${index}`);
+      lblSaldo.innerText = 'Pressione Enter ou clique fora para buscar...';
+      lblSaldo.style.color = 'var(--text-muted)';
+      document.getElementById(`perdaLote_${index}`).style.borderColor = 'var(--secondary)';
   },
 
   onPerdaLoteChange(index) {
-    const loteSelect = document.getElementById(`perdaLote_${index}`); const lblSaldo = document.getElementById(`perdaSaldo_${index}`); 
-    const opt = loteSelect.options[loteSelect.selectedIndex];
-    lblSaldo.innerText = opt && opt.dataset.saldo ? `Saldo do Lote: ${formatTons(opt.dataset.saldo)}t` : '';
+      const loteInput = document.getElementById(`perdaLote_${index}`);
+      const prodInput = document.getElementById(`perdaProd_${index}`);
+      const lblSaldo = document.getElementById(`perdaSaldo_${index}`);
+      const val = loteInput.value.trim().toUpperCase();
+
+      if (!val) {
+          lblSaldo.innerText = '';
+          loteInput.style.borderColor = 'var(--border)';
+          return;
+      }
+
+      let matches = (uiBuilder.lotesFlat || []).filter(item => {
+          if (val.length === 4 && !isNaN(val)) return item.lote.endsWith(val);
+          return item.lote.toUpperCase() === val; 
+      });
+
+      if (matches.length === 0) {
+          matches = (uiBuilder.lotesFlat || []).filter(item => item.lote.toUpperCase().includes(val));
+      }
+
+      if (matches.length === 1) {
+          loteInput.value = matches[0].lote;
+          prodInput.value = matches[0].produto;
+          lblSaldo.innerText = `Saldo do Lote: ${formatTons(matches[0].saldo)}t`;
+          lblSaldo.style.color = 'var(--success)';
+          loteInput.style.borderColor = 'var(--success)';
+          prodInput.style.borderColor = 'var(--success)';
+      } else if (matches.length > 1) {
+          lblSaldo.innerText = `⚠️ ${matches.length} lotes encontrados com o final ${val}. Digite mais números.`;
+          lblSaldo.style.color = 'var(--warning)';
+          loteInput.style.borderColor = 'var(--warning)';
+      } else {
+          lblSaldo.innerText = `❌ Lote não encontrado.`;
+          lblSaldo.style.color = 'var(--danger)';
+          loteInput.style.borderColor = 'var(--danger)';
+      }
+      this.updateGridVisibility();
   },
 
   limparPerda() { 
     document.getElementById('perdaAcomp').value = ''; 
     for(let i = 1; i <= 10; i++) { 
-      document.getElementById(`perdaProd_${i}`).value = ''; document.getElementById(`perdaQtd_${i}`).value = ''; document.getElementById(`perdaLote_${i}`).innerHTML = '<option value="">Lote...</option>'; 
-      document.getElementById(`perdaSaldo_${i}`).innerText = ''; document.getElementById(`perdaTipo_${i}`).value = ''; document.getElementById(`perdaObs_${i}`).value = ''; 
+      document.getElementById(`perdaProd_${i}`).value = ''; 
+      document.getElementById(`perdaProd_${i}`).style.borderColor = 'var(--border)';
+      document.getElementById(`perdaQtd_${i}`).value = ''; 
+      document.getElementById(`perdaLote_${i}`).value = ''; 
+      document.getElementById(`perdaLote_${i}`).style.borderColor = 'var(--border)';
+      document.getElementById(`perdaSaldo_${i}`).innerText = ''; 
+      document.getElementById(`perdaTipo_${i}`).value = ''; 
+      document.getElementById(`perdaObs_${i}`).value = ''; 
     } 
     uiBuilder.updateTimestamp(); 
     this.visibleEmptyRows = 0;
@@ -1994,15 +2120,21 @@ const perdasController = {
     for(let i=1; i<=10; i++) {
       const pRaw = document.getElementById(`perdaProd_${i}`).value; 
       const p = normalizeName(pRaw);
+      const lRaw = document.getElementById(`perdaLote_${i}`).value.trim();
       const q = parseBRNumber(document.getElementById(`perdaQtd_${i}`).value);
       
-      if(pRaw && q > 0) {
-        // Trava para forçar produto válido
-        if (!uiBuilder.lotesMap[p]) {
-            return alert(`⚠️ O produto "${pRaw}" digitado na linha ${i} não é válido. Por favor, selecione um produto válido da lista suspensa.`);
+      if(pRaw || lRaw || q > 0) {
+        if (!pRaw || !lRaw || q <= 0) {
+             return alert(`⚠️ A Linha ${i} está incompleta. Preencha Produto, Lote e Quantidade.`);
+        }
+
+        const loteValido = (uiBuilder.lotesFlat || []).find(item => item.lote.toUpperCase() === lRaw.toUpperCase() && normalizeName(item.produto) === p);
+        
+        if (!loteValido) {
+            return alert(`⚠️ O Lote "${lRaw}" não foi encontrado para o produto "${pRaw}" no estoque (Linha ${i}). Verifique a numeração e use a sugestão automática.`);
         }
         
-        perdas.push({ produto: pRaw, qtd: q, lote: document.getElementById(`perdaLote_${i}`).value || 'Sem Lote', tipo: document.getElementById(`perdaTipo_${i}`).value || 'Não informado', obs: document.getElementById(`perdaObs_${i}`).value });
+        perdas.push({ produto: pRaw, qtd: q, lote: lRaw, tipo: document.getElementById(`perdaTipo_${i}`).value || 'Não informado', obs: document.getElementById(`perdaObs_${i}`).value });
       }
     }
     
