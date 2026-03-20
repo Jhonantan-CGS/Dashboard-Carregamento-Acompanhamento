@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cysy Log">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2830/2830305.png">
+<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2830/2830305.png">
+
 <title>Cysy Fertilizantes - Controle Logístico</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
@@ -35,7 +42,17 @@
   .anim-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
   /* ==========================================
-     HEADER, NAVEGAÇÃO E STATUS DE REDE
+     LOGIN MODAL (PRIMEIRO ACESSO)
+  ========================================== */
+  #loginOverlay { position: fixed; inset: 0; background: rgba(15,23,42,0.95); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px;}
+  .login-box { background: var(--bg-card); width: 100%; max-width: 400px; padding: 32px; border-radius: var(--radius-lg); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); text-align: center; display: flex; flex-direction: column; gap: 16px;}
+  .login-box h2 { font-family: 'Montserrat', sans-serif; color: var(--primary); font-size: 24px; }
+  .login-box p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+  .login-box input { text-align: center; font-size: 18px; font-weight: 600; padding: 16px; }
+  .login-box button { width: 100%; height: 56px; font-size: 16px; background: var(--success); color: white; margin-top: 8px;}
+
+  /* ==========================================
+     HEADER E NAVEGAÇÃO
   ========================================== */
   header { position: fixed; top: 0; left: 0; width: 100%; background: var(--primary); color: var(--text-white); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 100; display: flex; flex-direction: column; box-shadow: var(--shadow-md); }
   .header-top { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; flex-wrap: wrap; gap: 12px; }
@@ -177,6 +194,10 @@
   .btn-status-manual { background: #FFFFFF; border: 1px solid var(--border); color: var(--text-main); font-size: 11px; padding: 6px 12px; min-height: 28px; height: 28px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); white-space: nowrap; cursor: pointer; font-family: 'Montserrat', sans-serif; font-weight: 700; transition: all 0.2s; }
   .btn-status-manual:hover { background: var(--bg-app); border-color: var(--primary); }
 
+  /* BOTÃO DA LOCALIZAÇÃO (CONSULTA) */
+  .btn-loc { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 4px 12px; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--primary); font-family: 'Montserrat', sans-serif;}
+  .btn-loc:hover { background: var(--bg-input); }
+
   /* ==========================================
      RESPONSIVIDADE MÁXIMA - iPHONE RETRATO (390px)
   ========================================== */
@@ -245,6 +266,15 @@
 </head>
 <body>
 
+  <div id="loginOverlay">
+      <div class="login-box">
+          <h2>Bem-vindo!</h2>
+          <p>Para acessar o sistema de logística, informe seu <strong>Nome e Sobrenome</strong>. Esta assinatura será usada em todos os seus registros.</p>
+          <input type="text" id="loginNameInput" placeholder="Ex: Jhonantan Cardoso" autocomplete="off">
+          <button onclick="loginManager.entrar()">Acessar Sistema</button>
+      </div>
+  </div>
+
   <div id="loaderOverlay"><div class="spinner-large"></div><p id="loaderText">Processando...</p></div>
 
   <header>
@@ -295,12 +325,7 @@
           <div class="form-group"><label>Data e Hora Local</label><input type="text" id="inpDataHora" readonly></div>
           <div class="form-group">
             <label>Responsável Operacional *</label>
-            <select id="selAcomp">
-              <option value="">Selecione...</option>
-              <option value="Jhonantan Cardoso Gonçalves">Jhonantan Cardoso Gonçalves</option>
-              <option value="Patrick Ramos">Patrick Ramos</option>
-              <option value="Ronaldo">Ronaldo</option>
-            </select>
+            <input type="text" id="selAcomp" readonly style="background: var(--bg-app); color: var(--text-muted); cursor: not-allowed; font-weight: bold;">
           </div>
           
           <div class="form-group" style="grid-column: 1 / -1;">
@@ -407,12 +432,7 @@
           <div class="form-group"><label>Data e Hora</label><input type="text" id="perdaDataHora" readonly></div>
           <div class="form-group">
             <label>Responsável Operacional *</label>
-            <select id="perdaAcomp">
-              <option value="">Selecione...</option>
-              <option value="Jhonantan Cardoso Gonçalves">Jhonantan Cardoso Gonçalves</option>
-              <option value="Patrick Ramos">Patrick Ramos</option>
-              <option value="Ronaldo">Ronaldo</option>
-            </select>
+            <input type="text" id="perdaAcomp" readonly style="background: var(--bg-app); color: var(--text-muted); cursor: not-allowed; font-weight: bold;">
           </div>
         </div>
         
@@ -432,7 +452,10 @@
 
     <div id="tab-consulta" class="tab-content">
       <section class="section anim-slide-up">
-        <div class="section-header"><h2><span>🔍</span> Consulta Rápida de Estoque</h2></div>
+        <div class="section-header">
+            <h2><span>🔍</span> Consulta Rápida de Estoque</h2>
+            <button onclick="consultaController.listarSemLocalizacao()" style="background: var(--warning-bg); color: #9A3412; border: 1px solid #FDBA74; font-size: 11px; padding: 6px 12px; min-height: auto;">⚠️ Ver Lotes sem Localização</button>
+        </div>
         <div class="grid-form" style="margin-bottom: 24px;">
           <div class="form-group" style="grid-column: 1 / -1;">
             <label style="font-size: 14px;">Digite o Lote Completo ou os últimos 4 números para buscar:</label>
@@ -452,7 +475,7 @@
     <p><strong>© 2026 Cysy Fertilizantes</strong> — Painel Logístico Avançado</p>
     <div class="credits">
       Desenvolvido por Jhonantan Cardoso Gonçalves<br>
-      📞 48 99215-9791
+      <a href="https://wa.me/5548992159791" target="_blank" style="text-decoration:none; color:inherit; display:inline-block; margin-top:4px;">📞 48 99215-9791</a>
     </div>
   </footer>
 
@@ -524,6 +547,43 @@ const normalizeName = (s) => String(s || '').toUpperCase().replace(/\s+/g, ' ').
 const formatTons = (val) => { const n = parseBRNumber(val); return (isNaN(n) ? 0 : n).toFixed(3); };
 const escapeHTML = (str) => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const extractPlaca = (obsStr) => { const match = /\b([A-Z]{3}-?[0-9][A-Z0-9][0-9]{2})\b/i.exec(obsStr || ''); return match ? match[1].toUpperCase() : ''; };
+
+// ==========================================
+// MÓDULO: LOGIN OBRIGATÓRIO
+// ==========================================
+const loginManager = {
+    init() {
+        const user = localStorage.getItem('cysyUser');
+        if(!user) {
+            document.getElementById('loginOverlay').style.display = 'flex';
+        } else {
+            this.setFields(user);
+            this.askNotification();
+        }
+    },
+    entrar() {
+        const name = document.getElementById('loginNameInput').value.trim();
+        const parts = name.split(/\s+/);
+        if(parts.length < 2) {
+            return alert("⚠️ Por favor, digite seu Nome e Sobrenome para garantir a rastreabilidade correta.");
+        }
+        localStorage.setItem('cysyUser', name);
+        document.getElementById('loginOverlay').style.display = 'none';
+        this.setFields(name);
+        this.askNotification();
+    },
+    setFields(name) {
+        const op = document.getElementById('selAcomp');
+        const perda = document.getElementById('perdaAcomp');
+        if(op) op.value = name;
+        if(perda) perda.value = name;
+    },
+    askNotification() {
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+    }
+};
 
 // ==========================================
 // MÓDULO: MOTOR INTELIGENTE DE STATUS DE CAMINHÕES
@@ -747,15 +807,14 @@ const syncManager = {
 };
 
 // ==========================================
-// MÓDULO: ALERTAS AUTOMÁTICOS (NOTIFICAÇÕES)
+// MÓDULO: ALERTAS AUTOMÁTICOS E NOTIFICAÇÕES (LOCATION INCLUDED)
 // ==========================================
 const alertManager = {
   notifiedPlates: new Set(),
   init() {
-    if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-      Notification.requestPermission();
-    }
     setInterval(() => this.checkTimes(), 30000);
+    // Intervalo de 30 minutos para alertar lotes sem localização
+    setInterval(() => this.checkMissingLocations(), 30 * 60 * 1000); 
   },
   checkTimes() {
     const obs = document.getElementById('inpObs')?.value || '';
@@ -776,11 +835,18 @@ const alertManager = {
       }
     }
   },
+  checkMissingLocations() {
+      if(!uiBuilder.lotesFlat) return;
+      const missing = uiBuilder.lotesFlat.filter(l => !consultaController.locDB[l.lote]);
+      if(missing.length > 0) {
+          this.showNotification("Localização de Estoque Pendente", `Você tem ${missing.length} lotes sem localização informada no sistema. Por favor, atualize!`);
+      }
+  },
   showNotification(title, body) {
     if ("Notification" in window && Notification.permission === "granted") {
-      new Notification(title, { body, icon: '🚛' });
+      new Notification(title, { body, icon: 'https://cdn-icons-png.flaticon.com/512/2830/2830305.png' });
     } else {
-      alert(`🔔 ALERTA DE CARREGAMENTO:\n${title}\n${body}`); 
+      alert(`🔔 ALERTA:\n${title}\n${body}`); 
     }
   }
 };
@@ -925,7 +991,7 @@ const dataParser = {
   },
   parseEstoque(values) {
     const map = {}; let ch = null;
-    const flat = []; // NOVO ARRAY LINEAR DE LOTES
+    const flat = []; // ARRAY LINEAR DE LOTES PARA BUSCA
     for (let i = 0; i < values.length; i++) {
       const row = values[i]; if (!row || !row[0]) continue;
       const colA = String(row[0]).trim();
@@ -941,7 +1007,6 @@ const dataParser = {
           if (kA !== normalizeName(kL)) { if (!map[kA]) map[kA] = {}; map[kA][kL] = saldo; }
           if (ch) { const kH = normalizeName(ch); if (!map[kH]) map[kH] = {}; map[kH][kL] = saldo; }
           
-          // Adiciona à lista linear para busca rápida
           const prodNameForFlat = ch ? normalizeName(ch) : kA;
           flat.push({ lote: kL, produto: prodNameForFlat, saldo: saldo });
         }
@@ -975,11 +1040,47 @@ function extrairHorarioObs(obs) {
 }
 
 // ==========================================
-// MÓDULO: CONSULTA DE LOTES (NOVA ABA)
+// MÓDULO: CONSULTA DE LOTES (COM LOCALIZAÇÃO)
 // ==========================================
 const consultaController = {
+    locDB: JSON.parse(localStorage.getItem('cysyLocations') || '{}'),
+
+    salvarLocalizacao(lote) {
+        const inp = document.getElementById(`loc_inp_${lote}`);
+        if(inp) {
+            this.locDB[lote] = inp.value.trim().toUpperCase();
+            localStorage.setItem('cysyLocations', JSON.stringify(this.locDB));
+            alert(`✅ Localização do lote ${lote} salva com sucesso!`);
+            this.buscar(); // Atualiza a view
+        }
+    },
+
+    listarSemLocalizacao() {
+        const wrapper = document.getElementById('consultaResultWrapper');
+        const container = document.getElementById('consultaResultContainer');
+        
+        if (!uiBuilder.lotesFlat || uiBuilder.lotesFlat.length === 0) {
+            container.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--danger); font-weight: bold;">Estoque não sincronizado.</div>';
+            wrapper.style.display = 'block';
+            return;
+        }
+
+        const missing = uiBuilder.lotesFlat.filter(item => !this.locDB[item.lote]);
+        
+        if (missing.length === 0) {
+            container.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--success); font-weight: bold;">Todos os lotes do estoque já possuem localização informada! 🎉</div>';
+            wrapper.style.display = 'block';
+            return;
+        }
+
+        this.renderMatches(missing, true);
+    },
+
     buscar() {
-        const termo = document.getElementById('inpBuscaLoteConsulta').value.trim().toUpperCase();
+        const termoRaw = document.getElementById('inpBuscaLoteConsulta').value.trim();
+        const termo = termoRaw.toUpperCase();
+        const termoNumStr = String(Number(termo.replace(/\D/g, ''))); // Tira zeros à esquerda para comparação
+        
         const wrapper = document.getElementById('consultaResultWrapper');
         const container = document.getElementById('consultaResultContainer');
         
@@ -989,11 +1090,13 @@ const consultaController = {
         }
 
         const matches = (uiBuilder.lotesFlat || []).filter(item => {
-            // Busca final inteligente de 4 dígitos ou match genérico
-            if (termo.length === 4 && !isNaN(termo)) {
-                return item.lote.endsWith(termo);
+            const loteNumStr = String(Number(String(item.lote).replace(/\D/g, '')));
+            
+            // Se digitou pelo menos 4 números, busca pelo final exato ou nome completo
+            if (termoNumStr.length >= 4) {
+                if (loteNumStr.endsWith(termoNumStr) || termoNumStr.endsWith(loteNumStr)) return true;
             }
-            return item.lote.toUpperCase().includes(termo);
+            return loteNumStr === termoNumStr || String(item.lote).toUpperCase().includes(termo);
         });
 
         if (matches.length === 0) {
@@ -1002,19 +1105,49 @@ const consultaController = {
             return;
         }
 
-        let html = `<div class="grid-header" style="grid-template-columns: 1.5fr 3fr 1.5fr;">
-                        <div>Lote</div><div>Produto</div><div>Qtd Disponível (t)</div>
+        this.renderMatches(matches, false);
+    },
+
+    renderMatches(matches, isMissingMode) {
+        const wrapper = document.getElementById('consultaResultWrapper');
+        const container = document.getElementById('consultaResultContainer');
+
+        let html = `<div class="grid-header" style="grid-template-columns: 1.2fr 2.5fr 1.2fr 2fr;">
+                        <div>Lote</div><div>Produto</div><div>Saldo</div><div>Localização</div>
                     </div>`;
         matches.forEach(m => {
-            html += `<div class="grid-row" style="grid-template-columns: 1.5fr 3fr 1.5fr; border-left: 4px solid var(--secondary);">
+            const locAtual = this.locDB[m.lote] || '';
+            const locInputHTML = locAtual 
+                ? `<div style="display:flex; align-items:center; gap:8px;">
+                     <span style="font-weight:800; color:var(--text-main); font-size:14px;">${escapeHTML(locAtual)}</span>
+                     <button class="btn-loc" onclick="document.getElementById('loc_inp_${m.lote}').style.display='inline-block'; this.style.display='none';">✏️ Editar</button>
+                     <input type="text" id="loc_inp_${m.lote}" value="${escapeHTML(locAtual)}" style="display:none; width:80px; min-height:30px; font-size:12px; padding:4px;" placeholder="Ex: B1">
+                     <button class="btn-loc" onclick="consultaController.salvarLocalizacao('${m.lote}')" style="display:none;" id="loc_btn_${m.lote}">Salvar</button>
+                   </div>`
+                : `<div style="display:flex; align-items:center; gap:8px;">
+                     <input type="text" id="loc_inp_${m.lote}" style="width:80px; min-height:30px; font-size:12px; padding:4px;" placeholder="Ex: B1">
+                     <button class="btn-loc" style="background:var(--success-bg); color:#065F46; border-color:var(--success);" onclick="consultaController.salvarLocalizacao('${m.lote}')">Salvar</button>
+                   </div>`;
+
+            html += `<div class="grid-row" style="grid-template-columns: 1.2fr 2.5fr 1.2fr 2fr; border-left: 4px solid ${locAtual ? 'var(--secondary)' : 'var(--danger)'};">
                         <div class="grid-cell" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary);">${escapeHTML(m.lote)}</div>
                         <div class="grid-cell" style="font-weight: 600;">${escapeHTML(m.produto)}</div>
                         <div class="grid-cell" style="font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--success);">${formatTons(m.saldo)} t</div>
+                        <div class="grid-cell">${locInputHTML}</div>
                      </div>`;
         });
         
         container.innerHTML = html;
         wrapper.style.display = 'block';
+
+        // Bind event listeners para aparecer o botão salvar do editar
+        matches.forEach(m => {
+            const inp = document.getElementById(`loc_inp_${m.lote}`);
+            const btn = document.getElementById(`loc_btn_${m.lote}`);
+            if(inp && btn) {
+                inp.addEventListener('input', () => { btn.style.display = 'inline-block'; });
+            }
+        });
     }
 };
 
@@ -1689,7 +1822,7 @@ const uiBuilder = {
       fe.style.display = 'none'; 
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
-      // Agora o fallback da aba ativa inicial é o Painel Executivo (tab-dash)
+      // Fallback para exibir o Painel (tab-dash) se fechar o erro
       const firstTabContent = document.getElementById('tab-dash'); if(firstTabContent) firstTabContent.classList.add('active'); 
       const firstTabBtn = document.querySelector('.tab-btn'); if(firstTabBtn) firstTabBtn.classList.add('active'); 
     }
@@ -1710,6 +1843,7 @@ const appController = {
   currentPendingPlacas: [],
 
   async initApp() { 
+    loginManager.init();
     uiBuilder.init(); 
     perdasController.init(); 
     swManager.init();
@@ -1882,7 +2016,6 @@ const appController = {
       if(resp && resp.success) {
         alert("✅ SUCESSO! Registro integrado à planilha.");
         uiBuilder.clearDependentFields(); 
-        document.getElementById('selAcomp').value = ''; 
         document.getElementById('selPlacaBusca').value = '';
         uiBuilder.updateGlobalUpdateTimestamp();
         this.silentRefresh(); 
@@ -1893,7 +2026,6 @@ const appController = {
       await dbManager.savePending('OPERACAO', payload);
       alert("📡 MODO OFFLINE DETECTADO!\n\nSeu registro foi salvo com segurança no seu dispositivo e será enviado automaticamente quando a internet voltar.");
       uiBuilder.clearDependentFields(); 
-      document.getElementById('selAcomp').value = ''; 
       document.getElementById('selPlacaBusca').value = '';
       
       const pending = await dbManager.getAllPending();
@@ -2061,6 +2193,7 @@ const perdasController = {
       const prodInput = document.getElementById(`perdaProd_${index}`);
       const lblSaldo = document.getElementById(`perdaSaldo_${index}`);
       const val = loteInput.value.trim().toUpperCase();
+      const valNumStr = String(Number(val.replace(/\D/g, ''))); // Remove zeros à esquerda
 
       if (!val) {
           lblSaldo.innerText = '';
@@ -2069,8 +2202,11 @@ const perdasController = {
       }
 
       let matches = (uiBuilder.lotesFlat || []).filter(item => {
-          if (val.length === 4 && !isNaN(val)) return item.lote.endsWith(val);
-          return item.lote.toUpperCase() === val; 
+          const itemNumStr = String(Number(String(item.lote).replace(/\D/g, '')));
+          if (valNumStr.length >= 4 && !isNaN(valNumStr)) {
+              return itemNumStr.endsWith(valNumStr) || valNumStr.endsWith(itemNumStr);
+          }
+          return itemNumStr === valNumStr || item.lote.toUpperCase() === val; 
       });
 
       if (matches.length === 0) {
@@ -2097,7 +2233,6 @@ const perdasController = {
   },
 
   limparPerda() { 
-    document.getElementById('perdaAcomp').value = ''; 
     for(let i = 1; i <= 10; i++) { 
       document.getElementById(`perdaProd_${i}`).value = ''; 
       document.getElementById(`perdaProd_${i}`).style.borderColor = 'var(--border)';
@@ -2115,7 +2250,7 @@ const perdasController = {
 
   async submitPerda() {
     const acomp = document.getElementById('perdaAcomp').value; 
-    if(!acomp) return alert('⚠️ Selecione o Responsável.');
+    if(!acomp) return alert('⚠️ Responsável não identificado. Recarregue a página.');
     
     const perdas = [];
     for(let i=1; i<=10; i++) {
