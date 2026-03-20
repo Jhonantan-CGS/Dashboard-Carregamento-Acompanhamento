@@ -54,7 +54,7 @@
   .anim-slide-up { animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   @keyframes pop { 0% { transform: scale(0.95); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
-  /* OVERLAYS */
+  /* OVERLAYS E MODAIS */
   .overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.9); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); padding: 20px;}
   .modal-box { background: #FFFFFF; width: 100%; max-width: 400px; padding: 32px; border-radius: 24px; box-shadow: var(--shadow-md); text-align: center; display: flex; flex-direction: column; gap: 16px; animation: pop 0.3s ease forwards;}
   .modal-box h2 { font-family: 'Montserrat', sans-serif; color: var(--primary); font-size: 24px; font-weight: 900; text-transform: uppercase;}
@@ -187,7 +187,7 @@
       <div class="modal-box">
           <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Delivery%20truck/3D/delivery_truck_3d.png" width="60" style="margin: 0 auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">
           <h2>Acesso Cysy Log</h2>
-          <p>Informe <strong>Nome e Sobrenome</strong> para habilitar as funções de rastreabilidade, mapa offline e alertas.</p>
+          <p>Informe <strong>Nome e Sobrenome</strong> para habilitar rastreabilidade, mapa e alertas do sistema.</p>
           <input type="text" id="loginNameInput" placeholder="Ex: Jhonantan Cardoso" autocomplete="off">
           <button class="btn-success" onclick="loginManager.entrar()" style="height: 56px;">🔐 Autenticar e Iniciar</button>
       </div>
@@ -227,8 +227,8 @@
 
   <div class="container">
 
-    <div id="fatalError" style="display:none; background: var(--danger-bg); border: 2px solid var(--danger); border-radius: var(--radius-lg); padding: 24px; text-align: center; color: var(--danger); font-family: 'Montserrat'; font-weight: 800; font-size: 16px;">
-      ❌ Falha de Comunicação com a Base de Dados.<br><span style="font-size:12px; color:#7F1D1D;">Verifique sua internet ou se a planilha está configurada para leitura pública.</span><br>
+    <div id="fatalError" style="display:none; background: var(--danger-bg); border: 2px solid var(--danger); border-radius: var(--radius-lg); padding: 24px; text-align: center; color: var(--danger); font-family: 'Montserrat'; font-weight: 800; font-size: 16px; margin-bottom: 20px;">
+      ❌ Falha de Comunicação.<br><span style="font-size:12px; color:#7F1D1D;">Verifique sua conexão ou limpe os Logs no Terminal. O aplicativo continua rodando offline.</span><br>
       <button onclick="appController.handleRefresh()" style="margin-top: 12px; background: var(--danger); color: white; border-radius: 8px;">🔄 TENTAR NOVAMENTE</button>
     </div>
 
@@ -384,7 +384,10 @@
   <div class="debug-panel" id="debugPanel" style="position:fixed; top:0; right:-300px; width:300px; height:100vh; background:#0F172A; z-index:10001; transition:right 0.3s; display:flex; flex-direction:column; box-shadow:-10px 0 30px rgba(0,0,0,0.5); color:#F8FAFC;">
     <div style="padding:16px; display:flex; justify-content:space-between; align-items:center; background:#1E293B; border-bottom:1px solid #334155;">
       <h3 style="font-size:12px; font-family:'Montserrat';">🛠 TERMINAL</h3>
-      <button onclick="debugEngine.togglePanel()" style="background:transparent; color:#94A3B8; font-size:10px; padding:4px; box-shadow:none;">FECHAR</button>
+      <div style="display:flex; gap:8px;">
+          <button onclick="debugEngine.copiarLogs()" style="background:var(--secondary); color:white; font-size:10px; padding:4px 8px; box-shadow:none;">📋 COPIAR</button>
+          <button onclick="debugEngine.togglePanel()" style="background:transparent; color:#94A3B8; font-size:10px; padding:4px; box-shadow:none;">FECHAR</button>
+      </div>
     </div>
     <div style="padding:16px; font-size:10px; font-family:'JetBrains Mono'; display:flex; flex-direction:column; gap:8px; flex:1;">
       <div id="dbgStatusAPI">⏳ API</div><div id="dbgStatusNet">⏳ Rede</div><div id="dbgStatusSW">⏳ SW</div>
@@ -394,7 +397,18 @@
 
 <script>
 // ==========================================
-// 1. CONFIGURAÇÕES GERAIS 
+// CAPTURA GLOBAL DE ERROS E PROMISSES 
+// ==========================================
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+    debugEngine.log(`Erro Crítico na linha ${lineNo}: ${msg}`, "error");
+    return false;
+};
+window.onunhandledrejection = function(event) {
+    debugEngine.log(`Promessa Rejeitada: ${event.reason}`, "error");
+};
+
+// ==========================================
+// 1. CONFIGURAÇÕES GERAIS E API GROQ
 // ==========================================
 const config = {
   api: {
@@ -404,7 +418,7 @@ const config = {
     historicoSheetId: '1KAOCFX7_raD0YMhA3yPh8HjS1fF9TlJWp9TYGACCMCI',
     rncSheetId: '1lyWfTaAkrgMWB0JrzbiPt9RIz7jB1WdCe2A9PwnRivY',
     key: 'AIzaSyAdzZznAPDRlGLqbT-8AAVSKslZYfr7Jc0',
-    range: 'Carregamento!A:AF', 
+    range: 'Carregamento', // Ajustado para pegar toda a aba dinamicamente, evitando estouro de limite
     timeoutMs: 15000,
     groqKey: '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'
   },
@@ -433,7 +447,29 @@ const parseBRNumber = (str) => {
 };
 const normalizeName = (s) => String(s || '').toUpperCase().replace(/\s+/g, ' ').trim();
 const formatTons = (val) => { const n = parseBRNumber(val); return (isNaN(n) ? 0 : n).toFixed(3); };
-const escapeHTML = (str) => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const escapeHTML = (str) => String(str || '').replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
+
+// ==========================================
+// MÓDULO: TERMINAL DE DIAGNÓSTICO (NÍVEL NASA)
+// ==========================================
+const debugEngine = {
+  logs: [], isOpen: false,
+  log(msg, type = 'info') {
+    const time = new Date().toLocaleTimeString(); this.logs.push({ time, msg, type });
+    const consoleDiv = document.getElementById('dbgLogConsole'); if(!consoleDiv) return;
+    const clr = type === 'error' ? '#EF4444' : type === 'success' ? '#10B981' : type === 'warn' ? '#F59E0B' : '#CBD5E1';
+    consoleDiv.innerHTML += `<div style="padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.1);"><span style="color:#94A3B8;">[${time}]</span> <span style="color:${clr}">${escapeHTML(msg)}</span></div>`;
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+  },
+  updateAPIStatus(connected, detail = '') { const el = document.getElementById('dbgStatusAPI'); if(el) el.innerHTML = connected ? `🟢 API Conectada <span style="font-size:10px;">${detail}</span>` : `🔴 API Falha <span style="font-size:10px;">${detail}</span>`; },
+  updateNetStatus(online) { const el = document.getElementById('dbgStatusNet'); if(el) el.innerHTML = online ? `🟢 Online` : `🔴 Offline`; },
+  updateSWStatus(active) { const el = document.getElementById('dbgStatusSW'); if (el) el.innerHTML = active ? `🟢 SW Ativo` : `🔴 SW (Bloqueado pelo Iframe do Google)`; },
+  togglePanel() { this.isOpen = !this.isOpen; const p = document.getElementById('debugPanel'); if(p) p.style.right = this.isOpen ? '0' : '-300px'; },
+  copiarLogs() {
+      const texto = this.logs.map(l => `[${l.time}] [${l.type.toUpperCase()}] ${l.msg}`).join('\n');
+      navigator.clipboard.writeText(texto).then(() => alert("Logs copiados com sucesso! Envie para o desenvolvedor."));
+  }
+};
 
 // ==========================================
 // MÓDULO: RELÓGIO E CLIMA (SATÉLITE OPEN-METEO)
@@ -557,24 +593,6 @@ const swManager = {
 };
 
 // ==========================================
-// MÓDULO: TERMINAL DE DIAGNÓSTICO
-// ==========================================
-const debugEngine = {
-  logs: [], isOpen: false,
-  log(msg, type = 'info') {
-    const time = new Date().toLocaleTimeString(); this.logs.push({ time, msg, type });
-    const consoleDiv = document.getElementById('dbgLogConsole'); if(!consoleDiv) return;
-    const clr = type === 'error' ? '#EF4444' : type === 'success' ? '#10B981' : type === 'warn' ? '#F59E0B' : '#CBD5E1';
-    consoleDiv.innerHTML += `<div style="padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.1);"><span style="color:#94A3B8;">[${time}]</span> <span style="color:${clr}">${escapeHTML(msg)}</span></div>`;
-    consoleDiv.scrollTop = consoleDiv.scrollHeight;
-  },
-  updateAPIStatus(connected, detail = '') { const el = document.getElementById('dbgStatusAPI'); if(el) el.innerHTML = connected ? `🟢 API Conectada <span style="font-size:10px;">${detail}</span>` : `🔴 API Offline <span style="font-size:10px;">${detail}</span>`; },
-  updateNetStatus(online) { const el = document.getElementById('dbgStatusNet'); if(el) el.innerHTML = online ? `🟢 Online` : `🔴 Offline`; },
-  updateSWStatus(active) { const el = document.getElementById('dbgStatusSW'); if (el) el.innerHTML = active ? `🟢 SW Ativo` : `🔴 SW (Bloqueado pelo Iframe do Google)`; },
-  togglePanel() { this.isOpen = !this.isOpen; const p = document.getElementById('debugPanel'); if(p) p.style.right = this.isOpen ? '0' : '-300px'; }
-};
-
-// ==========================================
 // MÓDULO: ALERTAS AUTOMÁTICOS
 // ==========================================
 const alertManager = {
@@ -611,28 +629,62 @@ const alertManager = {
 // ==========================================
 const apiService = {
   async fetchSheetData() {
-    if(!navigator.onLine) throw new Error("OFFLINE");
-    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.sheetId}/values/${config.api.range}?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`);
-    if (!res.ok) throw new Error("Erro HTTP " + res.status);
-    const json = await res.json();
-    debugEngine.updateAPIStatus(true, "(200 OK)"); return json.values || [];
+    if(!navigator.onLine) {
+        debugEngine.log("Falha ao buscar Carregamentos: OFFLINE", "error");
+        throw new Error("OFFLINE");
+    }
+    debugEngine.log("Buscando dados da aba de Carregamentos...", "info");
+    
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${config.api.sheetId}/values/${config.api.range}?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`;
+    const fetchPromise = fetch(url);
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout de 15s excedido")), config.api.timeoutMs));
+    
+    try {
+        const res = await Promise.race([fetchPromise, timeoutPromise]);
+        if (!res.ok) {
+            let errMsg = `HTTP ${res.status}`;
+            try { const errObj = await res.json(); errMsg += ` - ${errObj.error.message}`; } catch(e){}
+            debugEngine.log(`Erro API Carregamentos: ${errMsg}`, "error");
+            debugEngine.updateAPIStatus(false, `(Erro ${res.status})`);
+            throw new Error(errMsg);
+        }
+        const json = await res.json();
+        debugEngine.log(`Carregamentos obtidos com sucesso (${json.values ? json.values.length : 0} linhas).`, "success");
+        debugEngine.updateAPIStatus(true, "(200 OK)"); 
+        return json.values || [];
+    } catch(e) {
+        debugEngine.log(`Exceção no fetchSheetData: ${e.message}`, "error");
+        debugEngine.updateAPIStatus(false, "(Falha)");
+        throw e;
+    }
   },
+  
   async fetchEstoqueData() {
     if(!navigator.onLine) return [];
+    debugEngine.log("Buscando dados de Estoque...", "info");
     try {
       const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.estoqueSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
       const infoJson = await resInfo.json();
-      if(!infoJson.sheets) return [];
+      if(!infoJson.sheets) throw new Error("Aba de estoque não encontrada");
+      
       const visible = infoJson.sheets.filter(s => !s.properties.hidden);
       const now = new Date(); const meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
       let t = visible.find(s => s.properties.title.toUpperCase() === `${meses[now.getMonth()]}/${now.getFullYear()}`) || visible[0];
-      if(!t) return [];
+      if(!t) throw new Error("Nenhuma aba visível no estoque");
+      
       const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.estoqueSheetId}/values/'${encodeURIComponent(t.properties.title)}'!A:F?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`);
-      return (await resData.json()).values || [];
-    } catch (e) { return []; }
+      const dataJson = await resData.json();
+      debugEngine.log("Estoque sincronizado.", "success");
+      return dataJson.values || [];
+    } catch (e) { 
+        debugEngine.log(`Erro ao buscar Estoque: ${e.message}`, "warn");
+        return []; 
+    }
   },
+  
   async fetchHistoricoData() {
     if(!navigator.onLine) return [];
+    debugEngine.log("Buscando Histórico de Cargas...", "info");
     try {
       const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
       const infoJson = await resInfo.json();
@@ -641,10 +693,15 @@ const apiService = {
       if(!targetSheet) return [];
       const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:Z?key=${config.api.key}&valueRenderOption=FORMATTED_VALUE`);
       return (await resData.json()).values || [];
-    } catch (e) { return []; }
+    } catch (e) { 
+        debugEngine.log(`Erro ao buscar Histórico: ${e.message}`, "warn");
+        return []; 
+    }
   },
+  
   async fetchRncData() {
     if(!navigator.onLine) return [];
+    debugEngine.log("Buscando Reclamações (RNC)...", "info");
     try {
       const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
       const infoJson = await resInfo.json();
@@ -653,22 +710,34 @@ const apiService = {
       if(!targetSheet) return [];
       const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:N?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`);
       return (await resData.json()).values || [];
-    } catch (e) { return []; }
+    } catch (e) { 
+        debugEngine.log(`Erro ao buscar RNC: ${e.message}`, "warn");
+        return []; 
+    }
   },
+  
   async fetchGlobalLoc() {
       if(!navigator.onLine) return [];
+      debugEngine.log("Buscando Mapeamento Geográfico...", "info");
       try {
          const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.sheetId}/values/Localizacoes_Lotes!A:E?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`);
+         if(!resData.ok) throw new Error(`HTTP ${resData.status}`);
          const json = await resData.json();
          return json.values || [];
-      } catch(e) { return []; }
+      } catch(e) { 
+         debugEngine.log(`Erro ao buscar Mapa Geográfico: ${e.message} (Aba pode não existir ainda)`, "warn");
+         return []; 
+      }
   },
+  
   async sendDataToAppScript(payload) {
     if(!navigator.onLine) throw new Error("OFFLINE");
+    debugEngine.log(`Enviando POST payload (${payload.tipo})...`, "info");
     try {
       const res = await fetch(config.api.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
       return JSON.parse(await res.text());
     } catch (err) {
+      debugEngine.log(`Erro POST nativo, usando no-cors fallback...`, "warn");
       await fetch(config.api.scriptUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
       return { success: true, status: 'success' };
     }
@@ -757,7 +826,9 @@ const mapController = {
             // Adiciona Ponto Sede Base
             L.circleMarker([-28.6214, -49.0253], {color: 'white', fillColor: 'var(--primary)', fillOpacity: 0.8, radius: 8})
              .bindPopup("<b>🏢 Cysy Mineração</b><br>SC-100, Jaguaruna").addTo(this.map);
-        } catch(e) { debugEngine.log("Leaflet indisponível", "warn"); }
+             
+            debugEngine.log("Leaflet Satélite renderizado com sucesso.", "success");
+        } catch(e) { debugEngine.log("Falha ao inicializar o Mapa Leaflet", "error"); }
     },
 
     toggleFullScreen() {
@@ -784,7 +855,7 @@ const mapController = {
                     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
                     const navUrl = isIOS ? `http://maps.apple.com/?daddr=${lat},${lon}` : `http://maps.google.com/maps?daddr=${lat},${lon}`;
                     
-                    m.bindPopup(`<div style="font-family:'Montserrat'; font-size:14px; text-align:center;"><b>Lote: ${item.lote}</b><br><span style="font-size:11px; font-weight:normal;">${item.produto}</span><br><b style="color:#059669;">Saldo: ${formatTons(item.saldo)}t</b><br><br><a href="${navUrl}" target="_blank" style="display:inline-block; background:#2563EB; color:white; padding:8px 16px; border-radius:12px; text-decoration:none; font-weight:800; font-size:12px; box-shadow:0 4px 0 #1D4ED8;">🚗 NAVEGAR ATÉ AQUI</a></div>`);
+                    m.bindPopup(`<div style="font-family:'Montserrat'; font-size:14px; text-align:center;"><b>Lote: ${item.lote}</b><br><span style="font-size:11px; font-weight:normal;">${item.produto}</span><br><b style="color:#059669;">Saldo: ${formatTons(item.saldo)}t</b><br><br><a href="${navUrl}" target="_blank" style="display:inline-block; background:#2563EB; color:white; padding:8px 16px; border-radius:12px; text-decoration:none; font-weight:800; font-size:12px; box-shadow:0 4px 0 #1D4ED8;">🚗 NAVEGAR</a></div>`);
                     this.markers[item.lote] = m;
                     bounds.push([lat, lon]);
                 }
@@ -1257,7 +1328,10 @@ const appController = {
       uiBuilder.populateSelects(this.lastParsedData, uiBuilder.lotesMap); dashboardEngine.renderExecTable(this.lastParsedData, this.currentPendingPlacas);
       uiBuilder.updateTimestamp(); uiBuilder.updateGlobalUpdateTimestamp();
 
-    } catch (error) { document.getElementById('fatalError').style.display = 'block'; } finally { uiBuilder.toggleLoader(false); }
+    } catch (error) { 
+        document.getElementById('fatalError').style.display = 'block'; 
+        debugEngine.log(`Falha geral no Refresh: ${error.message}`, "error");
+    } finally { uiBuilder.toggleLoader(false); }
   },
 
   async submitFinal(statusLiberacao) {
