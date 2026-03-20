@@ -17,21 +17,21 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap');
 
-  /* TEMA INDUSTRIAL SÓBRIO (ALTO CONTRASTE P/ SOL FORTE) */
+  /* TEMA INDUSTRIAL SÓBRIO */
   :root {
-    --primary: #111827;      /* Muito Escuro (Sóbrio) */
+    --primary: #111827;      
     --primary-hover: #1F2937;
-    --secondary: #2563EB;    /* Azul Profissional */
-    --accent: #38BDF8;       /* Azul Claro (Destaque) */
-    --bg-app: #E2E8F0;       /* Fundo Cinza Aço Claro */
+    --secondary: #2563EB;    
+    --accent: #38BDF8;       
+    --bg-app: #E2E8F0;       
     --bg-card: #FFFFFF;
     --bg-input: #F8FAFC;
     --border: #CBD5E1;
     --text-main: #0F172A;
     --text-muted: #475569;
-    --success: #059669;      /* Verde Escuro (Legível no Sol) */
-    --danger: #DC2626;       /* Vermelho Sangue (Legível) */
-    --warning: #D97706;      /* Laranja Queimado */
+    --success: #059669;      
+    --danger: #DC2626;       
+    --warning: #D97706;      
     --radius-lg: 16px; 
     --radius: 8px; 
     --shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.08);
@@ -54,7 +54,7 @@
   .anim-slide-up { animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   @keyframes pop { 0% { transform: scale(0.95); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
-  /* OVERLAYS (LOGIN E ALERTAS) */
+  /* OVERLAYS */
   .overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.9); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); padding: 20px;}
   .modal-box { background: #FFFFFF; width: 100%; max-width: 400px; padding: 32px; border-radius: 24px; box-shadow: var(--shadow-md); text-align: center; display: flex; flex-direction: column; gap: 16px; animation: pop 0.3s ease forwards;}
   .modal-box h2 { font-family: 'Montserrat', sans-serif; color: var(--primary); font-size: 24px; font-weight: 900; text-transform: uppercase;}
@@ -62,7 +62,7 @@
   .modal-box input { text-align: center; font-size: 18px; font-weight: 700; padding: 16px; border-radius: 12px; border: 2px solid var(--border); background: var(--bg-input);}
   .modal-box input:focus { border-color: var(--secondary); background: #FFFFFF;}
 
-  /* HEADER SÓBRIO E ROBUSTO */
+  /* HEADER */
   header { position: fixed; top: 0; left: 0; width: 100%; background: var(--primary); color: #FFFFFF; z-index: 100; display: flex; flex-direction: column; box-shadow: var(--shadow-md); border-bottom: 4px solid var(--secondary);}
   .header-top { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; gap: 12px; }
   .brand-wrapper { display: flex; align-items: center; gap: 12px; }
@@ -78,7 +78,7 @@
   .tab-btn { flex: 1; padding: 16px; text-align: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 11px; color: #94A3B8; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;}
   .tab-btn.active { color: #FFFFFF; border-bottom-color: var(--accent); background: #374151; }
 
-  /* BOTÕES INDUSTRIAIS */
+  /* BOTÕES */
   button { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; min-height: var(--touch-size); padding: 0 20px; border-radius: var(--radius); border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s ease; text-transform: uppercase; letter-spacing: 0.5px; }
   button:active { transform: translateY(2px); opacity: 0.9;}
   .btn-primary { background: var(--secondary); color: white; }
@@ -86,7 +86,7 @@
   .btn-danger { background: var(--danger); color: white; width: 100%; font-size: 15px;}
   .btn-loc { background: #334155; color: #38BDF8; font-size: 11px; padding: 0 16px; min-height: 40px; border-radius: 6px; }
 
-  /* LAYOUT GERAL & CARDS */
+  /* LAYOUT & CARDS */
   .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; display: flex; flex-direction: column; gap: 20px; }
   .tab-content { display: none; flex-direction: column; gap: 20px; }
   .tab-content.active { display: flex; }
@@ -101,7 +101,7 @@
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--secondary); background: #FFFFFF; }
   input[readonly] { background: #E2E8F0; color: var(--text-muted); border-color: #CBD5E1; cursor: not-allowed; }
 
-  /* WIDGET DO CLIMA E ALERTAS (DASHBOARD) */
+  /* WIDGET DO CLIMA E ALERTAS */
   .weather-widget { background: var(--primary); border-radius: var(--radius-lg); padding: 20px; color: white; display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow-md); position: relative; overflow: hidden;}
   .weather-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; z-index: 2; position: relative;}
   .weather-item { display: flex; flex-direction: column; gap: 2px; }
@@ -111,14 +111,14 @@
   .wa-danger { background: rgba(220, 38, 38, 0.2); color: #FCA5A5; border: 1px solid #DC2626; }
   .wa-success { background: rgba(5, 150, 105, 0.2); color: #6EE7B7; border: 1px solid #059669; }
 
-  /* FOTOS COM EFEITO DASHED */
+  /* FOTOS */
   .file-upload-wrapper { position: relative; width: 100%; height: 120px; border: 2px dashed #94A3B8; border-radius: var(--radius); background: #F8FAFC; display: flex; align-items: center; justify-content: center; cursor: pointer;}
   .file-upload-wrapper input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;}
   .img-preview { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 12px; font-weight: 800; text-transform: uppercase; background-size: cover; background-position: center; flex-direction: column; gap: 8px;}
   .img-preview span { background: #FFFFFF; padding: 6px 12px; border-radius: 20px; box-shadow: var(--shadow-soft); z-index: 2; border: 1px solid var(--border);}
   .img-preview.has-image span { background: var(--primary); color: white; border-color: var(--primary);}
 
-  /* CORREÇÃO GRID RESPONSIVA ALTO CONTRASTE */
+  /* GRIDS RESPONSIVOS */
   .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); scrollbar-width: none; }
   .unified-grid { min-width: 850px; display: flex; flex-direction: column; }
   .grid-header { display: grid; background: #F1F5F9; border-bottom: 2px solid var(--border); }
@@ -130,7 +130,7 @@
   footer { margin-top: 40px; padding: 20px; text-align: center; color: #94A3B8; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; opacity: 0.6; }
   footer a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 10px; background: rgba(0,0,0,0.05); margin-top: 8px;}
 
-  /* MÍDIAS QUERIES - MOBILE REPARADO */
+  /* MÍDIAS QUERIES - MOBILE */
   @media (max-width: 768px) {
     body { padding-top: 155px; }
     .header-top { flex-direction: column; align-items: flex-start; }
@@ -228,7 +228,7 @@
   <div class="container">
 
     <div id="fatalError" style="display:none; background: var(--danger-bg); border: 2px solid var(--danger); border-radius: var(--radius-lg); padding: 24px; text-align: center; color: var(--danger); font-family: 'Montserrat'; font-weight: 800; font-size: 16px;">
-      ❌ Falha de Comunicação.<br><span style="font-size:12px; color:#7F1D1D;">A planilha pode estar bloqueada, limite de acessos atingido ou você está sem internet.</span><br>
+      ❌ Falha de Comunicação com a Base de Dados.<br><span style="font-size:12px; color:#7F1D1D;">Verifique sua internet ou se a planilha está configurada para leitura pública.</span><br>
       <button onclick="appController.handleRefresh()" style="margin-top: 12px; background: var(--danger); color: white; border-radius: 8px;">🔄 TENTAR NOVAMENTE</button>
     </div>
 
@@ -394,7 +394,7 @@
 
 <script>
 // ==========================================
-// 1. CONFIGURAÇÕES GERAIS E API GROQ
+// 1. CONFIGURAÇÕES GERAIS 
 // ==========================================
 const config = {
   api: {
@@ -404,7 +404,7 @@ const config = {
     historicoSheetId: '1KAOCFX7_raD0YMhA3yPh8HjS1fF9TlJWp9TYGACCMCI',
     rncSheetId: '1lyWfTaAkrgMWB0JrzbiPt9RIz7jB1WdCe2A9PwnRivY',
     key: 'AIzaSyAdzZznAPDRlGLqbT-8AAVSKslZYfr7Jc0',
-    range: 'Carregamento!A:AF', // Expandido para ler todas as colunas
+    range: 'Carregamento!A:AF', 
     timeoutMs: 15000,
     groqKey: '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'
   },
@@ -745,12 +745,18 @@ const mapController = {
     initLeaflet() {
         if(!document.getElementById('patioMap') || this.map) return;
         try {
-            this.map = L.map('patioMap').setView([-28.6214, -49.0253], 18);
-            // Satélite do Google (Modo Híbrido com ruas e rótulos)
+            // Inicializa focado em Cysy Mineração (Jaguaruna)
+            this.map = L.map('patioMap').setView([-28.6214, -49.0253], 17);
+            
+            // Satélite Híbrido Google (Satélite + Nomes)
             L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
                 maxZoom: 21,
                 attribution: '© Google Maps'
             }).addTo(this.map);
+
+            // Adiciona Ponto Sede Base
+            L.circleMarker([-28.6214, -49.0253], {color: 'white', fillColor: 'var(--primary)', fillOpacity: 0.8, radius: 8})
+             .bindPopup("<b>🏢 Cysy Mineração</b><br>SC-100, Jaguaruna").addTo(this.map);
         } catch(e) { debugEngine.log("Leaflet indisponível", "warn"); }
     },
 
