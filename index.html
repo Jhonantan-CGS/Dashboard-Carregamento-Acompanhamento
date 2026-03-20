@@ -134,7 +134,7 @@
   @media (max-width: 768px) {
     body { padding-top: 155px; }
     .header-top { flex-direction: column; align-items: flex-start; }
-    .live-info { display: none; } /* Oculta clima no top para não sobrepor, exibe apenas na aba Painel */
+    .live-info { display: none; } 
     
     .unified-grid { min-width: 100% !important; display: flex; flex-direction: column; gap: 12px; }
     .grid-header { display: none !important; }
@@ -143,7 +143,7 @@
     .grid-cell:last-child { border-bottom: none; }
     .grid-cell::before { content: attr(data-label); font-size: 10px; font-weight: 900; color: var(--secondary); text-transform: uppercase; margin-bottom: 4px; display: block;}
     
-    #patioMap { height: 65vh; min-height: 400px; }
+    #patioMap { height: 60vh; min-height: 400px; }
   }
 
   /* CHECKLIST */
@@ -167,15 +167,25 @@
   .carga-placa { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 900; color: var(--primary); background: #FFFFFF; border: 2px solid var(--border); border-radius: 8px; padding: 4px 12px; letter-spacing: 1px;}
   .carga-cliente { font-size: 14px; font-weight: 800; color: var(--text-main); flex: 1; text-transform: uppercase;}
 
-  /* MAPA LEAFLET */
-  #patioMap { width: 100%; height: 600px; border-radius: var(--radius-lg); border: 4px solid var(--primary); box-shadow: var(--shadow-md); z-index: 1;}
+  /* TELA CHEIA DO MAPA (FULLSCREEN) */
+  .map-fullscreen {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 100000 !important;
+      border-radius: 0 !important;
+      border: none !important;
+      margin: 0 !important;
+  }
 </style>
 </head>
 <body>
 
   <div id="loginOverlay" class="overlay">
       <div class="modal-box">
-          <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Delivery%20truck/3D/delivery_truck_3d.png" width="60" style="margin: 0 auto;">
+          <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Delivery%20truck/3D/delivery_truck_3d.png" width="60" style="margin: 0 auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">
           <h2>Acesso Cysy Log</h2>
           <p>Informe <strong>Nome e Sobrenome</strong> para habilitar as funções de rastreabilidade, mapa offline e alertas.</p>
           <input type="text" id="loginNameInput" placeholder="Ex: Jhonantan Cardoso" autocomplete="off">
@@ -185,7 +195,7 @@
 
   <div id="globalAlertOverlay" class="overlay">
       <div class="modal-box" id="alertGlobalBox" style="border: 2px solid var(--danger); background: var(--danger-bg);">
-          <div style="font-size: 50px; margin-bottom: 8px;">🚨</div>
+          <div style="font-size: 50px; margin-bottom: 8px; animation: pop 1s infinite;">🚨</div>
           <h2 style="color: var(--danger);">ALERTA DE ESTOQUE</h2>
           <p id="globalAlertMsg" style="color: #7F1D1D; font-weight: 700;">Você tem lotes sem localização mapeada.</p>
           <button class="btn-danger" onclick="document.getElementById('globalAlertOverlay').style.display='none'; uiBuilder.switchTab(event, 'mapa'); mapController.listarSemLocalizacao();" style="height: 56px;">🗺️ VER MAPA DE LOTES</button>
@@ -218,7 +228,8 @@
   <div class="container">
 
     <div id="fatalError" style="display:none; background: var(--danger-bg); border: 2px solid var(--danger); border-radius: var(--radius-lg); padding: 24px; text-align: center; color: var(--danger); font-family: 'Montserrat'; font-weight: 800; font-size: 16px;">
-      ❌ Falha de Comunicação.<br><span style="font-size:12px; color:#7F1D1D;">Verifique se a planilha está pública para leitura ou sua conexão de rede.</span>
+      ❌ Falha de Comunicação.<br><span style="font-size:12px; color:#7F1D1D;">A planilha pode estar bloqueada, limite de acessos atingido ou você está sem internet.</span><br>
+      <button onclick="appController.handleRefresh()" style="margin-top: 12px; background: var(--danger); color: white; border-radius: 8px;">🔄 TENTAR NOVAMENTE</button>
     </div>
 
     <div id="tab-dash" class="tab-content active">
@@ -324,7 +335,10 @@
             <button onclick="mapController.listarSemLocalizacao()" style="background: var(--warning); color: #FFF; font-size: 11px; padding: 8px 12px; min-height: auto;">⚠️ Pendentes</button>
         </div>
         
-        <div id="patioMap"></div>
+        <div id="patioMapContainer" style="position: relative; width: 100%; border-radius: var(--radius-lg); border: 4px solid var(--primary); box-shadow: var(--shadow-md); z-index: 1; overflow: hidden; background: #0F172A;">
+            <div id="patioMap" style="width: 100%; height: 500px;"></div>
+            <button onclick="mapController.toggleFullScreen()" style="position: absolute; top: 12px; right: 12px; z-index: 1000; background: rgba(15,23,42,0.9); color: white; border-radius: 8px; padding: 8px 16px; font-size: 12px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px);">⛶ TELA CHEIA</button>
+        </div>
         <p style="text-align:center; font-size:11px; font-weight: 700; color:var(--text-muted); margin-top:8px; margin-bottom:20px;">👆 Arraste e dê zoom para navegar pelo pátio via satélite.</p>
 
         <div class="grid-form" style="margin-bottom: 20px;">
@@ -384,14 +398,13 @@
 // ==========================================
 const config = {
   api: {
-    // ATENÇÃO: Verifique se este Script URL é o mais recente que você implantou!
     scriptUrl: 'https://script.google.com/macros/s/AKfycbwPCWcAgb90Esm31atFZNAkHf0QYa0Qeg9QVMjj6v4kuzS8yq2NF43xAdo2IKOgUM8Z/exec', 
     sheetId: '1bF_9A1P12OAITTcYskNsNRJ8ti_PXjNC3ti7ij0TVw0',
     estoqueSheetId: '1ubMI0M0znO3DTSx4w3dIM8AnQZ5KaJc22ZMyC_oU63c',
     historicoSheetId: '1KAOCFX7_raD0YMhA3yPh8HjS1fF9TlJWp9TYGACCMCI',
     rncSheetId: '1lyWfTaAkrgMWB0JrzbiPt9RIz7jB1WdCe2A9PwnRivY',
     key: 'AIzaSyAdzZznAPDRlGLqbT-8AAVSKslZYfr7Jc0',
-    range: 'Carregamento!A1:Q20',
+    range: 'Carregamento!A:AF', // Expandido para ler todas as colunas
     timeoutMs: 15000,
     groqKey: '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'
   },
@@ -464,7 +477,7 @@ const envManager = {
 };
 
 // ==========================================
-// MÓDULO: LOGIN OBRIGATÓRIO (PEDINDO PERMISSÕES)
+// MÓDULO: LOGIN OBRIGATÓRIO E PERMISSÕES
 // ==========================================
 const loginManager = {
     init() {
@@ -479,10 +492,8 @@ const loginManager = {
         document.getElementById('loginOverlay').style.display = 'none';
         this.setFields(name);
         
-        // Pede notificações e GPS
         if ("Notification" in window && Notification.permission === "default") { Notification.requestPermission(); }
         if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(()=>{},()=>{}); }
-        // Persistência
         if (navigator.storage && navigator.storage.persist) { await navigator.storage.persist(); }
     },
     setFields(name) {
@@ -539,6 +550,8 @@ const swManager = {
       const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => clients.claim()); self.addEventListener('fetch', e => { if(e.request.method === 'GET') e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))); });`;
       const blob = new Blob([swCode], {type: 'application/javascript'});
       navigator.serviceWorker.register(URL.createObjectURL(blob)).then(()=>debugEngine.updateSWStatus(true)).catch(()=>debugEngine.updateSWStatus(false));
+    } else {
+      debugEngine.updateSWStatus(false);
     }
   }
 };
@@ -557,7 +570,7 @@ const debugEngine = {
   },
   updateAPIStatus(connected, detail = '') { const el = document.getElementById('dbgStatusAPI'); if(el) el.innerHTML = connected ? `🟢 API Conectada <span style="font-size:10px;">${detail}</span>` : `🔴 API Offline <span style="font-size:10px;">${detail}</span>`; },
   updateNetStatus(online) { const el = document.getElementById('dbgStatusNet'); if(el) el.innerHTML = online ? `🟢 Online` : `🔴 Offline`; },
-  updateSWStatus(active) { const el = document.getElementById('dbgStatusSW'); if (el) el.innerHTML = active ? `🟢 SW Ativo` : `🔴 SW Inativo`; },
+  updateSWStatus(active) { const el = document.getElementById('dbgStatusSW'); if (el) el.innerHTML = active ? `🟢 SW Ativo` : `🔴 SW (Bloqueado pelo Iframe do Google)`; },
   togglePanel() { this.isOpen = !this.isOpen; const p = document.getElementById('debugPanel'); if(p) p.style.right = this.isOpen ? '0' : '-300px'; }
 };
 
@@ -594,44 +607,61 @@ const alertManager = {
 };
 
 // ==========================================
-// MÓDULO: API E DADOS (GOOGLE SHEETS)
+// MÓDULO: API E DADOS (GOOGLE SHEETS BLINDADO)
 // ==========================================
 const apiService = {
   async fetchSheetData() {
     if(!navigator.onLine) throw new Error("OFFLINE");
     const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.sheetId}/values/${config.api.range}?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`);
-    if (!res.ok) throw new Error("Erro HTTP");
-    debugEngine.updateAPIStatus(true, "(200 OK)"); return (await res.json()).values;
+    if (!res.ok) throw new Error("Erro HTTP " + res.status);
+    const json = await res.json();
+    debugEngine.updateAPIStatus(true, "(200 OK)"); return json.values || [];
   },
   async fetchEstoqueData() {
-    if(!navigator.onLine) return null;
+    if(!navigator.onLine) return [];
     try {
-      const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.estoqueSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
-      const visible = (await res.json()).sheets.filter(s => !s.properties.hidden);
+      const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.estoqueSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
+      const infoJson = await resInfo.json();
+      if(!infoJson.sheets) return [];
+      const visible = infoJson.sheets.filter(s => !s.properties.hidden);
       const now = new Date(); const meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
       let t = visible.find(s => s.properties.title.toUpperCase() === `${meses[now.getMonth()]}/${now.getFullYear()}`) || visible[0];
-      return (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.estoqueSheetId}/values/'${encodeURIComponent(t.properties.title)}'!A:F?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`)).json()).values;
-    } catch (e) { return null; }
+      if(!t) return [];
+      const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.estoqueSheetId}/values/'${encodeURIComponent(t.properties.title)}'!A:F?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`);
+      return (await resData.json()).values || [];
+    } catch (e) { return []; }
   },
   async fetchHistoricoData() {
-    if(!navigator.onLine) return null;
+    if(!navigator.onLine) return [];
     try {
-      const targetSheet = (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`)).json()).sheets.filter(s => !s.properties.hidden)[0]; 
-      return (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:Z?key=${config.api.key}&valueRenderOption=FORMATTED_VALUE`)).json()).values;
-    } catch (e) { return null; }
+      const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
+      const infoJson = await resInfo.json();
+      if(!infoJson.sheets) return [];
+      const targetSheet = infoJson.sheets.filter(s => !s.properties.hidden)[0]; 
+      if(!targetSheet) return [];
+      const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:Z?key=${config.api.key}&valueRenderOption=FORMATTED_VALUE`);
+      return (await resData.json()).values || [];
+    } catch (e) { return []; }
   },
   async fetchRncData() {
-    if(!navigator.onLine) return null;
+    if(!navigator.onLine) return [];
     try {
-      const targetSheet = (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`)).json()).sheets.filter(s => !s.properties.hidden).find(s => s.properties.title.toUpperCase().includes('RNC')) || (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`)).json()).sheets[0];
-      return (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:N?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`)).json()).values;
-    } catch (e) { return null; }
+      const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
+      const infoJson = await resInfo.json();
+      if(!infoJson.sheets) return [];
+      const targetSheet = infoJson.sheets.filter(s => !s.properties.hidden).find(s => s.properties.title.toUpperCase().includes('RNC')) || infoJson.sheets[0];
+      if(!targetSheet) return [];
+      const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:N?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`);
+      return (await resData.json()).values || [];
+    } catch (e) { return []; }
   },
   async fetchGlobalLoc() {
-      if(!navigator.onLine) return null;
+      if(!navigator.onLine) return [];
       try {
-         return (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.sheetId}/values/Localizacoes_Lotes!A:E?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`)).json()).values;
-      } catch(e) { return null; }
+         const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.sheetId}/values/Localizacoes_Lotes!A:E?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`);
+         const json = await resData.json();
+         return json.values || [];
+      } catch(e) { return []; }
   },
   async sendDataToAppScript(payload) {
     if(!navigator.onLine) throw new Error("OFFLINE");
@@ -647,7 +677,7 @@ const apiService = {
 
 const dataParser = {
   parse(rawValues) {
-    const parsed = []; if (!rawValues || rawValues.length === 0) return parsed;
+    const parsed = []; if (!Array.isArray(rawValues) || rawValues.length === 0) return parsed;
     for (let i = 2; i < rawValues.length; i++) {
       const row = rawValues[i]; if (!row) continue;
       const cliente = row[8] ? String(row[8]).trim() : '';
@@ -655,7 +685,9 @@ const dataParser = {
     } return parsed;
   },
   parseEstoque(values) {
-    const map = {}; let ch = null; const flat = []; 
+    const map = {}; const flat = []; 
+    if (!Array.isArray(values)) return { map, flat };
+    let ch = null; 
     for (let i = 0; i < values.length; i++) {
       const row = values[i]; if (!row || !row[0]) continue;
       const colA = String(row[0]).trim();
@@ -672,7 +704,7 @@ const dataParser = {
     } return { map, flat };
   },
   parseRnc(values) {
-    const rncs = []; if (!values || values.length <= 1) return rncs;
+    const rncs = []; if (!Array.isArray(values) || values.length <= 1) return rncs;
     for (let i = 1; i < values.length; i++) {
         const row = values[i]; if (!row) continue;
         rncs.push({ data: String(row[1] || '').trim(), cliente: String(row[2] || '').trim().toUpperCase(), transportador: String(row[3] || '').trim().toUpperCase(), produto: String(row[7] || '').trim(), descricao: String(row[8] || '').trim(), acaoImediata: String(row[11] || '').trim() });
@@ -704,7 +736,7 @@ const truckStatusManager = {
 };
 
 // ==========================================
-// MÓDULO: MAPA DO PÁTIO, LEAFLET E GROQ IA (MODO SATÉLITE)
+// MÓDULO: MAPA DO PÁTIO E LEAFLET SATÉLITE
 // ==========================================
 const mapController = {
     locDB: JSON.parse(localStorage.getItem('cysyLocations') || '{}'),
@@ -713,15 +745,19 @@ const mapController = {
     initLeaflet() {
         if(!document.getElementById('patioMap') || this.map) return;
         try {
-            // Centro em Jaguaruna SC
             this.map = L.map('patioMap').setView([-28.6214, -49.0253], 18);
-            
-            // Usando Visão de Satélite do Google Maps (Alta Resolução)
-            L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            // Satélite do Google (Modo Híbrido com ruas e rótulos)
+            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
                 maxZoom: 21,
-                attribution: '© Google Satellite'
+                attribution: '© Google Maps'
             }).addTo(this.map);
         } catch(e) { debugEngine.log("Leaflet indisponível", "warn"); }
+    },
+
+    toggleFullScreen() {
+        const container = document.getElementById('patioMapContainer');
+        container.classList.toggle('map-fullscreen');
+        setTimeout(() => { if(this.map) this.map.invalidateSize(); }, 300);
     },
 
     renderPins() {
@@ -748,11 +784,13 @@ const mapController = {
                 }
             }
         });
-        if(bounds.length > 0) this.map.fitBounds(bounds, {padding: [50, 50]});
+        if(bounds.length > 0) {
+            try { this.map.fitBounds(bounds, {padding: [50, 50]}); } catch(e){}
+        }
     },
 
     syncFromGlobal(globalData) {
-        if(!globalData) return;
+        if(!globalData || !Array.isArray(globalData)) return;
         let changed = false;
         for(let i=1; i<globalData.length; i++) {
             const lote = String(globalData[i][0]).trim();
@@ -786,18 +824,18 @@ const mapController = {
         if(lotesAchados.length !== 1) return alert("Refine a busca para encontrar apenas 1 lote.");
         const lote = lotesAchados[0].lote;
 
-        if (!navigator.geolocation) return alert("GPS não suportado.");
-        uiBuilder.toggleLoader(true, "Buscando satélites...");
+        if (!navigator.geolocation) return alert("GPS não suportado pelo navegador.");
+        uiBuilder.toggleLoader(true, "Buscando satélites precisos...");
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 uiBuilder.toggleLoader(false);
-                const lat = pos.coords.latitude.toFixed(5); const lon = pos.coords.longitude.toFixed(5);
+                const lat = pos.coords.latitude.toFixed(6); const lon = pos.coords.longitude.toFixed(6);
                 const desc = prompt("GPS Capturado! Adicione uma descrição extra do local (Opcional):") || "Localizado pelo GPS";
                 this.salvarLocalizacaoServer(lote, lat, lon, desc);
                 alert(`✅ GPS salvo com sucesso!`);
                 this.buscarNaLista();
             },
-            (err) => { uiBuilder.toggleLoader(false); alert("Erro de GPS. Ative a localização do dispositivo no navegador."); },
+            (err) => { uiBuilder.toggleLoader(false); alert("Erro de GPS. Autorize a localização no seu navegador."); },
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
     },
@@ -805,7 +843,7 @@ const mapController = {
     abrirIA(loteBusca) {
         if(!loteBusca || loteBusca.length < 3) return alert("Digite um lote na busca primeiro!");
         const lotesAchados = this.encontrarLotes(loteBusca);
-        if(lotesAchados.length !== 1) return alert("A IA precisa mapear 1 lote por vez. Refine a busca.");
+        if(lotesAchados.length !== 1) return alert("A IA mapeia 1 lote por vez. Refine a busca.");
         groqManager.iniciar(lotesAchados[0].lote);
     },
 
@@ -827,7 +865,7 @@ const mapController = {
         
         const matches = this.encontrarLotes(termoRaw);
         if (matches.length === 0) {
-            document.getElementById('mapaResultContainer').innerHTML = '<div style="padding: 24px; text-align: center; color: var(--danger); font-weight: bold;">Nenhum lote encontrado.</div>';
+            document.getElementById('mapaResultContainer').innerHTML = '<div style="padding: 24px; text-align: center; color: var(--danger); font-weight: bold;">Nenhum lote encontrado no estoque.</div>';
             wrapper.style.display = 'block'; return;
         }
 
@@ -882,7 +920,7 @@ const groqManager = {
             if(m.role === 'system') return;
             const div = document.createElement('div'); 
             div.style.padding = '12px'; div.style.borderRadius = '12px'; div.style.fontSize = '12px'; div.style.fontWeight = '600'; div.style.lineHeight = '1.5';
-            if (m.role === 'assistant') { div.style.background = '#334155'; div.style.borderLeft = '4px solid var(--accent)'; } 
+            if (m.role === 'assistant') { div.style.background = '#1E293B'; div.style.borderLeft = '4px solid var(--accent)'; } 
             else { div.style.background = 'var(--secondary)'; div.style.alignSelf = 'flex-end'; div.style.borderRight = '4px solid white'; }
             div.innerText = m.content; box.appendChild(div);
         });
@@ -892,7 +930,7 @@ const groqManager = {
         const inp = document.getElementById('groqInput'); const texto = inp.value.trim(); if(!texto) return;
         this.messages.push({role: "user", content: texto}); inp.value = ''; this.renderChat();
         
-        const loadingDiv = document.createElement('div'); loadingDiv.style.padding = '12px'; loadingDiv.style.background = '#334155'; loadingDiv.innerText = 'Pensando... ⏳'; document.getElementById('groqChatBox').appendChild(loadingDiv);
+        const loadingDiv = document.createElement('div'); loadingDiv.style.padding = '12px'; loadingDiv.style.background = '#1E293B'; loadingDiv.innerText = 'Pensando... ⏳'; document.getElementById('groqChatBox').appendChild(loadingDiv);
         
         try {
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -948,7 +986,7 @@ const dashboardEngine = {
       const clientesStr = [...new Set(itens.map(i => i.cliente))].join(' • ');
 
       let rncMatches = [];
-      if (uiBuilder.rncCargas) {
+      if (uiBuilder.rncCargas && Array.isArray(uiBuilder.rncCargas)) {
           const bc = this.limparNomesGenericos(clientesStr.toUpperCase()); const bo = this.limparNomesGenericos(obsUnificado.toUpperCase());
           uiBuilder.rncCargas.forEach(rnc => {
               const rC = this.limparNomesGenericos(rnc.cliente); const rT = this.limparNomesGenericos(rnc.transportador);
@@ -978,7 +1016,7 @@ const dashboardEngine = {
       let infoHTML = '';
       if(statusInteligente) {
           infoHTML = `
-            <div style="background: ${statusInteligente.bg}; border-left: 6px solid ${statusInteligente.color}; padding: 16px; margin: 16px 24px 0; border-radius: 12px;">
+            <div style="background: ${statusInteligente.bg}; border-left: 6px solid ${statusInteligente.color}; padding: 16px; margin: 16px 24px 0; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-weight: 900; color: ${statusInteligente.color}; font-size: 14px;">${statusInteligente.label}</span>
                     ${statusInteligente.code !== 'FATURAMENTO' ? `<button onclick="truckStatusManager.confirmarCarregamentoManual('${escapeHTML(placa)}')" style="background:white; color:${statusInteligente.color}; border:2px solid ${statusInteligente.color}; font-size:11px; padding:6px 12px; min-height:auto;">✔ CONFIRMAR</button>` : ''}
@@ -1014,7 +1052,7 @@ const uiBuilder = {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
     if(event) event.currentTarget.classList.add('active'); 
     document.getElementById(`tab-${tabId}`).classList.add('active'); 
-    if(tabId === 'mapa') { setTimeout(() => { mapController.initLeaflet(); mapController.renderPins(); }, 400); }
+    if(tabId === 'mapa') { setTimeout(() => { mapController.initLeaflet(); if(mapController.map) mapController.map.invalidateSize(); mapController.renderPins(); }, 400); }
   },
   updateTimestamp() { document.getElementById('inpDataHora').value = new Date().toLocaleString('pt-BR'); document.getElementById('perdaDataHora').value = new Date().toLocaleString('pt-BR'); },
   updateGlobalUpdateTimestamp() { document.getElementById('lastUpdateText').innerText = `Atualizado: ${new Date().toLocaleTimeString('pt-BR')}`; },
@@ -1039,7 +1077,7 @@ const uiBuilder = {
   handleImageUpload(event, previewId, hiddenInputId) {
       const file = event.target.files[0]; const preview = document.getElementById(previewId); const hiddenInput = document.getElementById(hiddenInputId);
       if (!file) { preview.classList.remove('has-image'); preview.style.backgroundImage = 'none'; hiddenInput.value = ''; return; }
-      preview.innerHTML = '<span>Carregando...</span>';
+      preview.innerHTML = '<span>Carregando 3D...</span>';
       const reader = new FileReader();
       reader.onload = (e) => {
           const img = new Image(); img.onload = () => {
@@ -1145,7 +1183,7 @@ const uiBuilder = {
 
   onLoteChange(index) {
     const loteSelect = document.getElementById(`selLote_${index}`); const opt = loteSelect.options[loteSelect.selectedIndex];
-    document.getElementById(`lblSaldo_${index}`).innerText = opt && opt.dataset.saldo ? `Disponível: ${formatTons(opt.dataset.saldo)}t` : ''; this.recalcularLinhas(index);
+    document.getElementById(`lblSaldo_${index}`).innerText = opt && opt.dataset.saldo ? `Saldo: ${formatTons(opt.dataset.saldo)}t` : ''; this.recalcularLinhas(index);
   },
 
   recalcularLinhas(changedIndex) {
@@ -1284,7 +1322,7 @@ const perdasController = {
   populateGlobais() { const dl = document.getElementById('listaLotesGlobais'); if (dl && uiBuilder.lotesFlat) { dl.innerHTML = uiBuilder.lotesFlat.map(item => `<option value="${escapeHTML(item.lote)}">${escapeHTML(item.produto)}</option>`).join(''); } },
   onPerdaProdChange(index) {
       const pVal = normalizeName(document.getElementById(`perdaProd_${index}`).value);
-      if (pVal && !uiBuilder.lotesMap[pVal]) { document.getElementById(`perdaProd_${index}`).style.borderColor = 'var(--danger)'; } 
+      if (pVal && (!uiBuilder.lotesMap || !uiBuilder.lotesMap[pVal])) { document.getElementById(`perdaProd_${index}`).style.borderColor = 'var(--danger)'; } 
       else { document.getElementById(`perdaProd_${index}`).style.borderColor = 'var(--success)'; if(!document.getElementById(`perdaLote_${index}`).value) { document.getElementById(`perdaSaldo_${index}`).innerText = 'Digite o lote para ver saldo...'; document.getElementById(`perdaSaldo_${index}`).style.color = 'var(--text-muted)'; } }
       this.updateGridVisibility();
   },
