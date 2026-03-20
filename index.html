@@ -262,9 +262,9 @@
       </div>
     </div>
     <div class="tabs">
-      <div class="tab-btn active" onclick="uiBuilder.switchTab(event, 'op')">📋 Operação e Checklist</div>
+      <div class="tab-btn active" onclick="uiBuilder.switchTab(event, 'dash')">📊 🚛 Carregamentos Pendentes do Dia</div>
+      <div class="tab-btn" onclick="uiBuilder.switchTab(event, 'op')">📋 Liberação de Carregamento</div>
       <div class="tab-btn" onclick="uiBuilder.switchTab(event, 'perdas')">📉 Baixa de Perdas</div>
-      <div class="tab-btn" onclick="uiBuilder.switchTab(event, 'dash')">📊 Painel Executivo</div>
       <div class="tab-btn" onclick="uiBuilder.switchTab(event, 'consulta')">🔍 Consulta de Lotes</div>
     </div>
   </header>
@@ -276,7 +276,17 @@
       <p id="fatalDesc">Verifique sua conexão ou as configurações do Apps Script.</p>
     </div>
 
-    <div id="tab-op" class="tab-content active">
+    <div id="tab-dash" class="tab-content active">
+      <div id="bannerContainer" class="anim-slide-up" style="animation-delay: 0.1s;"></div>
+      <section class="section anim-slide-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
+        <div class="section-header" style="padding: 24px 24px 0 24px; border:none; margin-bottom: 0;">
+          <h2><span>🚛</span> Carregamentos Pendentes do Dia</h2>
+        </div>
+        <div id="tabelaDiariaContainer"></div>
+      </section>
+    </div>
+
+    <div id="tab-op" class="tab-content">
       <section class="section anim-slide-up" style="animation-delay: 0.1s;">
         <div class="section-header">
           <h2><span>🏢</span> Dados da Operação e Destinos</h2>
@@ -417,16 +427,6 @@
         <div class="grid-form" style="margin-top: 32px;">
           <button class="btn-success" onclick="perdasController.submitPerda()" style="height: 60px;">✅ REGISTRAR BAIXA NO SISTEMA</button>
         </div>
-      </section>
-    </div>
-
-    <div id="tab-dash" class="tab-content">
-      <div id="bannerContainer" class="anim-slide-up" style="animation-delay: 0.1s;"></div>
-      <section class="section anim-slide-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
-        <div class="section-header" style="padding: 24px 24px 0 24px; border:none; margin-bottom: 0;">
-          <h2><span>🚛</span> Carregamentos Pendentes do Dia</h2>
-        </div>
-        <div id="tabelaDiariaContainer"></div>
       </section>
     </div>
 
@@ -1689,7 +1689,8 @@ const uiBuilder = {
       fe.style.display = 'none'; 
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
-      const firstTabContent = document.getElementById('tab-op'); if(firstTabContent) firstTabContent.classList.add('active'); 
+      // Agora o fallback da aba ativa inicial é o Painel Executivo (tab-dash)
+      const firstTabContent = document.getElementById('tab-dash'); if(firstTabContent) firstTabContent.classList.add('active'); 
       const firstTabBtn = document.querySelector('.tab-btn'); if(firstTabBtn) firstTabBtn.classList.add('active'); 
     }
   },
