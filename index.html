@@ -17,7 +17,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap');
 
-  /* TEMA INDUSTRIAL SÓBRIO */
+  /* TEMA GERAL */
   :root {
     --primary: #111827;      
     --primary-hover: #1F2937;
@@ -30,8 +30,13 @@
     --text-main: #0F172A;
     --text-muted: #475569;
     --success: #059669;      
+    --success-bg: #ECFDF5;
     --danger: #DC2626;       
+    --danger-bg: #FEF2F2;
     --warning: #D97706;      
+    --warning-bg: #FFFBEB;
+    --info: #0284C7;
+    --info-bg: #E0F2FE;
     --radius-lg: 16px; 
     --radius: 8px; 
     --shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.08);
@@ -118,21 +123,59 @@
   .img-preview span { background: #FFFFFF; padding: 6px 12px; border-radius: 20px; box-shadow: var(--shadow-soft); z-index: 2; border: 1px solid var(--border);}
   .img-preview.has-image span { background: var(--primary); color: white; border-color: var(--primary);}
 
-  /* GRIDS RESPONSIVOS */
+  /* GRIDS RESPONSIVOS E TABELAS */
   .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); scrollbar-width: none; }
   .unified-grid { min-width: 850px; display: flex; flex-direction: column; }
   .grid-header { display: grid; background: #F1F5F9; border-bottom: 2px solid var(--border); }
   .grid-header > div { padding: 12px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;}
   .grid-row { display: grid; border-bottom: 1px solid var(--border); }
   .grid-cell { padding: 12px; display: flex; flex-direction: column; justify-content: center; }
+
+  /* ==========================================
+     PAINEL EXECUTIVO E BANNERS (CSS RESTAURADO)
+  ========================================== */
+  .smart-banner { padding: 20px; border-radius: var(--radius); margin-bottom: 16px; display: flex; align-items: flex-start; gap: 16px; }
+  .banner-icon { font-size: 28px; }
+  .banner-content h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .banner-content p { font-size: 14px; opacity: 0.9; }
+  .banner-danger { background: var(--danger-bg); border: 1px solid var(--danger); color: #991B1B; }
+  .banner-success { background: var(--success-bg); border: 1px solid var(--success); color: #065F46; }
+
+  .carga-cards-grid { display: flex; flex-direction: column; gap: 20px; padding: 20px 24px 24px; }
+  .carga-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: all 0.4s ease;}
+  .carga-card.bloqueado { border-color: var(--danger); border-left: 4px solid var(--danger); }
+  .carga-card.liberado  { border-left: 4px solid var(--success); }
+  .carga-card-header { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: var(--bg-app); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .carga-placa { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--primary); background: #FFFFFF; border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; letter-spacing: 2px; display: flex; align-items: center; gap: 8px;}
   
-  /* MARCA D'ÁGUA NO RODAPÉ */
-  footer { margin-top: 40px; padding: 20px; text-align: center; color: #94A3B8; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; opacity: 0.6; }
-  footer a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 10px; background: rgba(0,0,0,0.05); margin-top: 8px;}
+  .time-badge { font-size: 14px; font-weight: 800; padding: 4px 8px; border-radius: 4px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main); }
+  .time-badge.alert { background: var(--warning-bg); color: #B45309; border-color: var(--warning); }
+  .time-badge.late { background: var(--danger-bg); color: #991B1B; border-color: var(--danger); }
+  
+  .badge-especial { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 4px; }
+  .badge-palete { background: #FFF7ED; color: #9A3412; border-color: #FDBA74; }
+  .badge-filme { background: #F0FDF4; color: #166534; border-color: #86EFAC; }
+  .badge-py { background: #EEF2FF; color: #3730A3; border-color: #A5B4FC; }
+
+  .carga-cliente { font-size: 15px; font-weight: 700; color: var(--text-main); flex: 1; display:flex; flex-direction:column; gap:4px;}
+  .carga-badges { display:flex; gap: 6px; flex-wrap: wrap; }
+  .carga-card-status { margin-left: auto; }
+  .carga-card-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .produto-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px 20px; align-items: center; padding: 12px 16px; background: var(--bg-input); border-radius: var(--radius); border: 1px solid var(--border); }
+  .produto-nome { font-size: 14px; font-weight: 600; color: var(--text-main); }
+  .produto-qtd  { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--secondary); }
+  .produto-label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px; }
+  .carga-card-footer { padding: 12px 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; background: var(--bg-app); }
+  
+  .badge-verde { background: var(--success-bg); color: #065F46; border: 1px solid var(--success); padding: 4px 10px; border-radius: 4px; font-weight: 800; font-size: 11px; }
+  .badge-vermelho{ background: var(--danger-bg);  color: #991B1B;  border: 1px solid var(--danger); padding: 4px 10px; border-radius: 4px; font-weight: 800; font-size: 11px; }
+
+  .btn-status-manual { background: #FFFFFF; border: 1px solid var(--border); color: var(--text-main); font-size: 11px; padding: 6px 12px; min-height: 28px; height: 28px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); white-space: nowrap; cursor: pointer; font-family: 'Montserrat', sans-serif; font-weight: 700; transition: all 0.2s; }
+  .btn-status-manual:hover { background: var(--bg-app); border-color: var(--primary); }
 
   /* MÍDIAS QUERIES - MOBILE */
   @media (max-width: 768px) {
-    body { padding-top: 155px; }
+    body { padding-top: 135px; }
     .header-top { flex-direction: column; align-items: flex-start; }
     .live-info { display: none; } 
     
@@ -144,6 +187,9 @@
     .grid-cell::before { content: attr(data-label); font-size: 10px; font-weight: 900; color: var(--secondary); text-transform: uppercase; margin-bottom: 4px; display: block;}
     
     #patioMap { height: 60vh; min-height: 400px; }
+    .carga-card-header { flex-direction: column; align-items: flex-start; }
+    .carga-card-status { margin-left: 0; margin-top: 8px; width: 100%; text-align: left; }
+    .produto-row { grid-template-columns: 1fr; gap: 8px; }
   }
 
   /* CHECKLIST */
@@ -159,15 +205,7 @@
   input[type="radio"][value="sim"]:checked + .check-opt-success { background: var(--success); color: white; border-color: var(--success); }
   input[type="radio"][value="nao"]:checked + .check-opt-danger  { background: var(--danger);  color: white; border-color: var(--danger); }
 
-  /* CARDS DO PAINEL EXECUTIVO */
-  .carga-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 16px; box-shadow: var(--shadow-soft);}
-  .carga-card.bloqueado { border-left: 6px solid var(--danger); border-color: var(--danger); }
-  .carga-card.liberado  { border-left: 6px solid var(--success); }
-  .carga-card-header { display: flex; align-items: center; gap: 12px; padding: 16px; background: #F8FAFC; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-  .carga-placa { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 900; color: var(--primary); background: #FFFFFF; border: 2px solid var(--border); border-radius: 8px; padding: 4px 12px; letter-spacing: 1px;}
-  .carga-cliente { font-size: 14px; font-weight: 800; color: var(--text-main); flex: 1; text-transform: uppercase;}
-
-  /* TELA CHEIA DO MAPA (FULLSCREEN) */
+  /* TELA CHEIA DO MAPA */
   .map-fullscreen {
       position: fixed !important;
       top: 0 !important;
@@ -179,6 +217,13 @@
       border: none !important;
       margin: 0 !important;
   }
+  
+  .map-action-btn { position: absolute; left: 12px; z-index: 1000; border-radius: 10px; padding: 8px 12px; font-size: 11px; min-height: auto; box-shadow: var(--shadow-md); }
+  #btnMyLocation { top: 12px; background: rgba(37,99,235,0.95); color: white; border: 1px solid rgba(255,255,255,0.2); }
+
+  /* MARCA D'ÁGUA NO RODAPÉ */
+  footer { margin-top: 40px; padding: 20px; text-align: center; color: #94A3B8; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; opacity: 0.6; }
+  footer a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 10px; background: rgba(0,0,0,0.05); margin-top: 8px;}
 </style>
 </head>
 <body>
@@ -216,6 +261,10 @@
           <div class="status-badge syncing" id="netStatusBadge" style="margin-top: 4px; width: fit-content;">🔄 Conectando...</div>
         </div>
       </div>
+      <div class="live-info" style="text-align: right;">
+        <div class="live-time" id="clockWidget" style="font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: #38BDF8;">--:--:--</div>
+        <div class="live-weather" id="weatherWidget" style="font-size: 12px; font-weight: 700; color: #FFFFFF;">🌤️ Atualizando clima...</div>
+      </div>
     </div>
     <div class="tabs">
       <div class="tab-btn active" onclick="uiBuilder.switchTab(event, 'dash')">📊 Pendentes</div>
@@ -233,6 +282,14 @@
     </div>
 
     <div id="tab-dash" class="tab-content active">
+      <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 16px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-soft);">
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Última Atualização</span>
+          <b id="lastUpdateText" style="font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--primary);">--:--:--</b>
+        </div>
+        <button class="btn-primary" onclick="appController.handleRefresh()" style="height: 40px; border-radius: 8px; font-size: 12px;">🔄 ATUALIZAR AGORA</button>
+      </div>
+
       <div class="weather-widget anim-slide-up" id="weatherDashboard" style="display: none;">
           <div style="font-family: 'Montserrat'; font-size: 14px; font-weight: 900; letter-spacing: 1px; color: var(--accent);">📍 CONDIÇÕES NO PÁTIO (JAGUARUNA)</div>
           <div class="weather-grid">
@@ -243,7 +300,9 @@
           </div>
           <div class="weather-alert wa-success" id="weatherAlertBanner">✅ Analisando riscos...</div>
       </div>
-      <div id="tabelaDiariaContainer" class="anim-slide-up" style="animation-delay: 0.1s;"></div>
+      
+      <div id="bannerContainer"></div>
+      <div id="tabelaDiariaContainer" class="anim-slide-up"></div>
     </div>
 
     <div id="tab-op" class="tab-content">
@@ -335,9 +394,10 @@
             <button onclick="mapController.listarSemLocalizacao()" style="background: var(--warning); color: #FFF; font-size: 11px; padding: 8px 12px; min-height: auto;">⚠️ Pendentes</button>
         </div>
         
-        <div id="patioMapContainer" style="position: relative; width: 100%; border-radius: var(--radius-lg); border: 4px solid var(--primary); box-shadow: var(--shadow-md); z-index: 1; overflow: hidden; background: #0F172A;">
+        <div id="patioMapContainer" style="position: relative; width: 100%; border-radius: var(--radius-lg); border: 4px solid var(--primary); box-shadow: var(--shadow-md); z-index: 1; overflow: hidden; background: #0F172A; transition: all 0.3s ease;">
             <div id="patioMap" style="width: 100%; height: 500px;"></div>
-            <button onclick="mapController.toggleFullScreen()" style="position: absolute; top: 12px; right: 12px; z-index: 1000; background: rgba(15,23,42,0.9); color: white; border-radius: 8px; padding: 8px 16px; font-size: 12px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px);">⛶ TELA CHEIA</button>
+            <button id="btnMyLocation" class="map-action-btn" onclick="mapController.marcarMinhaLocalizacao()">🎯 MINHA POSIÇÃO</button>
+            <button id="btnMapFullscreen" onclick="mapController.toggleFullScreen()" style="position: absolute; top: 12px; right: 12px; z-index: 999999; background: rgba(15,23,42,0.9); color: white; border-radius: 8px; padding: 8px 16px; font-size: 12px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px);">⛶ TELA CHEIA</button>
         </div>
         <p style="text-align:center; font-size:11px; font-weight: 700; color:var(--text-muted); margin-top:8px; margin-bottom:20px;">👆 Arraste e dê zoom para navegar pelo pátio via satélite.</p>
 
@@ -346,7 +406,7 @@
             <label>Localizar ou Atualizar Pino (Digite o Lote):</label>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <input type="text" id="inpBuscaMapa" placeholder="Buscar Lote..." style="flex:1; font-size: 18px; font-family: 'JetBrains Mono', monospace; font-weight: 900; text-align: center; border-color: var(--primary); min-width: 150px;" oninput="mapController.buscarNaLista()" autocomplete="off">
-                <button class="btn-primary" style="height: auto; border-radius: 8px; font-size: 12px;" onclick="mapController.capturarGPSEditar(document.getElementById('inpBuscaMapa').value)">📍 Pegar meu GPS Agora</button>
+                <button class="btn-primary" style="height: auto; border-radius: 8px; font-size: 12px;" onclick="mapController.capturarGPSEditar(document.getElementById('inpBuscaMapa').value)">📍 Pegar GPS Lote</button>
                 <button style="background:var(--accent); color:#000; border-radius: 8px; font-size: 12px;" onclick="mapController.abrirIA(document.getElementById('inpBuscaMapa').value)">🤖 IA Mapeadora</button>
             </div>
           </div>
@@ -385,7 +445,7 @@
     <div style="padding:16px; display:flex; justify-content:space-between; align-items:center; background:#1E293B; border-bottom:1px solid #334155;">
       <h3 style="font-size:12px; font-family:'Montserrat';">🛠 TERMINAL</h3>
       <div style="display:flex; gap:8px;">
-          <button onclick="debugEngine.copiarLogs()" style="background:var(--secondary); color:white; font-size:10px; padding:4px 8px; box-shadow:none;">📋 COPIAR</button>
+          <button onclick="debugEngine.copiarLogs()" style="background:var(--secondary); color:white; font-size:10px; padding:4px 8px; box-shadow:none; border-radius:4px;">📋 COPIAR</button>
           <button onclick="debugEngine.togglePanel()" style="background:transparent; color:#94A3B8; font-size:10px; padding:4px; box-shadow:none;">FECHAR</button>
       </div>
     </div>
@@ -397,10 +457,10 @@
 
 <script>
 // ==========================================
-// CAPTURA GLOBAL DE ERROS E PROMISSES 
+// CAPTURA GLOBAL DE ERROS E PROTEÇÕES
 // ==========================================
 window.onerror = function(msg, url, lineNo, columnNo, error) {
-    debugEngine.log(`Erro Crítico na linha ${lineNo}: ${msg}`, "error");
+    debugEngine.log(`Erro Linha ${lineNo}: ${msg}`, "error");
     return false;
 };
 window.onunhandledrejection = function(event) {
@@ -418,7 +478,7 @@ const config = {
     historicoSheetId: '1KAOCFX7_raD0YMhA3yPh8HjS1fF9TlJWp9TYGACCMCI',
     rncSheetId: '1lyWfTaAkrgMWB0JrzbiPt9RIz7jB1WdCe2A9PwnRivY',
     key: 'AIzaSyAdzZznAPDRlGLqbT-8AAVSKslZYfr7Jc0',
-    range: 'Carregamento', // Ajustado para pegar toda a aba dinamicamente, evitando estouro de limite
+    range: 'Carregamento!A:AF', 
     timeoutMs: 15000,
     groqKey: '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'
   },
@@ -436,6 +496,7 @@ const config = {
   ]
 };
 
+// FUNÇÕES DE UTILIDADE
 const parseBRNumber = (str) => {
     if (typeof str === 'number') return str;
     if (!str) return 0;
@@ -447,10 +508,31 @@ const parseBRNumber = (str) => {
 };
 const normalizeName = (s) => String(s || '').toUpperCase().replace(/\s+/g, ' ').trim();
 const formatTons = (val) => { const n = parseBRNumber(val); return (isNaN(n) ? 0 : n).toFixed(3); };
-const escapeHTML = (str) => String(str || '').replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
+const escapeHTML = (str) => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+const extractPlaca = (obs) => {
+  const text = String(obs || '').toUpperCase();
+  const patterns = [
+    /\bPLACA[:\s-]*([A-Z]{3}[0-9][A-Z0-9][0-9]{2})\b/,
+    /\bPLACA[:\s-]*([A-Z]{3}-?[0-9]{4})\b/,
+    /\b([A-Z]{3}[0-9][A-Z0-9][0-9]{2})\b/,
+    /\b([A-Z]{3}-?[0-9]{4})\b/
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) return match[1].replace(/[^A-Z0-9]/g, '');
+  }
+  return '';
+};
+
+const extrairHorarioObs = (obs) => {
+  const text = String(obs || '');
+  const match = text.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
+  return match ? `${match[1].padStart(2, '0')}:${match[2]}` : '';
+};
 
 // ==========================================
-// MÓDULO: TERMINAL DE DIAGNÓSTICO (NÍVEL NASA)
+// MÓDULO: TERMINAL DE DIAGNÓSTICO
 // ==========================================
 const debugEngine = {
   logs: [], isOpen: false,
@@ -463,52 +545,61 @@ const debugEngine = {
   },
   updateAPIStatus(connected, detail = '') { const el = document.getElementById('dbgStatusAPI'); if(el) el.innerHTML = connected ? `🟢 API Conectada <span style="font-size:10px;">${detail}</span>` : `🔴 API Falha <span style="font-size:10px;">${detail}</span>`; },
   updateNetStatus(online) { const el = document.getElementById('dbgStatusNet'); if(el) el.innerHTML = online ? `🟢 Online` : `🔴 Offline`; },
-  updateSWStatus(active) { const el = document.getElementById('dbgStatusSW'); if (el) el.innerHTML = active ? `🟢 SW Ativo` : `🔴 SW (Bloqueado pelo Iframe do Google)`; },
+  updateSWStatus(active) { const el = document.getElementById('dbgStatusSW'); if (el) el.innerHTML = active ? `🟢 SW Ativo` : `🔴 SW Bloqueado pelo Iframe`; },
   togglePanel() { this.isOpen = !this.isOpen; const p = document.getElementById('debugPanel'); if(p) p.style.right = this.isOpen ? '0' : '-300px'; },
   copiarLogs() {
       const texto = this.logs.map(l => `[${l.time}] [${l.type.toUpperCase()}] ${l.msg}`).join('\n');
-      navigator.clipboard.writeText(texto).then(() => alert("Logs copiados com sucesso! Envie para o desenvolvedor."));
+      navigator.clipboard.writeText(texto).then(() => alert("Logs copiados! Envie para o desenvolvedor."));
   }
 };
 
 // ==========================================
-// MÓDULO: RELÓGIO E CLIMA (SATÉLITE OPEN-METEO)
+// MÓDULO: RELÓGIO E CLIMA
 // ==========================================
 const envManager = {
     init() {
         setInterval(() => {
             const now = new Date();
-            document.getElementById('clockWidget').innerText = now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+            const cw = document.getElementById('clockWidget');
+            if(cw) cw.innerText = now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
         }, 1000);
         this.fetchWeather();
         setInterval(() => this.fetchWeather(), 3600000); 
     },
     async fetchWeather() {
         try {
-            const url = 'https://api.open-meteo.com/v1/forecast?latitude=-28.6214&longitude=-49.0253&current=temperature_2m,precipitation,wind_speed_10m&daily=temperature_2m_max,precipitation_probability_max,wind_speed_10m_max&timezone=America%2FSao_Paulo';
+            const url = 'https://api.open-meteo.com/v1/forecast?latitude=-28.5367&longitude=-48.9716&current=temperature_2m,precipitation,wind_speed_10m&daily=temperature_2m_max,precipitation_probability_max,wind_speed_10m_max,uv_index_max&timezone=America%2FSao_Paulo';
             const res = await fetch(url);
             const data = await res.json();
             
             const cur = data.current; const daily = data.daily;
             const tempNow = Math.round(cur.temperature_2m); const windNow = Math.round(cur.wind_speed_10m);
             const tempTom = Math.round(daily.temperature_2m_max[1]); const rainTom = daily.precipitation_probability_max[1];
+            const uvTom = daily.uv_index_max[1] || '--';
 
-            document.getElementById('weatherWidget').innerText = `🌡️ ${tempNow}°C | 💨 ${windNow}km/h`;
-            document.getElementById('weatherDashboard').style.display = 'flex';
-            document.getElementById('wTempNow').innerText = `${tempNow}°C`; document.getElementById('wWindNow').innerText = `${windNow} km/h`;
-            document.getElementById('wTempTom').innerText = `${tempTom}°C`; document.getElementById('wRainTom').innerText = `${rainTom}%`;
+            const wtn = document.getElementById('wTempNow'); if(wtn) wtn.innerText = `${tempNow}°C`; 
+            const wwn = document.getElementById('wWindNow'); if(wwn) wwn.innerText = `${windNow} km/h`;
+            const wtt = document.getElementById('wTempTom'); if(wtt) wtt.innerText = `${tempTom}°C`; 
+            const wrt = document.getElementById('wRainTom'); if(wrt) wrt.innerText = `${rainTom}%`;
+            const wut = document.getElementById('wUvTom'); if(wut) wut.innerText = uvTom;
 
             const alertBanner = document.getElementById('weatherAlertBanner');
-            if (windNow > 25 || daily.wind_speed_10m_max[0] > 35) {
-                alertBanner.className = 'weather-alert wa-danger'; alertBanner.innerHTML = '⚠️ VENTO FORTE: Risco de Lonas Voando!'; 
-            } else if (cur.precipitation > 0 || daily.precipitation_probability_max[0] > 60) {
-                alertBanner.className = 'weather-alert wa-danger'; alertBanner.innerHTML = '🌧️ ALERTA DE CHUVA: Cubra os lotes vulneráveis!'; 
-            } else if (tempNow > 32 || daily.temperature_2m_max[0] > 33) {
-                alertBanner.className = 'weather-alert wa-danger'; alertBanner.innerHTML = '☀️ SOL EXTREMO: Risco de ressecamento de Big Bags.'; 
+            if(!alertBanner) return;
+            
+            if (windNow > 25 || daily.wind_speed_10m_max[0] > 35 || daily.wind_speed_10m_max[1] > 35) {
+                alertBanner.style.background = 'rgba(220, 38, 38, 0.2)'; alertBanner.style.color = '#FCA5A5';
+                alertBanner.innerHTML = '⚠️ VENTO FORTE: Risco de Lonas Voando!'; 
+            } else if (cur.precipitation > 0 || daily.precipitation_probability_max[0] > 60 || daily.precipitation_probability_max[1] > 60) {
+                alertBanner.style.background = 'rgba(220, 38, 38, 0.2)'; alertBanner.style.color = '#FCA5A5';
+                alertBanner.innerHTML = '🌧️ ALERTA DE CHUVA: Cubra os lotes vulneráveis!'; 
+            } else if (tempNow > 32 || daily.temperature_2m_max[0] > 33 || daily.temperature_2m_max[1] > 33 || Number(uvTom) >= 8) {
+                alertBanner.style.background = 'rgba(220, 38, 38, 0.2)'; alertBanner.style.color = '#FCA5A5';
+                alertBanner.innerHTML = '☀️ SOL EXTREMO: Risco de ressecamento de Big Bags.'; 
             } else {
-                alertBanner.className = 'weather-alert wa-success'; alertBanner.innerHTML = '✅ Clima atual favorável para a operação.'; 
+                alertBanner.style.background = 'rgba(16, 185, 129, 0.2)'; alertBanner.style.color = '#34D399';
+                alertBanner.innerHTML = '✅ Clima atual favorável para a operação.'; 
             }
-        } catch(e) { document.getElementById('weatherWidget').innerText = `☁️ Clima Offline`; }
+        } catch(e) {}
     }
 };
 
@@ -599,12 +690,13 @@ const alertManager = {
   notifiedPlates: new Set(),
   init() { setInterval(() => this.checkTimes(), 30000); setInterval(() => this.checkMissingLocations(), 30 * 60 * 1000); },
   checkTimes() {
-    const obs = document.getElementById('inpObs')?.value || ''; const placa = document.getElementById('inpPlaca')?.value || ''; if (!obs || !placa) return;
-    const match = /\b([0-1]?[0-9]|2[0-3]):([0-5][0-9])\b/.exec(obs);
+    const obs = document.getElementById('inpObs'); const placa = document.getElementById('inpPlaca');
+    if (!obs || !placa || !obs.value || !placa.value) return;
+    const match = /\b([0-1]?[0-9]|2[0-3]):([0-5][0-9])\b/.exec(obs.value);
     if (match) {
       const now = new Date(); const currTotal = now.getHours() * 60 + now.getMinutes(); const schedTotal = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
-      if (currTotal >= (schedTotal - 15) && currTotal <= (schedTotal + 15) && !this.notifiedPlates.has(placa)) {
-        this.notifiedPlates.add(placa); this.showNotification(`Hora de Carregamento`, `A placa ${placa} está programada para agora (${match[0]}).`);
+      if (currTotal >= (schedTotal - 15) && currTotal <= (schedTotal + 15) && !this.notifiedPlates.has(placa.value)) {
+        this.notifiedPlates.add(placa.value); this.showNotification(`Hora de Carregamento`, `A placa ${placa.value} está programada para agora (${match[0]}).`);
       }
     }
   },
@@ -629,10 +721,7 @@ const alertManager = {
 // ==========================================
 const apiService = {
   async fetchSheetData() {
-    if(!navigator.onLine) {
-        debugEngine.log("Falha ao buscar Carregamentos: OFFLINE", "error");
-        throw new Error("OFFLINE");
-    }
+    if(!navigator.onLine) { debugEngine.log("Falha ao buscar Carregamentos: OFFLINE", "error"); throw new Error("OFFLINE"); }
     debugEngine.log("Buscando dados da aba de Carregamentos...", "info");
     
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${config.api.sheetId}/values/${config.api.range}?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`;
@@ -663,11 +752,11 @@ const apiService = {
     if(!navigator.onLine) return [];
     debugEngine.log("Buscando dados de Estoque...", "info");
     try {
-      const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.estoqueSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
+      const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.estoqueSheetId}?key=${config.api.key}&fields=sheets.properties.title`);
       const infoJson = await resInfo.json();
       if(!infoJson.sheets) throw new Error("Aba de estoque não encontrada");
       
-      const visible = infoJson.sheets.filter(s => !s.properties.hidden);
+      const visible = infoJson.sheets; 
       const now = new Date(); const meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
       let t = visible.find(s => s.properties.title.toUpperCase() === `${meses[now.getMonth()]}/${now.getFullYear()}`) || visible[0];
       if(!t) throw new Error("Nenhuma aba visível no estoque");
@@ -686,13 +775,14 @@ const apiService = {
     if(!navigator.onLine) return [];
     debugEngine.log("Buscando Histórico de Cargas...", "info");
     try {
-      const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
+      const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}?key=${config.api.key}&fields=sheets.properties.title`);
       const infoJson = await resInfo.json();
       if(!infoJson.sheets) return [];
-      const targetSheet = infoJson.sheets.filter(s => !s.properties.hidden)[0]; 
+      const targetSheet = infoJson.sheets[0]; 
       if(!targetSheet) return [];
       const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.historicoSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:Z?key=${config.api.key}&valueRenderOption=FORMATTED_VALUE`);
-      return (await resData.json()).values || [];
+      const json = await resData.json();
+      return json.values || [];
     } catch (e) { 
         debugEngine.log(`Erro ao buscar Histórico: ${e.message}`, "warn");
         return []; 
@@ -703,13 +793,14 @@ const apiService = {
     if(!navigator.onLine) return [];
     debugEngine.log("Buscando Reclamações (RNC)...", "info");
     try {
-      const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}?key=${config.api.key}&fields=sheets.properties(title,hidden)`);
+      const resInfo = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}?key=${config.api.key}&fields=sheets.properties.title`);
       const infoJson = await resInfo.json();
       if(!infoJson.sheets) return [];
-      const targetSheet = infoJson.sheets.filter(s => !s.properties.hidden).find(s => s.properties.title.toUpperCase().includes('RNC')) || infoJson.sheets[0];
+      const targetSheet = infoJson.sheets.find(s => s.properties.title.toUpperCase().includes('RNC')) || infoJson.sheets[0];
       if(!targetSheet) return [];
       const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.rncSheetId}/values/'${encodeURIComponent(targetSheet.properties.title)}'!A:N?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`);
-      return (await resData.json()).values || [];
+      const json = await resData.json();
+      return json.values || [];
     } catch (e) { 
         debugEngine.log(`Erro ao buscar RNC: ${e.message}`, "warn");
         return []; 
@@ -720,12 +811,20 @@ const apiService = {
       if(!navigator.onLine) return [];
       debugEngine.log("Buscando Mapeamento Geográfico...", "info");
       try {
+         const meta = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.sheetId}?key=${config.api.key}&fields=sheets.properties.title`);
+         const metaJson = await meta.json();
+         const existe = (metaJson.sheets || []).some(s => s.properties.title === 'Localizacoes_Lotes');
+         if (!existe) {
+             debugEngine.log("Aba Localizacoes_Lotes não existe. Ignorando.", "warn");
+             return [];
+         }
+         
          const resData = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${config.api.sheetId}/values/Localizacoes_Lotes!A:E?key=${config.api.key}&valueRenderOption=UNFORMATTED_VALUE`);
          if(!resData.ok) throw new Error(`HTTP ${resData.status}`);
          const json = await resData.json();
          return json.values || [];
       } catch(e) { 
-         debugEngine.log(`Erro ao buscar Mapa Geográfico: ${e.message} (Aba pode não existir ainda)`, "warn");
+         debugEngine.log(`Erro ao buscar Mapa Geográfico: ${e.message}`, "warn");
          return []; 
       }
   },
@@ -737,7 +836,7 @@ const apiService = {
       const res = await fetch(config.api.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
       return JSON.parse(await res.text());
     } catch (err) {
-      debugEngine.log(`Erro POST nativo, usando no-cors fallback...`, "warn");
+      debugEngine.log(`Erro POST nativo, usando fallback...`, "warn");
       await fetch(config.api.scriptUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
       return { success: true, status: 'success' };
     }
@@ -794,13 +893,19 @@ const truckStatusManager = {
         for (let row of uiBuilder.historicoCargas) { if (!row) continue; const str = normalizeName(row.join(' ')); if (r.test(str) && str.includes(p)) return true; } return false;
     },
     definirStatusCaminhao(placa, hStr, qtd, isPallet, pending) {
-        if (this.verificarSeJaCarregouPlanilha(placa) || this.manualConfirmations.has(placa) || pending) return { code: 'FATURAMENTO', color: '#059669', bg: '#D1FAE5', label: '✅ ENVIADO', msg: 'Processo finalizado.' };
+        if (this.verificarSeJaCarregouPlanilha(placa) || this.manualConfirmations.has(normalizeName(placa)) || pending) return { code: 'FATURAMENTO', color: '#059669', bg: '#D1FAE5', label: '✅ ENVIADO', msg: 'Processo finalizado.' };
         if (!hStr) return { code: 'AGUARDANDO', color: '#475569', bg: '#F1F5F9', label: 'Aguardando', msg: 'Horário não programado.' };
         const tempos = this.calcularHorarioFinal(hStr, (qtd * 120) + (isPallet ? qtd * 5 : 0)); if (!tempos) return null;
         const now = new Date();
         if (now >= tempos.start && now <= tempos.end) return { code: 'CARREGANDO', color: '#2563EB', bg: '#DBEAFE', label: '🚛 CARREGANDO', msg: `Término previsto às ${tempos.endStr}` };
         if (now > tempos.end) return { code: 'ATRASADO', color: '#DC2626', bg: '#FEE2E2', label: '⏳ EM ATRASO', msg: `Deveria ter finalizado às ${tempos.endStr}` };
         return { code: 'AGENDADO', color: '#D97706', bg: '#FEF3C7', label: '⏰ AGENDADO', msg: `Início previsto às ${hStr}` };
+    },
+    confirmarCarregamentoManual(placa) {
+        const normalizada = normalizeName(placa);
+        if (!normalizada) return;
+        this.manualConfirmations.add(normalizada);
+        dashboardEngine.renderExecTable(appController.lastParsedData, appController.currentPendingPlacas);
     }
 };
 
@@ -809,32 +914,81 @@ const truckStatusManager = {
 // ==========================================
 const mapController = {
     locDB: JSON.parse(localStorage.getItem('cysyLocations') || '{}'),
-    map: null, markers: {},
+    map: null, markers: {}, userMarker: null,
 
     initLeaflet() {
-        if(!document.getElementById('patioMap') || this.map) return;
+        if(this.map) return;
         try {
-            // Inicializa focado em Cysy Mineração (Jaguaruna)
-            this.map = L.map('patioMap').setView([-28.6214, -49.0253], 17);
+            // Inicializa focado na Cysy Mineração
+            this.map = L.map('patioMap').setView([-28.5367584, -48.9715873], 18);
             
-            // Satélite Híbrido Google (Satélite + Nomes)
+            // Satélite Híbrido Google
             L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
                 maxZoom: 21,
                 attribution: '© Google Maps'
             }).addTo(this.map);
 
-            // Adiciona Ponto Sede Base
-            L.circleMarker([-28.6214, -49.0253], {color: 'white', fillColor: 'var(--primary)', fillOpacity: 0.8, radius: 8})
-             .bindPopup("<b>🏢 Cysy Mineração</b><br>SC-100, Jaguaruna").addTo(this.map);
+            L.circleMarker([-28.5367584, -48.9715873], {color: 'white', fillColor: 'var(--secondary)', fillOpacity: 0.8, radius: 8})
+             .bindPopup("<b>🏢 Cysy Mineração</b><br>Base Principal").addTo(this.map);
              
             debugEngine.log("Leaflet Satélite renderizado com sucesso.", "success");
-        } catch(e) { debugEngine.log("Falha ao inicializar o Mapa Leaflet", "error"); }
+        } catch(e) { debugEngine.log(`Falha ao inicializar o Mapa Leaflet: ${e.message}`, "error"); }
     },
 
     toggleFullScreen() {
         const container = document.getElementById('patioMapContainer');
+        const btn = document.getElementById('btnMapFullscreen');
+        if (!container || !btn) return;
+
         container.classList.toggle('map-fullscreen');
-        setTimeout(() => { if(this.map) this.map.invalidateSize(); }, 300);
+
+        if (container.classList.contains('map-fullscreen')) {
+            btn.innerText = "✖ FECHAR TELA CHEIA";
+            btn.style.background = "var(--danger)";
+            btn.style.borderColor = "var(--danger)";
+        } else {
+            btn.innerText = "⛶ TELA CHEIA";
+            btn.style.background = "rgba(15,23,42,0.9)";
+            btn.style.borderColor = "rgba(255,255,255,0.2)";
+        }
+
+        [50, 200, 500, 900].forEach(delay => {
+            setTimeout(() => {
+                if (this.map) {
+                    this.map.invalidateSize(true);
+                    window.dispatchEvent(new Event('resize'));
+                }
+            }, delay);
+        });
+    },
+
+    marcarMinhaLocalizacao() {
+        if (!navigator.geolocation) return alert("GPS não suportado.");
+        this.initLeaflet();
+
+        uiBuilder.toggleLoader(true, "Buscando satélites precisos...");
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                uiBuilder.toggleLoader(false);
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+
+                if (!this.map) return alert("Mapa ainda não inicializado.");
+
+                this.map.invalidateSize(true);
+                this.map.setView([lat, lon], 19);
+
+                if (this.userMarker) this.map.removeLayer(this.userMarker);
+                this.userMarker = L.marker([lat, lon]).addTo(this.map)
+                 .bindPopup("<div style='text-align:center; font-family:Montserrat;'><b>📍 VOCÊ ESTÁ AQUI</b></div>")
+                 .openPopup();
+            },
+            (err) => { 
+                uiBuilder.toggleLoader(false); 
+                alert("Erro ao obter GPS. Certifique-se que o navegador/PWA tem permissão de localização e está em HTTPS."); 
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
     },
 
     renderPins() {
@@ -1035,88 +1189,200 @@ const groqManager = {
 // ==========================================
 const dashboardEngine = {
   limparNomesGenericos(str) {
-      const genericos = ['LTDA', 'S/A', 'SA', 'ME', 'EPP', 'TRANSPORTES', 'TRANSPORTADORA', 'LOGISTICA', 'LOGÍSTICA', 'COMERCIO', 'COMERCIAL', 'AGROPECUARIA', 'AGRO', 'BRASIL', 'CIA', 'EIRELI'];
-      return (str||'').split(/[\s,\.\-]+/).filter(w => !genericos.includes(w)).join(' ').trim();
+    const genericos = ['LTDA', 'S/A', 'SA', 'ME', 'EPP', 'TRANSPORTES', 'TRANSPORTADORA', 'LOGISTICA', 'LOGÍSTICA', 'COMERCIO', 'COMERCIAL', 'AGROPECUARIA', 'AGRO', 'BRASIL', 'CIA', 'EIRELI'];
+    return (str || '').split(/[\s,.\-]+/).filter(w => w && !genericos.includes(w)).join(' ').trim();
   },
-  renderExecTable(parsedData, pendingPlacas = []) {
-    const container = document.getElementById('tabelaDiariaContainer');
-    if (!parsedData || parsedData.length === 0) { container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);"><span style="font-size:60px;">📭</span><p style="font-weight:900; margin-top:12px;">Nenhum carregamento encontrado.</p></div>`; return; }
-    
-    const grupos = {};
-    parsedData.forEach(item => { const key = item.placa || 'SEM PLACA'; if (!grupos[key]) grupos[key] = []; grupos[key].push(item); });
-    
-    let arrayGrupos = Object.entries(grupos).map(([placa, itens]) => {
-      const obsUnificado = [...new Set(itens.map(i => i.obsStr).filter(Boolean))].join(' | ');
-      const timeStr = extrairHorarioObs(obsUnificado);
-      let timeMins = 9999; if(timeStr) { const [h, m] = timeStr.split(':').map(Number); timeMins = (h * 60) + m; }
-      const totalQtd = itens.reduce((sum, i) => sum + Number(i.qtd||0), 0);
-      let statusInteligente = truckStatusManager.definirStatusCaminhao(placa, timeStr, totalQtd, itens.some(i => String(i.pallet).toUpperCase() === 'SIM'), pendingPlacas.includes(placa));
-      return { placa, itens, timeMins, timeStr, obsUnificado, totalQtd, statusInteligente };
-    }).sort((a, b) => {
-        const fA = a.statusInteligente && a.statusInteligente.code === 'FATURAMENTO'; const fB = b.statusInteligente && b.statusInteligente.code === 'FATURAMENTO';
-        if (fA && !fB) return 1; if (!fA && fB) return -1; return a.timeMins - b.timeMins;
-    });
+
+  getClientColor(index) {
+    const colors = [
+      { bg: '#DBEAFE', fg: '#1D4ED8' }, { bg: '#DCFCE7', fg: '#166534' },
+      { bg: '#FEF3C7', fg: '#92400E' }, { bg: '#FCE7F3', fg: '#9D174D' }, { bg: '#EDE9FE', fg: '#6D28D9' }
+    ];
+    return colors[index % colors.length];
+  },
+
+  renderTopBanners(groups) {
+    const bannerContainer = document.getElementById('bannerContainer');
+    if (!bannerContainer) return;
+
+    const bloqueados = groups.filter(g => g.bloqueado);
+    const atrasados = groups.filter(g => g.statusInteligente?.code === 'ATRASADO');
+    const comRnc = groups.filter(g => g.rncMatches?.length > 0);
 
     let html = '';
-    arrayGrupos.forEach(({placa, itens, obsUnificado, totalQtd, statusInteligente}) => {
-      const bloqueado = itens.some(i => i.bloqueio.toUpperCase() !== 'LIBERADO' && i.bloqueio.trim() !== '');
-      const clientesStr = [...new Set(itens.map(i => i.cliente))].join(' • ');
+
+    if (bloqueados.length > 0) {
+      html += `
+        <div class="smart-banner danger">
+          <div style="font-size:20px;">⛔</div>
+          <div>
+            <div style="font-weight:900;">Bloqueios críticos encontrados</div>
+            <div style="font-size:12px; font-weight:700;">${bloqueados.length} veículo(s) com impedimento operacional/financeiro.</div>
+          </div>
+        </div>`;
+    }
+
+    if (atrasados.length > 0 || comRnc.length > 0) {
+      html += `
+        <div class="smart-banner ${bloqueados.length > 0 ? 'danger' : 'success'}">
+          <div style="font-size:20px;">📌</div>
+          <div>
+            <div style="font-weight:900;">Resumo executivo do turno</div>
+            <div style="font-size:12px; font-weight:700;">
+              ${atrasados.length} em atraso • ${comRnc.length} com alerta de qualidade
+            </div>
+          </div>
+        </div>`;
+    }
+
+    bannerContainer.innerHTML = html;
+  },
+
+  renderExecTable(parsedData, pendingPlacas = []) {
+    const container = document.getElementById('tabelaDiariaContainer');
+    if (!container) return;
+
+    if (!parsedData || parsedData.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);"><span style="font-size:60px;">📭</span><p style="font-weight:900; margin-top:12px;">Nenhum carregamento encontrado.</p></div>`;
+      return;
+    }
+
+    const grupos = {};
+    parsedData.forEach(item => {
+      const key = item.placa || 'SEM PLACA';
+      if (!grupos[key]) grupos[key] = [];
+      grupos[key].push(item);
+    });
+
+    const arrayGrupos = Object.entries(grupos).map(([placa, itens]) => {
+      const obsUnificado = [...new Set(itens.map(i => i.obsStr).filter(Boolean))].join(' | ');
+      const timeStr = extrairHorarioObs(obsUnificado);
+      let timeMins = 9999;
+      if (timeStr) {
+        const [h, m] = timeStr.split(':').map(Number);
+        timeMins = (h * 60) + m;
+      }
+
+      const totalQtd = itens.reduce((sum, i) => sum + Number(i.qtd || 0), 0);
+      const bloqueado = itens.some(i => i.bloqueio && i.bloqueio.trim() !== '' && i.bloqueio.toUpperCase() !== 'LIBERADO');
+
+      let statusInteligente = truckStatusManager.definirStatusCaminhao(
+        placa, timeStr, totalQtd, itens.some(i => String(i.pallet).toUpperCase() === 'SIM'), pendingPlacas.includes(placa)
+      );
+
+      if (bloqueado) {
+        statusInteligente = {
+          code: 'BLOQUEADO', color: '#DC2626', bg: '#FEE2E2', label: '⛔ BLOQUEADO', msg: 'Há bloqueio informado na programação.'
+        };
+      }
 
       let rncMatches = [];
       if (uiBuilder.rncCargas && Array.isArray(uiBuilder.rncCargas)) {
-          const bc = this.limparNomesGenericos(clientesStr.toUpperCase()); const bo = this.limparNomesGenericos(obsUnificado.toUpperCase());
-          uiBuilder.rncCargas.forEach(rnc => {
-              const rC = this.limparNomesGenericos(rnc.cliente); const rT = this.limparNomesGenericos(rnc.transportador);
-              const mC = rC.length >= 3 && bc.includes(rC); const mT = rT.length >= 3 && bo.includes(rT);
-              const pL = placa.toUpperCase().replace(/[^A-Z0-9]/g, '');
-              const mP = pL.length >= 7 && (rnc.transportador.replace(/[^A-Z0-9]/g, '').includes(pL) || rnc.descricao.toUpperCase().replace(/[^A-Z0-9]/g, '').includes(pL));
-              let tr = []; if (mP) tr.push("Placa"); if (mC && !mP) tr.push("Cliente"); if (mT && !mP) tr.push("Transp.");
-              if (tr.length > 0) rncMatches.push({ data: rnc.data, desc: rnc.descricao, prod: rnc.produto, acao: rnc.acaoImediata, trigger: tr.join(' e ') });
-          });
+        const clientesStr = [...new Set(itens.map(i => i.cliente))].join(' • ');
+        const bc = this.limparNomesGenericos(clientesStr.toUpperCase());
+        const bo = this.limparNomesGenericos(obsUnificado.toUpperCase());
+
+        uiBuilder.rncCargas.forEach(rnc => {
+          const rC = this.limparNomesGenericos(rnc.cliente); const rT = this.limparNomesGenericos(rnc.transportador);
+          const mC = rC.length >= 3 && bc.includes(rC); const mT = rT.length >= 3 && bo.includes(rT);
+          const pL = placa.toUpperCase().replace(/[^A-Z0-9]/g, '');
+          const mP = pL.length >= 7 && (rnc.transportador.replace(/[^A-Z0-9]/g, '').includes(pL) || rnc.descricao.toUpperCase().replace(/[^A-Z0-9]/g, '').includes(pL));
+
+          let tr = []; if (mP) tr.push('Placa'); if (mC && !mP) tr.push('Cliente'); if (mT && !mP) tr.push('Transp.');
+          if (tr.length > 0) rncMatches.push({ data: rnc.data, desc: rnc.descricao, prod: rnc.produto, acao: rnc.acaoImediata, trigger: tr.join(' e ') });
+        });
       }
 
-      let rncHTML = '';
-      if (rncMatches.length > 0) {
-          const uRnc = []; const dSet = new Set();
-          for (let r of rncMatches) { if (!dSet.has(r.desc)) { dSet.add(r.desc); uRnc.push(r); } }
-          rncHTML = `
-            <div style="background: rgba(220, 38, 38, 0.1); border-left: 6px solid var(--danger); padding: 16px; margin: 16px 24px 0; border-radius: 12px;">
-                <details>
-                    <summary style="cursor: pointer; outline: none; font-weight: 900; color: var(--danger); font-size: 14px;">⚠️ ${uRnc.length} ALERTA(S) DE QUALIDADE (RNC)</summary>
-                    <div style="margin-top: 16px; border-top: 2px dashed #FCA5A5; padding-top: 16px;">
-                        ${uRnc.map(r => `<div style="font-size: 12px; color: #7F1D1D; margin-bottom: 12px; background:white; padding:12px; border-radius:8px; box-shadow:var(--shadow-soft);"><strong>📅 ${escapeHTML(r.data)} | Alvo: ${escapeHTML(r.trigger)}</strong><br><strong>Produto:</strong> ${escapeHTML(r.prod)}<br><strong>Desc:</strong> ${escapeHTML(r.desc)}<br><strong>Ação:</strong> ${escapeHTML(r.acao)}</div>`).join('')}
-                    </div>
-                </details>
-            </div>`;
-      }
-
-      let infoHTML = '';
-      if(statusInteligente) {
-          infoHTML = `
-            <div style="background: ${statusInteligente.bg}; border-left: 6px solid ${statusInteligente.color}; padding: 16px; margin: 16px 24px 0; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 900; color: ${statusInteligente.color}; font-size: 14px;">${statusInteligente.label}</span>
-                    ${statusInteligente.code !== 'FATURAMENTO' ? `<button onclick="truckStatusManager.confirmarCarregamentoManual('${escapeHTML(placa)}')" style="background:white; color:${statusInteligente.color}; border:2px solid ${statusInteligente.color}; font-size:11px; padding:6px 12px; min-height:auto;">✔ CONFIRMAR</button>` : ''}
-                </div>
-                <div style="font-size: 12px; font-weight: 800; color: ${statusInteligente.color}; margin-top: 8px;">${statusInteligente.msg}</div>
-            </div>`;
-      }
-
-      const produtosHTML = itens.map(item => `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; margin: 12px 24px; padding: 16px; border-radius: 12px; border: 2px solid var(--border);">
-          <div style="font-weight: 800; font-size: 14px;">${escapeHTML(item.produtoDesc)}</div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 900; color: var(--primary);">${formatTons(item.qtd)} t</div>
-        </div>`).join('');
-      
-      html += `<div class="carga-card ${bloqueado ? 'bloqueado' : 'liberado'}">
-                  <div class="carga-card-header">
-                     <div class="carga-placa">${escapeHTML(placa)}</div>
-                     <div class="carga-cliente">${escapeHTML(clientesStr)}</div>
-                  </div>
-                  ${rncHTML} ${infoHTML}
-                  <div style="padding-bottom: 12px;">${produtosHTML}</div>
-               </div>`;
+      return { placa, itens, timeMins, statusInteligente, bloqueado, rncMatches };
+    }).sort((a, b) => {
+      const prioridade = { BLOQUEADO: 0, ATRASADO: 1, CARREGANDO: 2, AGENDADO: 3, AGUARDANDO: 4, FATURAMENTO: 5 };
+      return (prioridade[a.statusInteligente?.code] ?? 99) - (prioridade[b.statusInteligente?.code] ?? 99) || a.timeMins - b.timeMins;
     });
+
+    this.renderTopBanners(arrayGrupos);
+
+    let html = '<div class="carga-cards-grid">';
+    arrayGrupos.forEach(({ placa, itens, statusInteligente, bloqueado, rncMatches }) => {
+      const clientes = [...new Set(itens.map(i => i.cliente))];
+      const clientesTags = clientes.map((cliente, idx) => {
+        const cor = this.getClientColor(idx);
+        return `<span class="cliente-tag" style="background:${cor.bg}; color:${cor.fg};">${escapeHTML(cliente)}</span>`;
+      }).join(' ');
+
+      const rncHTML = rncMatches.length > 0 ? `
+        <div style="background: rgba(220,38,38,0.08); border-left: 6px solid var(--danger); padding: 16px; margin: 16px 24px 0; border-radius: 12px;">
+          <details>
+            <summary style="cursor:pointer; font-weight:900; color:var(--danger); font-size:14px;">⚠️ ${rncMatches.length} alerta(s) de qualidade</summary>
+            <div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
+              ${rncMatches.map(r => `
+                <div style="background:white; border:1px solid #FECACA; border-radius:10px; padding:12px; font-size:12px;">
+                  <strong>📅 ${escapeHTML(r.data)}</strong><br>
+                  <strong>Alvo:</strong> ${escapeHTML(r.trigger)}<br>
+                  <strong>Produto:</strong> ${escapeHTML(r.prod)}<br>
+                  <strong>Ocorrência:</strong> ${escapeHTML(r.desc)}<br>
+                  <strong>Ação imediata:</strong> ${escapeHTML(r.acao)}
+                </div>`).join('')}
+            </div>
+          </details>
+        </div>` : '';
+
+      const produtosHTML = itens.map(item => {
+        const badges = [];
+        if (String(item.estado || '').toUpperCase() === 'PY') badges.push('<span class="badge-especial badge-py">🇵🇾 PY</span>');
+        if (String(item.pallet || '').toUpperCase() === 'SIM') badges.push('<span class="badge-especial badge-palete">🟫 PALETE</span>');
+        if (String(item.filme || '').toUpperCase() === 'SIM') badges.push('<span class="badge-especial badge-filme">🎞️ FILME</span>');
+
+        return `
+          <div class="produto-row">
+            <div>
+              <span class="produto-label">Produto</span>
+              <div style="font-weight:900;">${escapeHTML(item.produtoDesc)}</div>
+              <div>${badges.join(' ')}</div>
+            </div>
+            <div>
+              <span class="produto-label">Quantidade</span>
+              <span class="produto-qtd">${formatTons(item.qtd)} t</span>
+            </div>
+            <div>
+              ${bloqueado && item.bloqueio && item.bloqueio.toUpperCase() !== 'LIBERADO'
+                ? `<span class="badge-vermelho">⛔ ${escapeHTML(item.bloqueio)}</span>`
+                : `<span class="badge-verde">✔ OK</span>`}
+            </div>
+          </div>`;
+      }).join('');
+
+      html += `
+        <div class="carga-card ${bloqueado ? 'status-bloqueado' : ''}">
+          <div class="carga-card-header">
+            <div class="carga-placa">${escapeHTML(placa)}</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; flex:1;">${clientesTags}</div>
+          </div>
+
+          <div class="status-banner ${
+            statusInteligente.code === 'BLOQUEADO' ? 'status-bloqueio' :
+            statusInteligente.code === 'ATRASADO' ? 'status-atraso' :
+            statusInteligente.code === 'CARREGANDO' ? 'status-carregando' :
+            statusInteligente.code === 'FATURAMENTO' ? 'status-faturamento' :
+            'status-agendado'
+          }">
+            <span>${statusInteligente.label}</span>
+            <span>${statusInteligente.msg}</span>
+          </div>
+
+          ${rncHTML}
+
+          ${statusInteligente.code !== 'FATURAMENTO' && statusInteligente.code !== 'BLOQUEADO' ? `
+            <div style="padding:16px 24px 0 24px;">
+              <button onclick="truckStatusManager.confirmarCarregamentoManual('${escapeHTML(placa)}')" style="background:white; color:${statusInteligente.color}; border:2px solid ${statusInteligente.color}; font-size:11px; min-height:auto;">
+                ✔ CONFIRMAR SAÍDA
+              </button>
+            </div>` : ''}
+
+          <div style="padding-top: 12px; padding-bottom: 12px;">${produtosHTML}</div>
+        </div>`;
+    });
+
+    html += '</div>';
     container.innerHTML = html;
   }
 };
@@ -1124,27 +1390,54 @@ const dashboardEngine = {
 const uiBuilder = {
   localDataStore: [], lotesMap: {}, lotesFlat: [], historicoCargas: [], rncCargas: [], visibleEmptyRows: 0, 
   init() { this.buildChecklistUI(); this.buildUnifiedGrid(); this.updateTimestamp(); },
+  
   switchTab(event, tabId) { 
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
-    if(event) event.currentTarget.classList.add('active'); 
+    if (event && event.currentTarget) event.currentTarget.classList.add('active'); 
     document.getElementById(`tab-${tabId}`).classList.add('active'); 
-    if(tabId === 'mapa') { setTimeout(() => { mapController.initLeaflet(); if(mapController.map) mapController.map.invalidateSize(); mapController.renderPins(); }, 400); }
+    
+    if (tabId === 'mapa') {
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                mapController.initLeaflet();
+                [0, 150, 400, 800].forEach(delay => {
+                    setTimeout(() => {
+                        if (mapController.map) {
+                            mapController.map.invalidateSize(true);
+                            window.dispatchEvent(new Event('resize'));
+                            mapController.renderPins();
+                        }
+                    }, delay);
+                });
+            }, 80);
+        });
+    }
   },
-  updateTimestamp() { document.getElementById('inpDataHora').value = new Date().toLocaleString('pt-BR'); document.getElementById('perdaDataHora').value = new Date().toLocaleString('pt-BR'); },
-  updateGlobalUpdateTimestamp() { document.getElementById('lastUpdateText').innerText = `Atualizado: ${new Date().toLocaleTimeString('pt-BR')}`; },
+  
+  updateTimestamp() { 
+      const d1 = document.getElementById('inpDataHora'); if(d1) d1.value = new Date().toLocaleString('pt-BR'); 
+      const d2 = document.getElementById('perdaDataHora'); if(d2) d2.value = new Date().toLocaleString('pt-BR'); 
+  },
+  updateGlobalUpdateTimestamp() { 
+      const el = document.getElementById('lastUpdateText');
+      if(el) el.innerText = `Atualizado: ${new Date().toLocaleTimeString('pt-BR')}`; 
+  },
   
   buildChecklistUI() {
-    document.getElementById('checklistGrid').innerHTML = config.checklist.map(c => {
+    const cg = document.getElementById('checklistGrid');
+    if(!cg) return;
+    cg.innerHTML = config.checklist.map(c => {
       if(c.type === 'text') return `<div class="check-card check-text-card" id="card_${c.id}"><div class="check-title">${escapeHTML(c.lbl)}</div><textarea id="chk_text_${c.id}" style="min-height: 100px; margin-top: 12px; border-width:2px;"></textarea></div>`;
       const isInv = c.type === 'yn_r'; const simClass = isInv ? 'check-opt-danger' : 'check-opt-success'; const naoClass = isInv ? 'check-opt-success' : 'check-opt-danger';
       return `<div class="check-card" id="card_${c.id}" data-inverted="${isInv}"><div class="check-title">${escapeHTML(c.lbl)}</div><div class="check-options"><label><input type="radio" name="chk_${c.id}" value="sim" onchange="uiBuilder.onCheckChange('${c.id}','sim')"><div class="check-opt ${simClass}">SIM</div></label><label><input type="radio" name="chk_${c.id}" value="nao" onchange="uiBuilder.onCheckChange('${c.id}','nao')"><div class="check-opt ${naoClass}">NÃO</div></label></div></div>`;
     }).join('');
   },
-  onCheckChange(id, val) { const card = document.getElementById(`card_${id}`); card.className = `check-card ${card.dataset.inverted === 'true' ? (val === 'sim' ? 'nao' : 'sim') : val}`; },
+  onCheckChange(id, val) { const card = document.getElementById(`card_${id}`); if(card) card.className = `check-card ${card.dataset.inverted === 'true' ? (val === 'sim' ? 'nao' : 'sim') : val}`; },
   
   buildUnifiedGrid() {
     const m = document.getElementById('materialsContainer'); 
+    if(!m) return;
     for(let i=1; i<=10; i++) {
       m.insertAdjacentHTML('beforeend', `<div class="grid-row" id="gridRow_${i}"><div class="grid-cell" data-label="Produto Liberado"><div id="lblDestino_${i}" style="font-size: 10px; font-weight: 900; color: var(--secondary); margin-bottom: 8px; display: none;"></div><select id="selProd_${i}" onchange="uiBuilder.onProdChange(${i})"><option value="">Selecione...</option></select></div><div class="grid-cell" data-label="Carregado (t)"><input type="number" id="inpQtd_${i}" step="0.001" min="0" oninput="uiBuilder.recalcularLinhas(${i})"></div><div class="grid-cell" data-label="Lote Utilizado"><select id="selLote_${i}" onchange="uiBuilder.onLoteChange(${i})"><option value="">Lote...</option></select><div id="lblSaldo_${i}" style="font-size: 11px; font-weight: 800; color: var(--success); margin-top: 4px;"></div></div><div class="grid-cell" data-label="Avaria (t)"><input type="number" id="inpPerda_${i}" step="0.001" min="0"></div><div class="grid-cell" data-label="Motivo Avaria"><select id="selMotivo_${i}"><option value="">Motivo...</option><option value="Rasgo na embalagem">Rasgo</option><option value="Qualidade">Qualidade</option><option value="Transporte">Transporte</option></select></div></div>`);
     }
@@ -1153,15 +1446,16 @@ const uiBuilder = {
 
   handleImageUpload(event, previewId, hiddenInputId) {
       const file = event.target.files[0]; const preview = document.getElementById(previewId); const hiddenInput = document.getElementById(hiddenInputId);
-      if (!file) { preview.classList.remove('has-image'); preview.style.backgroundImage = 'none'; hiddenInput.value = ''; return; }
-      preview.innerHTML = '<span>Carregando 3D...</span>';
+      if (!file) { if(preview) {preview.classList.remove('has-image'); preview.style.backgroundImage = 'none';} if(hiddenInput) hiddenInput.value = ''; return; }
+      if(preview) preview.innerHTML = '<span>Carregando 3D...</span>';
       const reader = new FileReader();
       reader.onload = (e) => {
           const img = new Image(); img.onload = () => {
               const canvas = document.createElement('canvas'); let width = img.width; let height = img.height;
               if (width > height) { if (width > 1000) { height *= 1000 / width; width = 1000; } } else { if (height > 1000) { width *= 1000 / height; height = 1000; } }
               canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-              preview.style.backgroundImage = `url(${canvas.toDataURL('image/jpeg', 0.6)})`; preview.classList.add('has-image'); preview.innerHTML = '<span>Foto Pronta ✔️</span>'; hiddenInput.value = canvas.toDataURL('image/jpeg', 0.6);
+              if(preview) { preview.style.backgroundImage = `url(${canvas.toDataURL('image/jpeg', 0.6)})`; preview.classList.add('has-image'); preview.innerHTML = '<span>Foto Pronta ✔️</span>'; }
+              if(hiddenInput) hiddenInput.value = canvas.toDataURL('image/jpeg', 0.6);
           }; img.src = e.target.result;
       }; reader.readAsDataURL(file);
   },
@@ -1171,7 +1465,8 @@ const uiBuilder = {
       const btn = document.getElementById('btnToggleGridRows'); let hasContent = 0, emptyShown = 0, totalShown = 0;
       for (let i = 1; i <= 10; i++) {
         const row = document.getElementById(`gridRow_${i}`); if(!row) continue;
-        if (document.getElementById(`selProd_${i}`).value !== '' || parseFloat(document.getElementById(`inpQtd_${i}`).value) > 0) { row.style.display = ''; hasContent++; totalShown++; } 
+        const sel = document.getElementById(`selProd_${i}`); const qtd = document.getElementById(`inpQtd_${i}`);
+        if ((sel && sel.value !== '') || (qtd && parseFloat(qtd.value) > 0)) { row.style.display = ''; hasContent++; totalShown++; } 
         else { if (emptyShown < this.visibleEmptyRows || (hasContent === 0 && emptyShown === 0)) { row.style.display = ''; emptyShown++; totalShown++; } else { row.style.display = 'none'; } }
       }
       if (btn) btn.innerHTML = totalShown >= 10 ? '⬆ Ocultar vazias' : '⬇ Expandir linha';
@@ -1180,7 +1475,8 @@ const uiBuilder = {
   populateSelects(parsedData, lotesMap) {
     this.localDataStore = parsedData; this.clearDependentFields();
     const placas = [...new Set(parsedData.map(d => d.placa).filter(Boolean))].sort();
-    const placaSelect = document.getElementById('selPlacaBusca'); const currentPlaca = placaSelect.value;
+    const placaSelect = document.getElementById('selPlacaBusca'); if(!placaSelect) return;
+    const currentPlaca = placaSelect.value;
     placaSelect.innerHTML = '<option value="">Selecione a Placa...</option>' + placas.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
     if(currentPlaca && placas.includes(currentPlaca)) placaSelect.value = currentPlaca;
   },
@@ -1190,18 +1486,23 @@ const uiBuilder = {
     const pedContainer = document.getElementById('pedidosContainer'); if(pedContainer) pedContainer.style.display = 'none';
     for(let i = 1; i <= 10; i++) {
       const sel = document.getElementById(`selProd_${i}`); if(sel) { sel.innerHTML = '<option value="">Selecione...</option>'; sel.dataset.sugQtd = ''; }
-      document.getElementById(`inpQtd_${i}`).value = ''; document.getElementById(`selLote_${i}`).innerHTML = '<option value="">Lote...</option>'; document.getElementById(`lblSaldo_${i}`).innerText = ''; document.getElementById(`inpPerda_${i}`).value = ''; document.getElementById(`selMotivo_${i}`).value = '';
+      const q = document.getElementById(`inpQtd_${i}`); if(q) q.value = ''; 
+      const sl = document.getElementById(`selLote_${i}`); if(sl) sl.innerHTML = '<option value="">Lote...</option>'; 
+      const ls = document.getElementById(`lblSaldo_${i}`); if(ls) ls.innerText = ''; 
+      const ip = document.getElementById(`inpPerda_${i}`); if(ip) ip.value = ''; 
+      const sm = document.getElementById(`selMotivo_${i}`); if(sm) sm.value = '';
       const lbl = document.getElementById(`lblDestino_${i}`); if(lbl) { lbl.innerText = ''; lbl.style.display = 'none'; }
       const row = document.getElementById(`gridRow_${i}`); if(row) { row.style.borderLeft = 'none'; }
     }
     document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false); document.querySelectorAll('.check-card').forEach(c => c.className = 'check-card');
     const ta = document.getElementById('chk_text_obs_geral'); if(ta) ta.value='';
-    ['Frente', 'Traseira', 'Assoalho'].forEach(id => { const preview = document.getElementById(`preview${id}`); if(preview) { preview.style.backgroundImage = 'none'; preview.classList.remove('has-image'); preview.innerHTML = '<span>📷 Câmera</span>'; } document.getElementById(`base64${id}`).value = ''; });
+    ['Frente', 'Traseira', 'Assoalho'].forEach(id => { const preview = document.getElementById(`preview${id}`); if(preview) { preview.style.backgroundImage = 'none'; preview.classList.remove('has-image'); preview.innerHTML = '<span>📷 Câmera</span>'; } const b = document.getElementById(`base64${id}`); if(b) b.value = ''; });
     this.verificarPlacaJaCarregou(); this.visibleEmptyRows = 0; this.updateGridVisibility();
   },
 
   onPlacaChange() {
-    const placa = document.getElementById('selPlacaBusca').value; this.clearDependentFields(); if(!placa) return;
+    const placaSelect = document.getElementById('selPlacaBusca'); if(!placaSelect) return;
+    const placa = placaSelect.value; this.clearDependentFields(); if(!placa) return;
     const items = this.localDataStore.filter(d => d.placa === placa);
     if(items.length > 0) {
       document.getElementById('pedidosContainer').style.display = 'block';
@@ -1214,7 +1515,9 @@ const uiBuilder = {
 
       const allObs = items.map(i => i.obsStr).filter(Boolean); let motEncontrado = "";
       for (const obs of allObs) { const match = /MOT(?:ORISTA)?[:\s]+([A-ZÀ-Úa-z\s]+?)(?:\s*-|\s*CPF|$)/i.exec(obs); if (match) motEncontrado = match[1].trim(); }
-      document.getElementById('inpPlaca').value = placa; document.getElementById('inpMotorista').value = motEncontrado; document.getElementById('inpObs').value = [...new Set(allObs)].join('\n');
+      const inpP = document.getElementById('inpPlaca'); if(inpP) inpP.value = placa; 
+      const inpM = document.getElementById('inpMotorista'); if(inpM) inpM.value = motEncontrado; 
+      const inpO = document.getElementById('inpObs'); if(inpO) inpO.value = [...new Set(allObs)].join('\n');
       
       let rowIdx = 1; const agrupamentoCliProd = {};
       items.forEach(i => { 
@@ -1222,21 +1525,25 @@ const uiBuilder = {
       });
 
       const optsHTML = '<option value="">Selecione...</option>' + [...new Set(items.map(i => i.produtoDesc).filter(Boolean))].map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
-      for(let i = 1; i <= 10; i++) document.getElementById(`selProd_${i}`).innerHTML = optsHTML;
+      for(let i = 1; i <= 10; i++) { const s = document.getElementById(`selProd_${i}`); if(s) s.innerHTML = optsHTML; }
 
       Object.values(agrupamentoCliProd).forEach(item => {
         if (rowIdx > 10) return;
         const sel = document.getElementById(`selProd_${rowIdx}`); const lbl = document.getElementById(`lblDestino_${rowIdx}`);
-        lbl.innerText = `📦 ${item.cliente} 📍 ${item.destino}`; lbl.style.display = 'inline-block';
-        sel.value = item.produto; sel.dataset.sugQtd = item.qtd; this.onProdChange(rowIdx, item.qtd); rowIdx++;
+        if(lbl) {lbl.innerText = `📦 ${item.cliente} 📍 ${item.destino}`; lbl.style.display = 'inline-block';}
+        if(sel) {sel.value = item.produto; sel.dataset.sugQtd = item.qtd;} this.onProdChange(rowIdx, item.qtd); rowIdx++;
       });
       this.verificarPlacaJaCarregou(); this.visibleEmptyRows = 0; this.updateGridVisibility();
     }
   },
 
   verificarPlacaJaCarregou() {
-    const placa = normalizeName(document.getElementById('inpPlaca')?.value || ''); const obs = normalizeName(document.getElementById('inpObs')?.value || ''); const badge = document.getElementById('badgeJaCarregou');
-    if(document.getElementById('chkManualPlaca')?.checked) { badge.style.display = 'inline-block'; return; }
+    const p = document.getElementById('inpPlaca'); const placa = p ? normalizeName(p.value) : ''; 
+    const o = document.getElementById('inpObs'); const obs = o ? normalizeName(o.value) : ''; 
+    const badge = document.getElementById('badgeJaCarregou'); if(!badge) return;
+    
+    const chk = document.getElementById('chkManualPlaca');
+    if(chk && chk.checked) { badge.style.display = 'inline-block'; return; }
     if(!placa || !obs || !this.historicoCargas || this.historicoCargas.length === 0) { badge.style.display = 'none'; return; }
     const ho = new Date(); const regex = new RegExp(`\\b${String(ho.getDate()).padStart(2, '0')}/${String(ho.getMonth() + 1).padStart(2, '0')}/${ho.getFullYear()}\\b`);
     let jaCarregou = false;
@@ -1245,22 +1552,26 @@ const uiBuilder = {
   },
 
   onProdChange(index, sugQtd = null) {
-    const sel = document.getElementById(`selProd_${index}`); const prodKey = normalizeName(sel.value); const qtdField = document.getElementById(`inpQtd_${index}`); const loteSelect = document.getElementById(`selLote_${index}`);
-    loteSelect.innerHTML = '<option value="">Lote...</option>'; qtdField.value = ''; 
+    const sel = document.getElementById(`selProd_${index}`); if(!sel) return;
+    const prodKey = normalizeName(sel.value); const qtdField = document.getElementById(`inpQtd_${index}`); const loteSelect = document.getElementById(`selLote_${index}`);
+    if(loteSelect) loteSelect.innerHTML = '<option value="">Lote...</option>'; 
+    if(qtdField) qtdField.value = ''; 
     if(prodKey) {
       const lotesObj = this.lotesMap[prodKey];
-      if (lotesObj && Object.keys(lotesObj).length > 0) {
+      if (lotesObj && Object.keys(lotesObj).length > 0 && loteSelect) {
         loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + Object.keys(lotesObj).map(l => `<option value="${escapeHTML(l)}" data-saldo="${lotesObj[l]}">${escapeHTML(l)}</option>`).join('');
         if(Object.keys(lotesObj).length === 1) { loteSelect.selectedIndex = 1; this.onLoteChange(index); }
-      } else { loteSelect.innerHTML = '<option value="S/ Lote">Sem Lote no Estoque</option>'; }
-      const valQtd = typeof sugQtd === 'number' ? sugQtd : Number(sel.dataset.sugQtd || 0); if (valQtd > 0) qtdField.value = formatTons(valQtd);
+      } else if (loteSelect) { loteSelect.innerHTML = '<option value="S/ Lote">Sem Lote no Estoque</option>'; }
+      const valQtd = typeof sugQtd === 'number' ? sugQtd : Number(sel.dataset.sugQtd || 0); if (valQtd > 0 && qtdField) qtdField.value = formatTons(valQtd);
       this.recalcularLinhas(index);
-    } else { document.getElementById(`lblDestino_${index}`).style.display = 'none'; this.recalcularLinhas(index); }
+    } else { const l = document.getElementById(`lblDestino_${index}`); if(l) l.style.display = 'none'; this.recalcularLinhas(index); }
   },
 
   onLoteChange(index) {
-    const loteSelect = document.getElementById(`selLote_${index}`); const opt = loteSelect.options[loteSelect.selectedIndex];
-    document.getElementById(`lblSaldo_${index}`).innerText = opt && opt.dataset.saldo ? `Saldo: ${formatTons(opt.dataset.saldo)}t` : ''; this.recalcularLinhas(index);
+    const loteSelect = document.getElementById(`selLote_${index}`); const lbl = document.getElementById(`lblSaldo_${index}`);
+    if(!loteSelect || !lbl) return;
+    const opt = loteSelect.options[loteSelect.selectedIndex];
+    lbl.innerText = opt && opt.dataset.saldo ? `Saldo: ${formatTons(opt.dataset.saldo)}t` : ''; this.recalcularLinhas(index);
   },
 
   recalcularLinhas(changedIndex) {
@@ -1280,7 +1591,7 @@ const uiBuilder = {
     }
     this.updateGridVisibility(); 
   },
-  toggleLoader(show, text="Sincronizando...") { const overlay = document.getElementById('loaderOverlay'); document.getElementById('loaderText').innerText = text; overlay.style.display = show ? 'flex' : 'none'; }
+  toggleLoader(show, text="Sincronizando...") { const overlay = document.getElementById('loaderOverlay'); if(!overlay) return; const t = document.getElementById('loaderText'); if(t) t.innerText = text; overlay.style.display = show ? 'flex' : 'none'; }
 };
 
 const appController = {
@@ -1305,7 +1616,7 @@ const appController = {
       if (rawEstoque) { const parsedE = dataParser.parseEstoque(rawEstoque); if (Object.keys(parsedE.map).length > 0) { uiBuilder.lotesMap = parsedE.map; uiBuilder.lotesFlat = parsedE.flat; perdasController.populateProdutos(parsedE.map); perdasController.populateGlobais(); } }
       
       const pending = await dbManager.getAllPending(); this.currentPendingPlacas = (pending || []).filter(p => p.type === 'OPERACAO').map(p => p.payload.placa);
-      if (document.getElementById('tab-dash').classList.contains('active')) dashboardEngine.renderExecTable(this.lastParsedData, this.currentPendingPlacas);
+      const dash = document.getElementById('tab-dash'); if (dash && dash.classList.contains('active')) dashboardEngine.renderExecTable(this.lastParsedData, this.currentPendingPlacas);
       uiBuilder.verificarPlacaJaCarregou(); uiBuilder.updateGlobalUpdateTimestamp();
     } catch (error) {}
   },
@@ -1314,7 +1625,7 @@ const appController = {
     if(!navigator.onLine) return; 
     uiBuilder.toggleLoader(true, "Conectando ao Centro de Comando...");
     try {
-      document.getElementById('fatalError').style.display = 'none';
+      const fe = document.getElementById('fatalError'); if(fe) fe.style.display = 'none';
       const [rawValues, historicoRaw, rncRaw, globLocRaw] = await Promise.all([ apiService.fetchSheetData(), apiService.fetchHistoricoData(), apiService.fetchRncData(), apiService.fetchGlobalLoc() ]);
 
       this.lastParsedData = dataParser.parse(rawValues || []); uiBuilder.historicoCargas = historicoRaw || []; uiBuilder.rncCargas = dataParser.parseRnc(rncRaw); uiBuilder.localDataStore = this.lastParsedData;
@@ -1329,49 +1640,57 @@ const appController = {
       uiBuilder.updateTimestamp(); uiBuilder.updateGlobalUpdateTimestamp();
 
     } catch (error) { 
-        document.getElementById('fatalError').style.display = 'block'; 
-        debugEngine.log(`Falha geral no Refresh: ${error.message}`, "error");
+        const fe = document.getElementById('fatalError'); if(fe) fe.style.display = 'block'; 
+        debugEngine.log(`Falha no Refresh: ${error.message}`, "error");
     } finally { uiBuilder.toggleLoader(false); }
   },
 
   async submitFinal(statusLiberacao) {
     if(this.isSubmitting) return;
-    const acomp = document.getElementById('selAcomp').value; const placaSelecionada = document.getElementById('selPlacaBusca').value; 
+    const sa = document.getElementById('selAcomp'); const acomp = sa ? sa.value : ''; 
+    const sp = document.getElementById('selPlacaBusca'); const placaSelecionada = sp ? sp.value : ''; 
     if(!acomp || !placaSelecionada) return alert("⚠️ Preencha Responsável e a Placa.");
 
     const itemsCarga = uiBuilder.localDataStore.filter(d => d.placa === placaSelecionada);
     const cli = [...new Set(itemsCarga.map(i => i.cliente))].join(' | '); const ped = [...new Set(itemsCarga.map(i => i.pedido))].join(' | ');
 
-    let missingCheck = false; config.checklist.forEach(c => { if(c.type !== 'text' && !document.querySelector(`input[name="chk_${c.id}"]:checked`)) missingCheck = true; });
+    let missingCheck = false; config.checklist.forEach(c => { const rb = document.querySelector(`input[name="chk_${c.id}"]:checked`); if(c.type !== 'text' && !rb) missingCheck = true; });
     if(missingCheck) return alert("⚠️ Responda todos os itens do Checklist.");
 
-    const base64Frente = document.getElementById('base64Frente').value; const base64Traseira = document.getElementById('base64Traseira').value; const base64Assoalho = document.getElementById('base64Assoalho').value;
+    const fF = document.getElementById('base64Frente'); const base64Frente = fF ? fF.value : ''; 
+    const fT = document.getElementById('base64Traseira'); const base64Traseira = fT ? fT.value : ''; 
+    const fA = document.getElementById('base64Assoalho'); const base64Assoalho = fA ? fA.value : '';
     if(!base64Frente || !base64Traseira || !base64Assoalho) return alert("⚠️ FOTOS PENDENTES (Frente, Traseira e Assoalho).");
 
-    const payload = { tipo: "OPERACAO", status: statusLiberacao, dataHora: new Date().toLocaleString('pt-BR'), acompanhamento: acomp, cliente: cli, pedido: ped, produto: '', quantidadeTotal: 0, placa: document.getElementById('inpPlaca').value, motorista: document.getElementById('inpMotorista').value, obs: document.getElementById('inpObs').value, linhasOperacao: [], checklist: {}, fotos: { frente: base64Frente, traseira: base64Traseira, assoalho: base64Assoalho } };
+    const p = document.getElementById('inpPlaca'); const m = document.getElementById('inpMotorista'); const o = document.getElementById('inpObs');
+    const payload = { tipo: "OPERACAO", status: statusLiberacao, dataHora: new Date().toLocaleString('pt-BR'), acompanhamento: acomp, cliente: cli, pedido: ped, produto: '', quantidadeTotal: 0, placa: p ? p.value : '', motorista: m ? m.value : '', obs: o ? o.value : '', linhasOperacao: [], checklist: {}, fotos: { frente: base64Frente, traseira: base64Traseira, assoalho: base64Assoalho } };
 
     let hasMaterial = false;
     for(let i=1; i<=10; i++) {
-      const p = document.getElementById(`selProd_${i}`).value; const q = parseBRNumber(document.getElementById(`inpQtd_${i}`).value); const l = document.getElementById(`selLote_${i}`)?.value || 'S/ Lote'; const qPerda = parseBRNumber(document.getElementById(`inpPerda_${i}`).value); const mPerda = document.getElementById(`selMotivo_${i}`).value;
+      const e_p = document.getElementById(`selProd_${i}`); const p_val = e_p ? e_p.value : ''; 
+      const e_q = document.getElementById(`inpQtd_${i}`); const q = parseBRNumber(e_q ? e_q.value : ''); 
+      const e_l = document.getElementById(`selLote_${i}`); const l = e_l ? (e_l.value || 'S/ Lote') : 'S/ Lote'; 
+      const e_qp = document.getElementById(`inpPerda_${i}`); const qPerda = parseBRNumber(e_qp ? e_qp.value : ''); 
+      const e_mp = document.getElementById(`selMotivo_${i}`); const mPerda = e_mp ? e_mp.value : '';
       if (q < 0 || qPerda < 0) return alert(`⛔ Valores negativos.`);
-      if(p && (q > 0 || qPerda > 0)) {
-        hasMaterial = true; if (!payload.produto) payload.produto = p;
+      if(p_val && (q > 0 || qPerda > 0)) {
+        hasMaterial = true; if (!payload.produto) payload.produto = p_val;
         if(qPerda > 0 && !mPerda) return alert(`⛔ Informe motivo da perda.`);
-        payload.quantidadeTotal += q; payload.linhasOperacao.push({ produto: p, quantidade: q, lote: l, perda: qPerda, motivoPerda: mPerda || "-" });
+        payload.quantidadeTotal += q; payload.linhasOperacao.push({ produto: p_val, quantidade: q, lote: l, perda: qPerda, motivoPerda: mPerda || "-" });
       }
     }
     if(!hasMaterial) return alert("⚠️ Informe a quantidade de pelo menos um produto.");
-    config.checklist.forEach(c => { payload.checklist[c.lbl] = c.type === 'text' ? (document.getElementById(`chk_text_${c.id}`).value || 'Sem observações adicionais') : document.querySelector(`input[name="chk_${c.id}"]:checked`).value; });
+    config.checklist.forEach(c => { const textNode = document.getElementById(`chk_text_${c.id}`); const rbNode = document.querySelector(`input[name="chk_${c.id}"]:checked`); payload.checklist[c.lbl] = c.type === 'text' ? (textNode ? textNode.value || 'Sem observações adicionais' : 'Sem observações adicionais') : (rbNode ? rbNode.value : ''); });
 
     this.isSubmitting = true; uiBuilder.toggleLoader(true, "Transmitindo Operação...");
     try {
       const resp = await apiService.sendDataToAppScript(payload);
-      if(resp && resp.success) { alert("✅ SUCESSO!"); uiBuilder.clearDependentFields(); document.getElementById('selPlacaBusca').value = ''; uiBuilder.updateGlobalUpdateTimestamp(); this.silentRefresh(); } 
+      if(resp && resp.success) { alert("✅ SUCESSO!"); uiBuilder.clearDependentFields(); if(sp) sp.value = ''; uiBuilder.updateGlobalUpdateTimestamp(); this.silentRefresh(); } 
       else { alert("❌ ERRO DO SCRIPT:\n\n" + (resp.message || "Erro desconhecido.")); }
     } catch(err) { 
       await dbManager.savePending('OPERACAO', payload); alert("📡 MODO OFFLINE!\n\nSalvo no dispositivo.");
-      uiBuilder.clearDependentFields(); document.getElementById('selPlacaBusca').value = '';
-      const pending = await dbManager.getAllPending(); this.currentPendingPlacas = (pending || []).filter(p => p.type === 'OPERACAO').map(p => p.payload.placa); dashboardEngine.renderExecTable(this.lastParsedData, this.currentPendingPlacas);
+      uiBuilder.clearDependentFields(); if(sp) sp.value = '';
+      const pending = await dbManager.getAllPending(); this.currentPendingPlacas = (pending || []).filter(pd => pd.type === 'OPERACAO').map(pd => pd.payload.placa); dashboardEngine.renderExecTable(this.lastParsedData, this.currentPendingPlacas);
       syncManager.updateStatus(navigator.onLine);
     } finally { this.isSubmitting = false; uiBuilder.toggleLoader(false); }
   }
@@ -1381,7 +1700,7 @@ const perdasController = {
   visibleEmptyRows: 0,
   init() { this.buildPerdasGrid(); this.updateGridVisibility(); },
   buildPerdasGrid() {
-    const c = document.getElementById('perdasContainer');
+    const c = document.getElementById('perdasContainer'); if(!c) return;
     c.insertAdjacentHTML('beforebegin', '<datalist id="listaProdutosPerda"></datalist><datalist id="listaLotesGlobais"></datalist>');
     for(let i = 1; i <= 10; i++) {
       c.insertAdjacentHTML('beforeend', `<div class="grid-row perda-row" id="perdaRow_${i}" style="grid-template-columns: minmax(200px,3fr) 2fr 1.4fr 1.2fr 2fr;"><div class="grid-cell" data-label="Produto"><input type="text" list="listaProdutosPerda" id="perdaProd_${i}" placeholder="Comece a digitar..." onchange="perdasController.onPerdaProdChange(${i})" autocomplete="off"></div><div class="grid-cell" data-label="Lote (Saldo)"><input type="text" list="listaLotesGlobais" id="perdaLote_${i}" placeholder="Lote (Ex: 3574)" autocomplete="off" onchange="perdasController.onPerdaLoteChange(${i})" oninput="perdasController.limparSaldo(${i})"><div id="perdaSaldo_${i}" style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-top: 4px;"></div></div><div class="grid-cell" data-label="Qtd (t)"><input type="number" id="perdaQtd_${i}" step="0.001" min="0" placeholder="Ex: 2.500" oninput="perdasController.updateGridVisibility()"></div><div class="grid-cell" data-label="Tipo de Perda"><select id="perdaTipo_${i}"><option value="">Motivo...</option><option value="Processo">Processo</option><option value="Carregamento">Carregamento</option><option value="Avaria">Avaria</option></select></div><div class="grid-cell" data-label="Observação"><input type="text" id="perdaObs_${i}" placeholder="Detalhes..."></div></div>`);
@@ -1393,7 +1712,8 @@ const perdasController = {
       const btn = document.getElementById('btnTogglePerdasRows'); let hasContentCount = 0, emptyRowsShown = 0, totalShown = 0;
       for (let i = 1; i <= 10; i++) {
         const row = document.getElementById(`perdaRow_${i}`); if(!row) continue;
-        if (document.getElementById(`perdaProd_${i}`).value !== '' || parseFloat(document.getElementById(`perdaQtd_${i}`).value) > 0) { row.style.display = ''; hasContentCount++; totalShown++; } 
+        const pp = document.getElementById(`perdaProd_${i}`); const pq = document.getElementById(`perdaQtd_${i}`);
+        if ((pp && pp.value !== '') || (pq && parseFloat(pq.value) > 0)) { row.style.display = ''; hasContentCount++; totalShown++; } 
         else { if (emptyRowsShown < this.visibleEmptyRows || (hasContentCount === 0 && emptyRowsShown === 0)) { row.style.display = ''; emptyRowsShown++; totalShown++; } else { row.style.display = 'none'; } }
       }
       if (btn) { btn.innerHTML = totalShown >= 10 ? '⬆ Ocultar linhas vazias' : '⬇ Expandir mais uma linha'; }
@@ -1401,14 +1721,17 @@ const perdasController = {
   populateProdutos(lotesMap) { const keys = Object.keys(lotesMap).filter(k => /[a-zA-Z]/.test(k)).sort(); const datalist = document.getElementById('listaProdutosPerda'); if (datalist) { datalist.innerHTML = keys.map(p => `<option value="${escapeHTML(p)}">`).join(''); } },
   populateGlobais() { const dl = document.getElementById('listaLotesGlobais'); if (dl && uiBuilder.lotesFlat) { dl.innerHTML = uiBuilder.lotesFlat.map(item => `<option value="${escapeHTML(item.lote)}">${escapeHTML(item.produto)}</option>`).join(''); } },
   onPerdaProdChange(index) {
-      const pVal = normalizeName(document.getElementById(`perdaProd_${index}`).value);
-      if (pVal && (!uiBuilder.lotesMap || !uiBuilder.lotesMap[pVal])) { document.getElementById(`perdaProd_${index}`).style.borderColor = 'var(--danger)'; } 
-      else { document.getElementById(`perdaProd_${index}`).style.borderColor = 'var(--success)'; if(!document.getElementById(`perdaLote_${index}`).value) { document.getElementById(`perdaSaldo_${index}`).innerText = 'Digite o lote para ver saldo...'; document.getElementById(`perdaSaldo_${index}`).style.color = 'var(--text-muted)'; } }
+      const pp = document.getElementById(`perdaProd_${index}`); const pl = document.getElementById(`perdaLote_${index}`); const ps = document.getElementById(`perdaSaldo_${index}`);
+      if(!pp || !pl || !ps) return;
+      const pVal = normalizeName(pp.value);
+      if (pVal && (!uiBuilder.lotesMap || !uiBuilder.lotesMap[pVal])) { pp.style.borderColor = 'var(--danger)'; } 
+      else { pp.style.borderColor = 'var(--success)'; if(!pl.value) { ps.innerText = 'Digite o lote para ver saldo...'; ps.style.color = 'var(--text-muted)'; } }
       this.updateGridVisibility();
   },
-  limparSaldo(index) { document.getElementById(`perdaSaldo_${index}`).innerText = 'Pressione Enter para buscar...'; document.getElementById(`perdaSaldo_${index}`).style.color = 'var(--text-muted)'; document.getElementById(`perdaLote_${index}`).style.borderColor = 'var(--border)'; },
+  limparSaldo(index) { const ps = document.getElementById(`perdaSaldo_${index}`); const pl = document.getElementById(`perdaLote_${index}`); if(ps) {ps.innerText = 'Pressione Enter para buscar...'; ps.style.color = 'var(--text-muted)';} if(pl) pl.style.borderColor = 'var(--border)'; },
   onPerdaLoteChange(index) {
       const loteInput = document.getElementById(`perdaLote_${index}`); const prodInput = document.getElementById(`perdaProd_${index}`); const lblSaldo = document.getElementById(`perdaSaldo_${index}`);
+      if(!loteInput || !prodInput || !lblSaldo) return;
       const val = loteInput.value.trim().toUpperCase(); const valNumStr = String(Number(val.replace(/\D/g, ''))); 
       if (!val) { lblSaldo.innerText = ''; loteInput.style.borderColor = 'var(--border)'; return; }
       let matches = (uiBuilder.lotesFlat || []).filter(item => { const itemNumStr = String(Number(String(item.lote).replace(/\D/g, ''))); if (valNumStr.length >= 4 && !isNaN(valNumStr)) { return itemNumStr.endsWith(valNumStr) || valNumStr.endsWith(itemNumStr); } return itemNumStr === valNumStr || item.lote.toUpperCase() === val; });
@@ -1419,19 +1742,20 @@ const perdasController = {
       this.updateGridVisibility();
   },
   limparPerda() { 
-    for(let i = 1; i <= 10; i++) { document.getElementById(`perdaProd_${i}`).value = ''; document.getElementById(`perdaProd_${i}`).style.borderColor = 'var(--border)'; document.getElementById(`perdaQtd_${i}`).value = ''; document.getElementById(`perdaLote_${i}`).value = ''; document.getElementById(`perdaLote_${i}`).style.borderColor = 'var(--border)'; document.getElementById(`perdaSaldo_${i}`).innerText = ''; document.getElementById(`perdaTipo_${i}`).value = ''; document.getElementById(`perdaObs_${i}`).value = ''; } 
+    for(let i = 1; i <= 10; i++) { const pp = document.getElementById(`perdaProd_${i}`); if(pp) {pp.value = ''; pp.style.borderColor = 'var(--border)';} const pq = document.getElementById(`perdaQtd_${i}`); if(pq) pq.value = ''; const pl = document.getElementById(`perdaLote_${i}`); if(pl) {pl.value = ''; pl.style.borderColor = 'var(--border)';} const ps = document.getElementById(`perdaSaldo_${i}`); if(ps) ps.innerText = ''; const pt = document.getElementById(`perdaTipo_${i}`); if(pt) pt.value = ''; const po = document.getElementById(`perdaObs_${i}`); if(po) po.value = ''; } 
     uiBuilder.updateTimestamp(); this.visibleEmptyRows = 0; this.updateGridVisibility();
   },
   async submitPerda() {
-    const acomp = document.getElementById('perdaAcomp').value; if(!acomp) return alert('⚠️ Responsável não identificado.');
+    const pa = document.getElementById('perdaAcomp'); const acomp = pa ? pa.value : ''; if(!acomp) return alert('⚠️ Responsável não identificado.');
     const perdas = [];
     for(let i=1; i<=10; i++) {
-      const pRaw = document.getElementById(`perdaProd_${i}`).value; const p = normalizeName(pRaw); const lRaw = document.getElementById(`perdaLote_${i}`).value.trim(); const q = parseBRNumber(document.getElementById(`perdaQtd_${i}`).value);
+      const pp = document.getElementById(`perdaProd_${i}`); const pRaw = pp ? pp.value : ''; const p = normalizeName(pRaw); const pl = document.getElementById(`perdaLote_${i}`); const lRaw = pl ? pl.value.trim() : ''; const pq = document.getElementById(`perdaQtd_${i}`); const q = parseBRNumber(pq ? pq.value : '');
+      const pt = document.getElementById(`perdaTipo_${i}`); const po = document.getElementById(`perdaObs_${i}`);
       if(pRaw || lRaw || q > 0) {
         if (!pRaw || !lRaw || q <= 0) { return alert(`⚠️ A Linha ${i} está incompleta.`); }
         const loteValido = (uiBuilder.lotesFlat || []).find(item => item.lote.toUpperCase() === lRaw.toUpperCase() && normalizeName(item.produto) === p);
         if (!loteValido) { return alert(`⚠️ O Lote "${lRaw}" não existe (Linha ${i}).`); }
-        perdas.push({ produto: pRaw, qtd: q, lote: lRaw, tipo: document.getElementById(`perdaTipo_${i}`).value || 'Não informado', obs: document.getElementById(`perdaObs_${i}`).value });
+        perdas.push({ produto: pRaw, qtd: q, lote: lRaw, tipo: pt ? pt.value || 'Não informado' : 'Não informado', obs: po ? po.value : '' });
       }
     }
     if(perdas.length === 0) return alert('⚠️ Preencha ao menos uma perda.');
