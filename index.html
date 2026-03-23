@@ -129,7 +129,7 @@
   .grid-cell { padding: 12px; display: flex; flex-direction: column; justify-content: center; }
 
   /* ==========================================
-     CARDS DO PAINEL EXECUTIVO - LÓGICA VISUAL EXATA
+     CARDS DO PAINEL EXECUTIVO - LÓGICA DE CORES EXATA
   ========================================== */
   .carga-cards-grid { display: flex; flex-direction: column; gap: 16px; }
   .carga-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-soft); position: relative;}
@@ -141,14 +141,14 @@
       background: #FFFFFF; border: 2px solid #111827; border-top: 12px solid #003399; 
       border-radius: 6px; padding: 4px 12px; letter-spacing: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  
+  .carga-cliente { font-size: 14px; font-weight: 900; color: var(--text-main); flex: 1; text-transform: uppercase;}
+
   .status-banner { padding: 12px 16px; font-size: 12px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);}
   .status-agendado { background: var(--warning-bg); color: var(--warning); border-left: 6px solid var(--warning); }
   .status-carregando { background: var(--info-bg); color: var(--info); border-left: 6px solid var(--info); }
   .status-atraso { background: var(--danger-bg); color: var(--danger); border-left: 6px solid var(--danger); }
   .status-faturamento { background: var(--success-bg); color: var(--success); border-left: 6px solid var(--success); }
-  .status-bloqueio { background: var(--danger-bg); color: var(--danger); border-left: 6px solid var(--danger); }
-  .carga-card.status-bloqueado { border: 3px solid var(--danger); }
+  .status-bloqueado { border: 3px solid var(--danger); }
 
   .produto-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 12px 16px; background: var(--bg-input); border-radius: var(--radius); border: 1px solid var(--border); margin: 0 16px 12px 16px;}
   .badge-especial { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; margin-right: 4px; }
@@ -166,12 +166,6 @@
   .smart-banner { padding: 16px; border-radius: var(--radius); margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; border: 2px solid transparent;}
   .smart-banner.danger { background: var(--danger-bg); border-color: var(--danger); color: #991B1B; }
   .smart-banner.success { background: var(--success-bg); border-color: var(--success); color: #065F46; }
-
-  /* UPDATE BOX */
-  .update-box { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-soft); margin-bottom: 20px;}
-  .update-info { display: flex; flex-direction: column; gap: 4px; }
-  .update-info span { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
-  .update-info b { font-family: 'JetBrains Mono', monospace; font-size: 16px; color: var(--primary); }
 
   /* TELA CHEIA DO MAPA */
   .map-fullscreen { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 100000 !important; border-radius: 0 !important; border: none !important; margin: 0 !important; }
@@ -196,8 +190,6 @@
     
     #patioMap { height: 60vh; min-height: 400px; }
     .produto-row { grid-template-columns: 1fr; gap: 8px; margin: 0 12px 12px 12px;}
-    .update-box { flex-direction: column; gap: 16px; text-align: center; }
-    .update-box button { width: 100%; }
   }
 
   /* CHECKLIST */
@@ -231,7 +223,7 @@
           <div style="font-size: 50px; margin-bottom: 8px; animation: pop 1s infinite;">🚨</div>
           <h2 style="color: var(--danger);">ALERTA DE ESTOQUE</h2>
           <p id="globalAlertMsg" style="color: #7F1D1D; font-weight: 700;">Você tem lotes sem localização mapeada.</p>
-          <button class="btn-danger" onclick="document.getElementById('globalAlertOverlay').style.display='none'; uiBuilder.switchTab(null, 'mapa'); mapController.listarSemLocalizacao();" style="height: 56px;">🗺️ VER MAPA DE LOTES</button>
+          <button class="btn-danger" onclick="document.getElementById('globalAlertOverlay').style.display='none'; uiBuilder.switchTab(event, 'mapa'); mapController.listarSemLocalizacao();" style="height: 56px;">🗺️ VER MAPA DE LOTES</button>
       </div>
   </div>
 
@@ -283,16 +275,8 @@
     </div>
 
     <div id="tab-dash" class="tab-content active">
-      <div class="update-box anim-slide-up">
-          <div class="update-info">
-              <span>Última Sincronização de Dados</span>
-              <b id="lastUpdateText">--:--:--</b>
-          </div>
-          <button class="btn-primary" onclick="appController.handleRefresh()" style="border-radius: 12px; height: 50px;">🔄 ATUALIZAR AGORA</button>
-      </div>
-      
-      <div id="bannerContainer" class="anim-slide-up" style="animation-delay: 0.1s;"></div>
-      <div id="tabelaDiariaContainer" class="anim-slide-up" style="animation-delay: 0.2s;"></div>
+      <div id="bannerContainer"></div>
+      <div id="tabelaDiariaContainer" class="anim-slide-up"></div>
     </div>
 
     <div id="tab-op" class="tab-content">
@@ -468,7 +452,7 @@ const config = {
     historicoSheetId: '1KAOCFX7_raD0YMhA3yPh8HjS1fF9TlJWp9TYGACCMCI',
     rncSheetId: '1lyWfTaAkrgMWB0JrzbiPt9RIz7jB1WdCe2A9PwnRivY',
     key: 'AIzaSyAdzZznAPDRlGLqbT-8AAVSKslZYfr7Jc0',
-    range: 'Carregamento!A:AF', 
+    range: 'Carregamento', 
     timeoutMs: 15000,
     groqKey: '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'
   },
@@ -486,7 +470,9 @@ const config = {
   ]
 };
 
-// FUNÇÕES DE UTILIDADE (Restauradas)
+// ==========================================
+// FUNÇÕES UTILITÁRIAS VITAIS (RESTAURADAS)
+// ==========================================
 const parseBRNumber = (str) => {
     if (typeof str === 'number') return str;
     if (!str) return 0;
@@ -498,7 +484,7 @@ const parseBRNumber = (str) => {
 };
 const normalizeName = (s) => String(s || '').toUpperCase().replace(/\s+/g, ' ').trim();
 const formatTons = (val) => { const n = parseBRNumber(val); return (isNaN(n) ? 0 : n).toFixed(3); };
-const escapeHTML = (str) => String(str || '').replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
+const escapeHTML = (str) => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const extractPlaca = (obs) => {
   const text = String(obs || '').toUpperCase();
@@ -904,15 +890,13 @@ const truckStatusManager = {
 // ==========================================
 const mapController = {
     locDB: JSON.parse(localStorage.getItem('cysyLocations') || '{}'),
-    map: null, markers: {},
+    map: null, markers: {}, resizeObs: null,
 
     initLeaflet() {
         if(this.map) return;
         try {
-            // Inicializa focado na Cysy Mineração
             this.map = L.map('patioMap').setView([-28.5367584, -48.9715873], 18);
             
-            // Satélite Híbrido Google
             L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
                 maxZoom: 21,
                 attribution: '© Google Maps'
@@ -921,10 +905,13 @@ const mapController = {
             L.circleMarker([-28.5367584, -48.9715873], {color: 'white', fillColor: 'var(--secondary)', fillOpacity: 0.8, radius: 8})
              .bindPopup("<b>🏢 Cysy Mineração</b><br>Base Principal").addTo(this.map);
              
+            // Observador de Redimensionamento (Resolve o bug do mapa cinza/metade da tela)
+            this.resizeObs = new ResizeObserver(() => {
+                if(this.map) this.map.invalidateSize();
+            });
+            this.resizeObs.observe(document.getElementById('patioMapContainer'));
+
             debugEngine.log("Leaflet Satélite renderizado com sucesso.", "success");
-            
-            // Força a renderização correta ao iniciar
-            setTimeout(() => { if(this.map) this.map.invalidateSize(true); }, 500);
         } catch(e) { debugEngine.log(`Falha ao inicializar o Mapa Leaflet: ${e.message}`, "error"); }
     },
 
@@ -945,12 +932,11 @@ const mapController = {
             btn.style.borderColor = "rgba(255,255,255,0.2)";
         }
         
-        // Timeout dinâmico em cascata para lidar com a transição e redesenhar o mapa
-        [50, 200, 500, 900].forEach(delay => {
+        [100, 300, 700].forEach(delay => {
             setTimeout(() => { 
                 if(this.map) {
-                    this.map.invalidateSize(true); 
-                    window.dispatchEvent(new Event('resize'));
+                    this.map.invalidateSize(); 
+                    if(container.classList.contains('map-fullscreen')) this.map.setView([-28.5367584, -48.9715873], 18);
                 }
             }, delay);
         });
@@ -958,30 +944,20 @@ const mapController = {
 
     marcarMinhaLocalizacao() {
         if (!navigator.geolocation) return alert("GPS não suportado.");
-        this.initLeaflet();
-
-        uiBuilder.toggleLoader(true, "Buscando satélites precisos...");
+        uiBuilder.toggleLoader(true, "Buscando satélites...");
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 uiBuilder.toggleLoader(false);
                 const lat = pos.coords.latitude;
                 const lon = pos.coords.longitude;
-
-                if (!this.map) return alert("Mapa ainda não inicializado.");
-
-                this.map.invalidateSize(true);
-                this.map.setView([lat, lon], 19);
-
-                if (this.userMarker) this.map.removeLayer(this.userMarker);
-                this.userMarker = L.marker([lat, lon]).addTo(this.map)
-                 .bindPopup("<div style='text-align:center; font-family:Montserrat;'><b>📍 VOCÊ ESTÁ AQUI</b></div>")
-                 .openPopup();
+                if(this.map) {
+                    this.map.setView([lat, lon], 19);
+                    L.marker([lat, lon]).addTo(this.map)
+                     .bindPopup("<div style='text-align:center; font-family:Montserrat;'><b>📍 VOCÊ ESTÁ AQUI</b></div>").openPopup();
+                }
             },
-            (err) => { 
-                uiBuilder.toggleLoader(false); 
-                alert("Erro ao obter GPS. Certifique-se que o navegador/PWA tem permissão de localização."); 
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            (err) => { uiBuilder.toggleLoader(false); alert("Erro ao obter GPS. Certifique-se que o navegador tem permissão de localização."); },
+            { enableHighAccuracy: true }
         );
     },
 
@@ -1183,10 +1159,10 @@ const groqManager = {
 // ==========================================
 const dashboardEngine = {
   limparNomesGenericos(str) {
-      const genericos = ['LTDA', 'S/A', 'SA', 'ME', 'EPP', 'TRANSPORTES', 'TRANSPORTADORA', 'LOGISTICA', 'LOGÍSTICA', 'COMERCIO', 'COMERCIAL', 'AGROPECUARIA', 'AGRO', 'BRASIL', 'CIA', 'EIRELI'];
-      return (str||'').split(/[\s,\.\-]+/).filter(w => !genericos.includes(w)).join(' ').trim();
+    const genericos = ['LTDA', 'S/A', 'SA', 'ME', 'EPP', 'TRANSPORTES', 'TRANSPORTADORA', 'LOGISTICA', 'LOGÍSTICA', 'COMERCIO', 'COMERCIAL', 'AGROPECUARIA', 'AGRO', 'BRASIL', 'CIA', 'EIRELI'];
+    return (str || '').split(/[\s,.\-]+/).filter(w => w && !genericos.includes(w)).join(' ').trim();
   },
-  
+
   getClientColor(index) {
     const colors = [
       { bg: '#DBEAFE', fg: '#1D4ED8' }, { bg: '#DCFCE7', fg: '#166534' },
@@ -1240,19 +1216,30 @@ const dashboardEngine = {
       container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);"><span style="font-size:60px;">📭</span><p style="font-weight:900; margin-top:12px;">Nenhum carregamento encontrado.</p></div>`;
       return;
     }
-    
+
     const grupos = {};
-    parsedData.forEach(item => { const key = item.placa || 'SEM PLACA'; if (!grupos[key]) grupos[key] = []; grupos[key].push(item); });
-    
-    let arrayGrupos = Object.entries(grupos).map(([placa, itens]) => {
+    parsedData.forEach(item => {
+      const key = item.placa || 'SEM PLACA';
+      if (!grupos[key]) grupos[key] = [];
+      grupos[key].push(item);
+    });
+
+    const arrayGrupos = Object.entries(grupos).map(([placa, itens]) => {
       const obsUnificado = [...new Set(itens.map(i => i.obsStr).filter(Boolean))].join(' | ');
       const timeStr = extrairHorarioObs(obsUnificado);
-      let timeMins = 9999; if(timeStr) { const [h, m] = timeStr.split(':').map(Number); timeMins = (h * 60) + m; }
-      const totalQtd = itens.reduce((sum, i) => sum + Number(i.qtd||0), 0);
+      let timeMins = 9999;
+      if (timeStr) {
+        const [h, m] = timeStr.split(':').map(Number);
+        timeMins = (h * 60) + m;
+      }
+
+      const totalQtd = itens.reduce((sum, i) => sum + Number(i.qtd || 0), 0);
       const bloqueado = itens.some(i => i.bloqueio && i.bloqueio.trim() !== '' && i.bloqueio.toUpperCase() !== 'LIBERADO');
 
-      let statusInteligente = truckStatusManager.definirStatusCaminhao(placa, timeStr, totalQtd, itens.some(i => String(i.pallet).toUpperCase() === 'SIM'), pendingPlacas.includes(placa));
-      
+      let statusInteligente = truckStatusManager.definirStatusCaminhao(
+        placa, timeStr, totalQtd, itens.some(i => String(i.pallet).toUpperCase() === 'SIM'), pendingPlacas.includes(placa)
+      );
+
       if (bloqueado) {
         statusInteligente = {
           code: 'BLOQUEADO', color: '#DC2626', bg: '#FEE2E2', label: '⛔ BLOQUEADO', msg: 'Há bloqueio informado na programação.'
@@ -1261,56 +1248,53 @@ const dashboardEngine = {
 
       let rncMatches = [];
       if (uiBuilder.rncCargas && Array.isArray(uiBuilder.rncCargas)) {
-          const clientesStr = [...new Set(itens.map(i => i.cliente))].join(' • ');
-          const bc = this.limparNomesGenericos(clientesStr.toUpperCase()); const bo = this.limparNomesGenericos(obsUnificado.toUpperCase());
-          uiBuilder.rncCargas.forEach(rnc => {
-              const rC = this.limparNomesGenericos(rnc.cliente); const rT = this.limparNomesGenericos(rnc.transportador);
-              const mC = rC.length >= 3 && bc.includes(rC); const mT = rT.length >= 3 && bo.includes(rT);
-              const pL = placa.toUpperCase().replace(/[^A-Z0-9]/g, '');
-              const mP = pL.length >= 7 && (rnc.transportador.replace(/[^A-Z0-9]/g, '').includes(pL) || rnc.descricao.toUpperCase().replace(/[^A-Z0-9]/g, '').includes(pL));
-              let tr = []; if (mP) tr.push("Placa"); if (mC && !mP) tr.push("Cliente"); if (mT && !mP) tr.push("Transp.");
-              if (tr.length > 0) rncMatches.push({ data: rnc.data, desc: rnc.descricao, prod: rnc.produto, acao: rnc.acaoImediata, trigger: tr.join(' e ') });
-          });
+        const clientesStr = [...new Set(itens.map(i => i.cliente))].join(' • ');
+        const bc = this.limparNomesGenericos(clientesStr.toUpperCase());
+        const bo = this.limparNomesGenericos(obsUnificado.toUpperCase());
+
+        uiBuilder.rncCargas.forEach(rnc => {
+          const rC = this.limparNomesGenericos(rnc.cliente); const rT = this.limparNomesGenericos(rnc.transportador);
+          const mC = rC.length >= 3 && bc.includes(rC); const mT = rT.length >= 3 && bo.includes(rT);
+          const pL = placa.toUpperCase().replace(/[^A-Z0-9]/g, '');
+          const mP = pL.length >= 7 && (rnc.transportador.replace(/[^A-Z0-9]/g, '').includes(pL) || rnc.descricao.toUpperCase().replace(/[^A-Z0-9]/g, '').includes(pL));
+
+          let tr = []; if (mP) tr.push('Placa'); if (mC && !mP) tr.push('Cliente'); if (mT && !mP) tr.push('Transp.');
+          if (tr.length > 0) rncMatches.push({ data: rnc.data, desc: rnc.descricao, prod: rnc.produto, acao: rnc.acaoImediata, trigger: tr.join(' e ') });
+        });
       }
 
-      return { placa, itens, timeMins, timeStr, obsUnificado, totalQtd, statusInteligente, bloqueado, rncMatches };
+      return { placa, itens, timeMins, statusInteligente, bloqueado, rncMatches };
     }).sort((a, b) => {
-        const prioridade = { BLOQUEADO: 0, ATRASADO: 1, CARREGANDO: 2, AGENDADO: 3, AGUARDANDO: 4, FATURAMENTO: 5 };
-        return (prioridade[a.statusInteligente?.code] ?? 99) - (prioridade[b.statusInteligente?.code] ?? 99) || a.timeMins - b.timeMins;
+      const prioridade = { BLOQUEADO: 0, ATRASADO: 1, CARREGANDO: 2, AGENDADO: 3, AGUARDANDO: 4, FATURAMENTO: 5 };
+      return (prioridade[a.statusInteligente?.code] ?? 99) - (prioridade[b.statusInteligente?.code] ?? 99) || a.timeMins - b.timeMins;
     });
 
     this.renderTopBanners(arrayGrupos);
 
     let html = '<div class="carga-cards-grid">';
-    arrayGrupos.forEach(({placa, itens, statusInteligente, bloqueado, rncMatches}) => {
-      
+    arrayGrupos.forEach(({ placa, itens, statusInteligente, bloqueado, rncMatches }) => {
       const clientes = [...new Set(itens.map(i => i.cliente))];
       const clientesTags = clientes.map((cliente, idx) => {
         const cor = this.getClientColor(idx);
         return `<span class="cliente-tag" style="background:${cor.bg}; color:${cor.fg};">${escapeHTML(cliente)}</span>`;
       }).join(' ');
 
-      let rncHTML = '';
-      if (rncMatches.length > 0) {
-          const uRnc = []; const dSet = new Set();
-          for (let r of rncMatches) { if (!dSet.has(r.desc)) { dSet.add(r.desc); uRnc.push(r); } }
-          rncHTML = `
-            <div style="background: rgba(220,38,38,0.08); border-left: 6px solid var(--danger); padding: 16px; margin: 16px 24px 0; border-radius: 12px;">
-              <details>
-                <summary style="cursor:pointer; font-weight:900; color:var(--danger); font-size:14px;">⚠️ ${rncMatches.length} alerta(s) de qualidade</summary>
-                <div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
-                  ${rncMatches.map(r => `
-                    <div style="background:white; border:1px solid #FECACA; border-radius:10px; padding:12px; font-size:12px;">
-                      <strong>📅 ${escapeHTML(r.data)}</strong><br>
-                      <strong>Alvo:</strong> ${escapeHTML(r.trigger)}<br>
-                      <strong>Produto:</strong> ${escapeHTML(r.prod)}<br>
-                      <strong>Ocorrência:</strong> ${escapeHTML(r.desc)}<br>
-                      <strong>Ação imediata:</strong> ${escapeHTML(r.acao)}
-                    </div>`).join('')}
-                </div>
-              </details>
-            </div>`;
-      }
+      const rncHTML = rncMatches.length > 0 ? `
+        <div style="background: rgba(220,38,38,0.08); border-left: 6px solid var(--danger); padding: 16px; margin: 16px 24px 0; border-radius: 12px;">
+          <details>
+            <summary style="cursor:pointer; font-weight:900; color:var(--danger); font-size:14px;">⚠️ ${rncMatches.length} alerta(s) de qualidade</summary>
+            <div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
+              ${rncMatches.map(r => `
+                <div style="background:white; border:1px solid #FECACA; border-radius:10px; padding:12px; font-size:12px;">
+                  <strong>📅 ${escapeHTML(r.data)}</strong><br>
+                  <strong>Alvo:</strong> ${escapeHTML(r.trigger)}<br>
+                  <strong>Produto:</strong> ${escapeHTML(r.prod)}<br>
+                  <strong>Ocorrência:</strong> ${escapeHTML(r.desc)}<br>
+                  <strong>Ação imediata:</strong> ${escapeHTML(r.acao)}
+                </div>`).join('')}
+            </div>
+          </details>
+        </div>` : '';
 
       const produtosHTML = itens.map(item => {
         const badges = [];
@@ -1345,7 +1329,7 @@ const dashboardEngine = {
           </div>
 
           <div class="status-banner ${
-            statusInteligente.code === 'BLOQUEADO' ? 'status-bloqueio' :
+            statusInteligente.code === 'BLOQUEADO' ? 'status-atraso' :
             statusInteligente.code === 'ATRASADO' ? 'status-atraso' :
             statusInteligente.code === 'CARREGANDO' ? 'status-carregando' :
             statusInteligente.code === 'FATURAMENTO' ? 'status-faturamento' :
@@ -1367,6 +1351,8 @@ const dashboardEngine = {
           <div style="padding-top: 12px; padding-bottom: 12px;">${produtosHTML}</div>
         </div>`;
     });
+
+    html += '</div>';
     container.innerHTML = html;
   }
 };
@@ -1374,31 +1360,25 @@ const dashboardEngine = {
 const uiBuilder = {
   localDataStore: [], lotesMap: {}, lotesFlat: [], historicoCargas: [], rncCargas: [], visibleEmptyRows: 0, 
   init() { this.buildChecklistUI(); this.buildUnifiedGrid(); this.updateTimestamp(); },
-  
   switchTab(event, tabId) { 
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
-    if (event && event.currentTarget) event.currentTarget.classList.add('active'); 
+    if(event) event.currentTarget.classList.add('active'); 
     document.getElementById(`tab-${tabId}`).classList.add('active'); 
-    
-    if (tabId === 'mapa') {
+    if(tabId === 'mapa') { 
         requestAnimationFrame(() => {
             setTimeout(() => {
                 mapController.initLeaflet();
-                [0, 150, 400, 800].forEach(delay => {
-                    setTimeout(() => {
-                        if (mapController.map) {
-                            mapController.map.invalidateSize(true);
-                            window.dispatchEvent(new Event('resize'));
-                            mapController.renderPins();
-                        }
-                    }, delay);
-                });
-            }, 80);
+                if (mapController.map) {
+                    mapController.map.invalidateSize();
+                    setTimeout(() => mapController.map && mapController.map.invalidateSize(), 200);
+                    setTimeout(() => mapController.map && mapController.map.invalidateSize(), 500);
+                    mapController.renderPins();
+                }
+            }, 50);
         });
     }
   },
-  
   updateTimestamp() { 
       const d1 = document.getElementById('inpDataHora'); if(d1) d1.value = new Date().toLocaleString('pt-BR'); 
       const d2 = document.getElementById('perdaDataHora'); if(d2) d2.value = new Date().toLocaleString('pt-BR'); 
@@ -1607,7 +1587,7 @@ const appController = {
 
   async handleRefresh() {
     if(!navigator.onLine) return; 
-    uiBuilder.toggleLoader(true, "Sincronizando com a base de dados...");
+    uiBuilder.toggleLoader(true, "Conectando ao Centro de Comando...");
     try {
       const fe = document.getElementById('fatalError'); if(fe) fe.style.display = 'none';
       const [rawValues, historicoRaw, rncRaw, globLocRaw] = await Promise.all([ apiService.fetchSheetData(), apiService.fetchHistoricoData(), apiService.fetchRncData(), apiService.fetchGlobalLoc() ]);
